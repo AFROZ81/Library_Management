@@ -1,0 +1,127 @@
+﻿@{
+    ViewData["Title"] = "Librarian Dashboard";
+}
+
+<div class="container py-4 animate-fade-in">
+    <div class="p-5 mb-4 rounded-3 shadow-sm border-0 position-relative overflow-hidden"
+         style="background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%); color: white;">
+        <div class="row position-relative" style="z-index: 2;">
+            <div class="col-md-8">
+                <h1 class="display-4 fw-bold">Welcome back, Librarian</h1>
+                <p class="lead opacity-75">System Status: <span class="badge bg-success">Operational</span></p>
+                <hr class="my-4 opacity-25">
+                <p>Manage your library assets, monitor member activity, and track circulation in real-time.</p>
+                <div class="d-flex gap-2">
+                    <a asp-controller="Loans" asp-action="Issue" class="btn btn-warning fw-bold px-4 rounded-pill shadow">
+                        <i class="bi bi-plus-lg me-2"></i>Issue New Book
+                    </a>
+                    <a asp-controller="Books" asp-action="Index" class="btn btn-outline-light px-4 rounded-pill">
+                        View Catalog
+                    </a>
+                </div>
+            </div>
+        </div>
+        <i class="bi bi-shield-check position-absolute bottom-0 end-0 m-4 opacity-10" style="font-size: 15rem;"></i>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm hover-up">
+                <div class="card-body p-4 border-bottom border-4 border-primary rounded-top">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="text-muted small fw-bold text-uppercase mb-1">Total Books</p>
+                            <h2 class="fw-bold mb-0">@ViewBag.TotalBooks</h2>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+                            <i class="bi bi-book fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm hover-up">
+                <div class="card-body p-4 border-bottom border-4 border-success rounded-top">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="text-muted small fw-bold text-uppercase mb-1">Active Members</p>
+                            <h2 class="fw-bold mb-0">@ViewBag.TotalMembers</h2>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle text-success">
+                            <i class="bi bi-people fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm hover-up">
+                <div class="card-body p-4 border-bottom border-4 border-warning rounded-top">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="text-muted small fw-bold text-uppercase mb-1">In Circulation</p>
+                            <h2 class="fw-bold mb-0">@ViewBag.ActiveLoans</h2>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle text-warning">
+                            <i class="bi bi-arrow-left-right fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm hover-up">
+                <div class="card-body p-4 border-bottom border-4 border-danger rounded-top">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="text-muted small fw-bold text-uppercase mb-1">Overdue Items</p>
+                            <h2 class="fw-bold mb-0 text-danger">@ViewBag.OverdueLoans</h2>
+                        </div>
+                        <div class="bg-danger bg-opacity-10 p-3 rounded-circle text-danger">
+                            <i class="bi bi-exclamation-octagon fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-up {
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+        .hover-up:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important;
+        }
+
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .border-primary {
+        border-color: #1a237e !important;
+    }
+
+    .text-primary {
+        color: #1a237e !important;
+    }
+</style>

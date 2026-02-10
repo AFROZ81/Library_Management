@@ -1,0 +1,100 @@
+﻿@model IEnumerable<LibraryPro.Web.Models.Entities.Member>
+
+@{
+    ViewData["Title"] = "Library Members";
+}
+
+<div class="container mt-4 animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">Member Directory</h2>
+            <p class="text-muted">Manage registered library patrons and their status.</p>
+        </div>
+        <a asp-action="Register" class="btn btn-warning fw-bold px-4 shadow-sm">
+            <i class="bi bi-person-plus-fill me-2"></i>New Registration
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="background-color: #1a237e; color: white;">
+                        <tr>
+                            <th class="ps-4 py-3">Full Name</th>
+                            <th class="py-3">Email Address</th>
+                            <th class="py-3">Phone Number</th>
+                            <th class="py-3">Joined Date</th>
+                            <th class="py-3 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var m in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-3">@m.Name.Substring(0, 1).ToUpper()</div>
+                                        <span class="fw-medium">@m.Name</span>
+                                    </div>
+                                </td>
+                                <td><i class="bi bi-envelope-at me-2 text-muted"></i>@m.Email</td>
+                                <td><i class="bi bi-telephone me-2 text-muted"></i>@m.PhoneNumber</td>
+                                <td>@m.MembershipDate.ToString("MMM dd, yyyy")</td>
+                                <td class="text-center">
+                                    <div class="btn-group">
+                                        <a class="btn btn-sm btn-outline-primary" title="Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a class="btn btn-sm btn-outline-secondary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Professional touches for the Member List */
+    .avatar-circle {
+        width: 35px;
+        height: 35px;
+        background-color: #e8eaf6;
+        color: #1a237e;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.85rem;
+    }
+
+    .table thead th {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

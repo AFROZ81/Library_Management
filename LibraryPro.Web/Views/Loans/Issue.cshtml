@@ -1,0 +1,115 @@
+﻿@model LibraryPro.Web.Models.Entities.BookLoan
+
+@{
+    ViewData["Title"] = "Issue Book";
+}
+
+<div class="container mt-5 animate-slide-in">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card shadow-lg border-0 overflow-hidden">
+                <div class="card-header py-4 text-center text-white" style="background-color: #1a237e;">
+                    <div class="display-6 mb-1"><i class="bi bi-journal-arrow-up"></i></div>
+                    <h4 class="fw-bold mb-0">Book Issuance</h4>
+                    <p class="small text-white-50 mb-0">Assign a library asset to a registered member</p>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    <form asp-action="Issue">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4"></div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted small text-uppercase tracking-wider">Asset Selection</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-book text-primary"></i></span>
+                                <select asp-for="BookId" class="form-select form-select-lg border-start-0" asp-items="ViewBag.Books">
+                                    <option value="" selected disabled>-- Select Available Book --</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="BookId" class="text-danger x-small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted small text-uppercase tracking-wider">Patron Information</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-person-badge text-primary"></i></span>
+                                <select asp-for="MemberId" class="form-select form-select-lg border-start-0" asp-items="ViewBag.Members">
+                                    <option value="" selected disabled>-- Search Registered Member --</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="MemberId" class="text-danger x-small"></span>
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="form-label fw-bold text-muted small text-uppercase tracking-wider">Return Deadline</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-calendar-event text-primary"></i></span>
+                                <input asp-for="DueDate" type="date" class="form-control form-control-lg border-start-0"
+                                       value="@DateTime.Now.AddDays(14).ToString("yyyy-MM-dd")" />
+                            </div>
+                            <span asp-validation-for="DueDate" class="text-danger x-small"></span>
+                            <div class="form-text mt-2"><i class="bi bi-info-circle me-1"></i> Default loan period is 14 days.</div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-warning btn-lg fw-bold shadow-sm py-3 transition-hover">
+                                <i class="bi bi-check2-circle me-2"></i>CONFIRM TRANSACTION
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer bg-light border-0 py-3 text-center">
+                    <a asp-action="Index" class="text-decoration-none text-muted small">
+                        <i class="bi bi-arrow-left me-1"></i> Cancel and Return to Loans
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* CSS for that extra "Wow" factor */
+    .animate-slide-in {
+        animation: slideIn 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .form-select-lg, .form-control-lg {
+        font-size: 1rem;
+        border-color: #dee2e6;
+    }
+
+    .form-select:focus, .form-control:focus {
+        border-color: #1a237e;
+        box-shadow: 0 0 0 0.25rem rgba(26, 35, 126, 0.1);
+    }
+
+    .tracking-wider {
+        letter-spacing: 0.05rem;
+    }
+
+    .x-small {
+        font-size: 0.75rem;
+    }
+
+    .transition-hover {
+        transition: all 0.3s;
+    }
+
+        .transition-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+        }
+</style>

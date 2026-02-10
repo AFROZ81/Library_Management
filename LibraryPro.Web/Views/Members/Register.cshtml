@@ -1,0 +1,104 @@
+﻿@model LibraryPro.Web.Models.Entities.Member
+
+@{
+    ViewData["Title"] = "Member Registration";
+}
+
+<div class="container mt-5 animate-slide-up">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header text-white text-center py-4" style="background-color: #1a237e;">
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-person-plus-fill me-2"></i>New Member Registration</h4>
+                    <p class="small opacity-75 mb-0">Join our library community today</p>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    <form asp-action="Register">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-4">
+                            <label asp-for="Name" class="form-label fw-semibold text-secondary"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-primary"></i></span>
+                                <input asp-for="Name" class="form-control border-start-0 ps-0" placeholder="Enter full name" />
+                            </div>
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Email" class="form-label fw-semibold text-secondary"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-primary"></i></span>
+                                <input asp-for="Email" class="form-control border-start-0 ps-0" placeholder="email@example.com" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="PhoneNumber" class="form-label fw-semibold text-secondary"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-telephone text-primary"></i></span>
+                                <input asp-for="PhoneNumber" class="form-control border-start-0 ps-0" placeholder="Ex: +123456789" />
+                            </div>
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid gap-3 mt-5">
+                            <button type="submit" class="btn btn-warning btn-lg fw-bold shadow-sm py-3">
+                                Register Member
+                            </button>
+                            <a asp-action="Index" class="btn btn-link text-decoration-none text-muted">
+                                <i class="bi bi-arrow-left me-1"></i> Back to Member Directory
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Professional UI Enhancements */
+    .form-control:focus {
+        box-shadow: none;
+        border-color: #1a237e;
+    }
+
+    .input-group-text {
+        border-color: #dee2e6;
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Subtle hover effect on the Register button */
+    .btn-warning {
+        transition: all 0.3s;
+    }
+
+        .btn-warning:hover {
+            transform: scale(1.02);
+            background-color: #ffca2c;
+        }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

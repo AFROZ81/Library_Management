@@ -1,0 +1,174 @@
+﻿@model IEnumerable<LibraryPro.Web.Models.Entities.Book>
+
+@{
+    ViewData["Title"] = "Book Inventory";
+}
+
+<div class="container mt-4 animate-fade-in">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-0"><i class="bi bi-collection-play me-2 text-primary"></i>Digital Catalog</h2>
+            <p class="text-muted mb-0">Browse and manage the complete library collection</p>
+        </div>
+        <a asp-action="Create" class="btn btn-warning fw-bold shadow-sm px-4">
+            <i class="bi bi-plus-lg me-2"></i>Add New Volume
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-5" style="background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px);">
+        <div class="card-body p-3">
+            <form asp-action="Index" method="get" class="row g-2">
+                <div class="col-md-9">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 text-muted">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="searchString" class="form-control border-start-0 ps-0"
+                               placeholder="Search by title, author, or genre..."
+                               value="@ViewData["CurrentFilter"]" />
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter Results</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-clockwise"></i></a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm book-card">
+                    <div class="availability-bar @(item.AvailableCopies > 0 ? "bg-success" : "bg-danger")"></div>
+
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-wrap gap-1 mb-2">
+                            @if (item.Genre != null && item.Genre.Any())
+                            {
+                                foreach (var g in item.Genre)
+                                {
+                                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1" style="font-size: 0.7rem;">
+                                        @g
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-muted rounded-pill px-2 py-1" style="font-size: 0.7rem;">Uncategorized</span>
+                            }
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <h5 class="card-title fw-bold text-dark mb-0">@item.Title</h5>
+                            <small class="text-muted fw-bold ms-2">@item.PublicationYear</small>
+                        </div>
+
+                        <p class="text-muted small mb-3">by <span class="text-dark fw-medium">@item.Author</span></p>
+
+                        <div class="d-flex align-items-center justify-content-between bg-light rounded p-2 mb-3">
+                            <div class="text-center border-end pe-3">
+                                <small class="d-block text-muted x-small text-uppercase">Stock</small>
+                                <span class="fw-bold">@item.TotalCopies</span>
+                            </div>
+                            <div class="text-center ps-2">
+                                <small class="d-block text-muted x-small text-uppercase">Available</small>
+                                <span class="fw-bold @(item.AvailableCopies > 0 ? "text-success" : "text-danger")">
+                                    @item.AvailableCopies
+                                </span>
+                            </div>
+                        </div>
+
+                        <code class="small text-muted d-block">ISBN: @(string.IsNullOrEmpty(item.ISBN) ? "N/A" : item.ISBN)</code>
+                    </div>
+
+                    <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                        <div class="btn-group w-100 shadow-sm">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-pencil-square me-1"></i> Edit
+                            </a>
+
+                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                    onclick="confirmDelete('@item.Id', '@item.Title')">
+                                <i class="bi bi-trash me-1"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .book-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+        .book-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 1rem 3rem rgba(0,0,0,0.1) !important;
+        }
+
+    .availability-bar {
+        height: 4px;
+        width: 100%;
+    }
+
+    .x-small {
+        font-size: 0.65rem;
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id, title) {
+            Swal.fire({
+                title: 'Delete Book?',
+                text: `Are you sure you want to remove "${title}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    // UPDATE: Pointing directly to the Delete action
+                    form.action = '/Books/Delete/' + id;
+
+                    const token = $('input[name="__RequestVerificationToken"]').val();
+                    const hiddenToken = document.createElement('input');
+                    hiddenToken.type = 'hidden';
+                    hiddenToken.name = '__RequestVerificationToken';
+                    hiddenToken.value = token;
+                    form.appendChild(hiddenToken);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+    </script>
+}

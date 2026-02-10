@@ -1,0 +1,214 @@
+﻿@model LibraryPro.Web.Models.Entities.Book
+
+@{
+    ViewData["Title"] = "Register New Book";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<div class="container mt-5 animate-slide-up">
+    <div class="row justify-content-center">
+        <div class="col-md-9 col-lg-8">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header text-white text-center py-4" style="background-color: #1a237e;">
+                    <div class="display-6 mb-2"><i class="bi bi-book-half"></i></div>
+                    <h4 class="mb-0 fw-bold">Register New Book</h4>
+                    <p class="small opacity-75 mb-0">Add a new asset to your digital collection</p>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4"></div>
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label asp-for="Title" class="form-label fw-semibold text-secondary small text-uppercase">Title</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-type text-primary"></i></span>
+                                    <input asp-for="Title" class="form-control border-start-0" placeholder="e.g. The Great Gatsby" />
+                                </div>
+                                <span asp-validation-for="Title" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Author" class="form-label fw-semibold text-secondary small text-uppercase">Author</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-lines-fill text-primary"></i></span>
+                                    <input asp-for="Author" class="form-control border-start-0" placeholder="Author Name" />
+                                </div>
+                                <span asp-validation-for="Author" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="ISBN" class="form-label fw-semibold text-secondary small text-uppercase">ISBN</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-upc-scan text-primary"></i></span>
+                                    <input asp-for="ISBN" class="form-control border-start-0" placeholder="ISBN-13" />
+                                </div>
+                                <span asp-validation-for="ISBN" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Genre" class="form-label fw-semibold text-secondary small text-uppercase">Genre</label>
+                                <div class="input-group select2-bootstrap-fix">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-tags text-primary"></i></span>
+                                    <select asp-for="Genre" id="genreSelect" class="form-select" multiple="multiple">
+                                        <option value="Fiction">Fiction</option>
+                                        <option value="Non-Fiction">Non-Fiction</option>
+                                        <option value="Science">Science</option>
+                                        <option value="History">History</option>
+                                        <option value="Adventure">Adventure</option>
+                                        <option value="Fantasy">Fantasy</option>
+                                        <option value="Mystery">Mystery</option>
+                                        <option value="Romance">Romance</option>
+                                    </select>
+                                </div>
+                                <span asp-validation-for="Genre" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="PublicationYear" class="form-label fw-semibold text-secondary small text-uppercase">Year</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-calendar-check text-primary"></i></span>
+                                    <select asp-for="PublicationYear" class="form-select border-start-0">
+                                        <option value="">-- Year --</option>
+                                        @for (int year = DateTime.Now.Year; year >= 1800; year--)
+                                        {
+                                            <option value="@year">@year</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="TotalCopies" class="form-label fw-semibold text-secondary small text-uppercase">Stock Quantity</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-plus-square text-primary"></i></span>
+                                    <input asp-for="TotalCopies" class="form-control border-start-0" type="number" min="1" value="1" />
+                                </div>
+                                <span asp-validation-for="TotalCopies" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-3 mt-5">
+                            <button type="submit" class="btn btn-warning btn-lg fw-bold shadow-sm py-3 transition-lift">
+                                <i class="bi bi-cloud-arrow-up-fill me-2"></i>SAVE TO CATALOG
+                            </button>
+                            <a asp-action="Index" class="btn btn-link text-decoration-none text-muted">
+                                <i class="bi bi-arrow-left me-1"></i> Back to Collection
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* 1. Fix the Bootstrap Input Group alignment for Select2 */
+    .select2-bootstrap-fix {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+    }
+
+    .select2-container {
+        flex: 1 1 auto !important;
+        width: 1% !important;
+    }
+
+    /* 2. Style the main Select2 box to match Bootstrap inputs */
+    .select2-container--default .select2-selection--multiple {
+        border: 1px solid #dee2e6 !important;
+        border-left: none !important;
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+        padding: 2px 5px !important;
+        min-height: 38px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    /* 3. FIX: Tag Container & Internal Spacing */
+    .select2-selection__choice {
+        background-color: #1a237e !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 4px !important;
+        margin: 2px 4px !important;
+        padding: 2px 8px 2px 24px !important; /* LARGE LEFT PADDING to make room for X */
+        position: relative !important;
+        display: inline-block !important;
+    }
+
+    /* 4. FIX: Position the "X" remove button so it doesn't overlap */
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        position: absolute !important;
+        left: 4px !important; /* Lock it to the far left */
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        color: rgba(255,255,255,0.8) !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 0 4px !important;
+        font-weight: bold !important;
+    }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+            color: #fff !important;
+            background: transparent !important;
+        }
+
+    /* 5. Fix the search input alignment inside the box */
+    .select2-search--inline, .select2-search__field {
+        margin: 0 !important;
+        height: 30px !important;
+        line-height: 30px !important;
+    }
+
+    /* UI Polish */
+    .form-control:focus, .form-select:focus {
+        border-color: #1a237e;
+        box-shadow: none;
+    }
+
+    .transition-lift {
+        transition: transform 0.2s;
+    }
+
+        .transition-lift:hover {
+            transform: translateY(-3px);
+        }
+
+    .animate-slide-up {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#genreSelect').select2({
+                placeholder: "  Select Genres", /* Added spaces for alignment */
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

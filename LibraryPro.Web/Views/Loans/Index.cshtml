@@ -1,0 +1,164 @@
+﻿@model IEnumerable<LibraryPro.Web.Models.Entities.BookLoan>
+
+@{
+    ViewData["Title"] = "Loan Management";
+}
+
+<div class="container mt-4 animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">Loan Transactions</h2>
+            <p class="text-muted">Monitor active borrowings, due dates, and late fee assessments.</p>
+        </div>
+        <a asp-action="Issue" class="btn btn-warning fw-bold px-4 shadow-sm">
+            <i class="bi bi-plus-circle-fill me-2"></i>New Loan
+        </a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-white p-3 border-start border-4 border-primary">
+                <small class="text-muted text-uppercase fw-bold">Total Active</small>
+                <h4 class="mb-0 fw-bold">@Model.Count(l => !l.IsReturned)</h4>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-white p-3 border-start border-4 border-danger">
+                <small class="text-muted text-uppercase fw-bold">Overdue Items</small>
+                <h4 class="mb-0 fw-bold text-danger">@Model.Count(l => !l.IsReturned && l.CalculateLateFee > 0)</h4>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-white p-3 border-start border-4 border-success">
+                <small class="text-muted text-uppercase fw-bold">Recent Returns</small>
+                <h4 class="mb-0 fw-bold text-success">@Model.Count(l => l.IsReturned)</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="background-color: #1a237e; color: white;">
+                        <tr>
+                            <th class="ps-4 py-3">Book Details</th>
+                            <th class="py-3">Member</th>
+                            <th class="py-3">Due Date</th>
+                            <th class="py-3">Fine Status</th>
+                            <th class="py-3">Status</th>
+                            <th class="py-3 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var loan in Model)
+                        {
+                            var isOverdue = loan.CalculateLateFee > 0 && !loan.IsReturned;
+                            <tr class="@(isOverdue ? "bg-light-danger" : "")">
+                                <td class="ps-4">
+                                    <div class="fw-bold text-primary">@loan.Book.Title</div>
+                                    <small class="text-muted">ISBN: @loan.Book.ISBN</small>
+                                </td>
+                                <td>
+                                    <div class="fw-medium">@loan.Member.Name</div>
+                                    <small class="text-muted text-truncate">@loan.Member.Email</small>
+                                </td>
+                                <td>
+                                    <div class="@(isOverdue ? "text-danger fw-bold" : "")">
+                                        <i class="bi bi-calendar3 me-2"></i>@loan.DueDate.ToString("MMM dd, yyyy")
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (loan.CalculateLateFee > 0)
+                                    {
+                                        <span class="text-danger fw-bold">
+                                            <i class="bi bi-currency-dollar"></i>@loan.CalculateLateFee.ToString("N2")
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">No Fine</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (loan.IsReturned)
+                                    {
+                                        <span class="badge rounded-pill bg-success-soft text-success px-3">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Returned
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill @(isOverdue ? "bg-danger" : "bg-warning text-dark") px-3">
+                                            <i class="bi bi-clock-history me-1"></i>@(isOverdue ? "Overdue" : "Borrowed")
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-center pe-3">
+                                    @if (!loan.IsReturned)
+                                    {
+                                        <form asp-action="Return" method="post">
+                                            <input type="hidden" name="loanId" value="@loan.Id" />
+                                            <button type="submit" class="btn btn-sm btn-primary px-3 rounded-pill shadow-sm">
+                                                Return Book
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small italic">Settled on @loan.ReturnDate?.ToString("d")</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Professional Styling for Loans */
+    .bg-light-danger {
+        background-color: #fff5f5;
+    }
+
+    .bg-success-soft {
+        background-color: #e8f5e9;
+    }
+
+    .table thead th {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.4s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    .card {
+        border-radius: 10px;
+    }
+
+    /* Hover effects for return button */
+    .btn-primary {
+        transition: all 0.2s;
+    }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            background-color: #0d47a1;
+        }
+</style>
