@@ -1,115 +1,74 @@
 ﻿@model LibraryPro.Web.Models.Entities.BookLoan
 
 @{
-    ViewData["Title"] = "Issue Book";
+    ViewData["Title"] = "Issue New Book";
 }
 
-<div class="container mt-5 animate-slide-in">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+
+<div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-7 col-lg-6">
-            <div class="card shadow-lg border-0 overflow-hidden">
-                <div class="card-header py-4 text-center text-white" style="background-color: #1a237e;">
-                    <div class="display-6 mb-1"><i class="bi bi-journal-arrow-up"></i></div>
-                    <h4 class="fw-bold mb-0">Book Issuance</h4>
-                    <p class="small text-white-50 mb-0">Assign a library asset to a registered member</p>
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-navy text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-journal-plus me-2"></i>New Loan Transaction</h5>
                 </div>
-
-                <div class="card-body p-4 p-lg-5">
+                <div class="card-body p-4">
                     <form asp-action="Issue">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4"></div>
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
                         <div class="mb-4">
-                            <label class="form-label fw-bold text-muted small text-uppercase tracking-wider">Asset Selection</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-book text-primary"></i></span>
-                                <select asp-for="BookId" class="form-select form-select-lg border-start-0" asp-items="ViewBag.Books">
-                                    <option value="" selected disabled>-- Select Available Book --</option>
-                                </select>
-                            </div>
-                            <span asp-validation-for="BookId" class="text-danger x-small"></span>
+                            <label class="form-label fw-bold">Select Member</label>
+                            <select asp-for="MemberId" class="form-select select-search" asp-items="ViewBag.Members">
+                                <option value="">-- Search by Name or Email --</option>
+                            </select>
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label fw-bold text-muted small text-uppercase tracking-wider">Patron Information</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-person-badge text-primary"></i></span>
-                                <select asp-for="MemberId" class="form-select form-select-lg border-start-0" asp-items="ViewBag.Members">
-                                    <option value="" selected disabled>-- Search Registered Member --</option>
-                                </select>
-                            </div>
-                            <span asp-validation-for="MemberId" class="text-danger x-small"></span>
+                            <label class="form-label fw-bold">Select Book</label>
+                            <select asp-for="BookId" class="form-select select-search" asp-items="ViewBag.Books">
+                                <option value="">-- Search by Title or ISBN --</option>
+                            </select>
                         </div>
 
-                        <div class="mb-5">
-                            <label class="form-label fw-bold text-muted small text-uppercase tracking-wider">Return Deadline</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-calendar-event text-primary"></i></span>
-                                <input asp-for="DueDate" type="date" class="form-control form-control-lg border-start-0"
-                                       value="@DateTime.Now.AddDays(14).ToString("yyyy-MM-dd")" />
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="LoanDate" class="form-label fw-bold">Issue Date</label>
+                                <input asp-for="LoanDate" type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
                             </div>
-                            <span asp-validation-for="DueDate" class="text-danger x-small"></span>
-                            <div class="form-text mt-2"><i class="bi bi-info-circle me-1"></i> Default loan period is 14 days.</div>
+                            <div class="col-md-6">
+                                <label asp-for="DueDate" class="form-label fw-bold">Due Date</label>
+                                <input asp-for="DueDate" type="date" class="form-control" value="@DateTime.Now.AddDays(14).ToString("yyyy-MM-dd")" />
+                            </div>
                         </div>
 
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-warning btn-lg fw-bold shadow-sm py-3 transition-hover">
-                                <i class="bi bi-check2-circle me-2"></i>CONFIRM TRANSACTION
+                            <button type="submit" class="btn btn-warning btn-lg fw-bold">
+                                <i class="bi bi-check2-circle me-1"></i>CONFIRM ISSUE
                             </button>
                         </div>
                     </form>
-                </div>
-                <div class="card-footer bg-light border-0 py-3 text-center">
-                    <a asp-action="Index" class="text-decoration-none text-muted small">
-                        <i class="bi bi-arrow-left me-1"></i> Cancel and Return to Loans
-                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.select-search').select2({
+                theme: 'bootstrap-5',
+                width: '100%'
+            });
+        });
+    </script>
+}
+
 <style>
-    /* CSS for that extra "Wow" factor */
-    .animate-slide-in {
-        animation: slideIn 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+    .bg-navy {
+        background-color: #1a237e;
     }
-
-    @@keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: scale(0.95) translateY(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
-    }
-
-    .form-select-lg, .form-control-lg {
-        font-size: 1rem;
-        border-color: #dee2e6;
-    }
-
-    .form-select:focus, .form-control:focus {
-        border-color: #1a237e;
-        box-shadow: 0 0 0 0.25rem rgba(26, 35, 126, 0.1);
-    }
-
-    .tracking-wider {
-        letter-spacing: 0.05rem;
-    }
-
-    .x-small {
-        font-size: 0.75rem;
-    }
-
-    .transition-hover {
-        transition: all 0.3s;
-    }
-
-        .transition-hover:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
-        }
 </style>

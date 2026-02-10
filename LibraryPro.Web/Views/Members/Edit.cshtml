@@ -1,0 +1,96 @@
+﻿@model LibraryPro.Web.Models.Entities.Member
+
+@{
+    ViewData["Title"] = "Edit Member";
+}
+
+<div class="container mt-5 animate-slide-up">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header text-white text-center py-4" style="background-color: #1a237e;">
+                    <div class="display-6 mb-2"><i class="bi bi-person-gear"></i></div>
+                    <h4 class="mb-0 fw-bold">Update Member Profile</h4>
+                    <p class="small opacity-75 mb-0">Modifying: <span class="fw-bold">@Model.Name</span></p>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4"></div>
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="MembershipDate" />
+
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label asp-for="Name" class="form-label fw-semibold text-secondary small text-uppercase">Full Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-primary"></i></span>
+                                    <input asp-for="Name" class="form-control border-start-0" placeholder="John Doe" />
+                                </div>
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Email" class="form-label fw-semibold text-secondary small text-uppercase">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope-at text-primary"></i></span>
+                                    <input asp-for="Email" class="form-control border-start-0" placeholder="name@example.com" />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="PhoneNumber" class="form-label fw-semibold text-secondary small text-uppercase">Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-telephone text-primary"></i></span>
+                                    <input asp-for="PhoneNumber" class="form-control border-start-0" placeholder="+1 (555) 000-0000" />
+                                </div>
+                                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-3 mt-5">
+                            <button type="submit" class="btn btn-warning btn-lg fw-bold shadow-sm py-3 transition-lift">
+                                <i class="bi bi-check-circle-fill me-2"></i>SAVE CHANGES
+                            </button>
+                            <a asp-action="Index" class="btn btn-link text-decoration-none text-muted small text-center">
+                                <i class="bi bi-arrow-left me-1"></i> Return to Directory
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control:focus {
+        border-color: #1a237e;
+        box-shadow: none;
+    }
+
+    .transition-lift {
+        transition: all 0.2s ease-in-out;
+    }
+
+        .transition-lift:hover {
+            transform: translateY(-3px);
+        }
+
+    .animate-slide-up {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

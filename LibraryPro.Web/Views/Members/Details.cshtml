@@ -1,0 +1,33 @@
+﻿@model LibraryPro.Web.Models.Entities.Member
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-lg overflow-hidden">
+                <div class="p-4 text-center text-white" style="background-color: #1a237e;">
+                    <div class="rounded-circle bg-white text-primary d-inline-flex align-items-center justify-content-center mb-3" style="width:80px; height:80px; font-size: 2rem; font-weight: bold;">
+                        @Model.Name.Substring(0, 1).ToUpper()
+                    </div>
+                    <h3 class="mb-0">@Model.Name</h3>
+                    <p class="small opacity-75">Member since @Model.MembershipDate.ToShortDateString()</p>
+                </div>
+                <div class="card-body p-4">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted"><i class="bi bi-envelope me-2"></i>Email</span>
+                            <span class="fw-bold">@Model.Email</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted"><i class="bi bi-telephone me-2"></i>Phone</span>
+                            <span class="fw-bold">@Model.PhoneNumber</span>
+                        </li>
+                    </ul>
+                    <div class="mt-4 d-grid gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit Profile</a>
+                        <a asp-action="Index" class="btn btn-link text-muted">Back to Directory</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

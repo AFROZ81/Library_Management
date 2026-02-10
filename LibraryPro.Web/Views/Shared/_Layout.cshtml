@@ -16,84 +16,139 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
+        :root {
+            --primary-navy: #1a237e;
+            --accent-yellow: #ffc107;
+            --glass-bg: rgba(26, 35, 126, 0.92);
         }
 
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f7f9;
+            /* Added padding so fixed navbar doesn't cover top content */
+            padding-top: 85px;
+            transition: all 0.3s ease;
+        }
+
+        /* --- Professional Fixed Navbar --- */
         .navbar {
-            background: #1a237e !important;
-            padding: 0.8rem 1rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: var(--glass-bg) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 0.7rem 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
         .navbar-brand {
-            font-weight: 700;
-            letter-spacing: 1px;
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: -0.5px;
             color: #fff !important;
+            display: flex;
+            align-items: center;
         }
 
+        .brand-icon {
+            background: var(--accent-yellow);
+            color: var(--primary-navy);
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* --- Modern Active State logic --- */
         .nav-link {
-            color: rgba(255,255,255,0.8) !important;
+            color: rgba(255,255,255,0.75) !important;
             font-weight: 500;
-            transition: 0.3s;
-            margin: 0 5px;
+            font-size: 0.95rem;
+            margin: 0 8px;
+            padding: 0.5rem 0 !important;
+            position: relative;
+            transition: all 0.3s ease;
         }
 
             .nav-link:hover {
                 color: #fff !important;
-                transform: translateY(-2px);
+                transform: translateY(-1px);
             }
 
+            /* Active Page Indicator (Yellow Glow Underline) */
             .nav-link.active {
                 color: #fff !important;
-                border-bottom: 2px solid #fff;
             }
 
+                .nav-link.active::after {
+                    content: "";
+                    position: absolute;
+                    bottom: -5px;
+                    left: 0;
+                    width: 100%;
+                    height: 3px;
+                    background: var(--accent-yellow);
+                    border-radius: 10px;
+                    box-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
+                }
+
+        /* --- Issue Book CTA Button --- */
+        .btn-issue {
+            background-color: var(--accent-yellow) !important;
+            color: var(--primary-navy) !important;
+            font-weight: 700 !important;
+            border: none;
+            border-radius: 8px !important;
+            padding: 0.6rem 1.2rem !important;
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+            transition: all 0.2s ease-in-out !important;
+        }
+
+            .btn-issue:hover {
+                transform: translateY(-2px) scale(1.02);
+                box-shadow: 0 6px 15px rgba(255, 193, 7, 0.4);
+                background-color: #ffca2c !important;
+            }
+
+        /* --- Footer & Container --- */
         .main-container {
-            min-height: 85vh;
-            padding-top: 20px;
+            min-height: 80vh;
         }
 
         footer {
             background: #fff;
-            padding: 20px 0;
-            border-top: 1px solid #dee2e6;
+            padding: 30px 0;
+            border-top: 1px solid #e9ecef;
+            font-size: 0.9rem;
         }
 
-        .card {
-            border: none;
-            border-radius: 12px;
-            transition: 0.3s;
+        .footer-brand {
+            color: var(--primary-navy);
+            font-weight: 700;
         }
-
-            .card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
-            }
-
-        .btn-primary {
-            background-color: #1a237e;
-            border: none;
-        }
-
-            .btn-primary:hover {
-                background-color: #0d1440;
-            }
     </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-dark sticky-top">
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-book-half me-2"></i>LIBRARY<span class="text-warning">PRO</span>
+                    <div class="brand-icon">
+                        <i class="bi bi-book-half"></i>
+                    </div>
+                    <span>LIBRARY<span class="text-warning">PRO</span></span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end">
-                    <ul class="navbar-nav">
+
+                <div class="navbar-collapse collapse justify-content-end" id="navbarContent">
+                    <ul class="navbar-nav align-items-center">
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")"
                                asp-controller="Home" asp-action="Index">Dashboard</a>
@@ -107,13 +162,13 @@
                                asp-controller="Members" asp-action="Index">Members</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn btn-warning text-dark ms-lg-3 px-3 shadow-sm"
-                               asp-controller="Loans" asp-action="Issue">
-                                <i class="bi bi-plus-lg me-1"></i>Issue Book
-                            </a>
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Loans" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
+                               asp-controller="Loans" asp-action="Index">Active Loans</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Loans" asp-action="Index">Active Loans</a>
+                        <li class="nav-item ms-md-3 mt-2 mt-md-0">
+                            <a class="nav-link btn-issue text-dark" asp-controller="Loans" asp-action="Issue">
+                                <i class="bi bi-plus-circle-fill me-1"></i>ISSUE BOOK
+                            </a>
                         </li>
                     </ul>
                 </div>
@@ -129,8 +184,8 @@
 
     <footer class="text-muted mt-5">
         <div class="container text-center">
-            <p class="mb-0">&copy; 2026 - <strong>LibraryPro Management System</strong> - Designed for Excellence</p>
-            <small><a asp-controller="Home" asp-action="Privacy" class="text-decoration-none">System Privacy Policy</a></small>
+            <p class="mb-1">&copy; 2026 - <span class="footer-brand">LibraryPro</span> Management System</p>
+            <p class="small mb-0">Designed for Excellence | <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-primary">Privacy Policy</a></p>
         </div>
     </footer>
 

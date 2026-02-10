@@ -5,50 +5,93 @@
 }
 
 <div class="container mt-4 animate-fade-in">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
             <h2 class="fw-bold text-dark mb-0">Member Directory</h2>
-            <p class="text-muted">Manage registered library patrons and their status.</p>
+            <p class="text-muted mb-0">Manage patrons, track borrowing eligibility, and monitor status.</p>
         </div>
-        <a asp-action="Register" class="btn btn-warning fw-bold px-4 shadow-sm">
-            <i class="bi bi-person-plus-fill me-2"></i>New Registration
-        </a>
+        <div class="d-flex gap-2">
+            <div class="input-group shadow-sm" style="width: 250px;">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" id="memberSearch" class="form-control border-start-0 ps-0" placeholder="Search patrons...">
+            </div>
+            <a asp-action="Register" class="btn btn-primary fw-bold px-4 shadow-sm rounded-pill">
+                <i class="bi bi-person-plus-fill me-2"></i>New Registration
+            </a>
+        </div>
     </div>
 
-    <div class="card shadow-sm border-0">
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-3 bg-light-blue">
+                <small class="text-uppercase fw-bold text-primary opacity-75">Total Patrons</small>
+                <h4 class="fw-bold mb-0">@Model.Count()</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 overflow-hidden">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead style="background-color: #1a237e; color: white;">
+                    <thead class="bg-dark text-white">
                         <tr>
-                            <th class="ps-4 py-3">Full Name</th>
-                            <th class="py-3">Email Address</th>
-                            <th class="py-3">Phone Number</th>
-                            <th class="py-3">Joined Date</th>
-                            <th class="py-3 text-center">Actions</th>
+                            <th class="ps-4 py-3 border-0">Patron Information</th>
+                            <th class="py-3 border-0">Contact Details</th>
+                            <th class="py-3 border-0">Joined Date</th>
+                            <th class="py-3 border-0 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var m in Model)
                         {
+                            var isOverdue = ((List<int>)ViewBag.OverdueMemberIds).Contains(m.Id);
                             <tr>
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center">
-                                        <div class="avatar-circle me-3">@m.Name.Substring(0, 1).ToUpper()</div>
-                                        <span class="fw-medium">@m.Name</span>
+                                        <div class="avatar-circle me-3 shadow-sm">@m.Name.Substring(0, 1).ToUpper()</div>
+                                        <div>
+                                            <span class="fw-bold d-block text-dark">@m.Name</span>
+                                            @if (isOverdue)
+                                            {
+                                                <span class="badge bg-danger-soft text-danger rounded-pill" style="font-size: 0.7rem;">
+                                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Overdue Items
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success-soft text-success rounded-pill" style="font-size: 0.7rem;">
+                                                    Active Member
+                                                </span>
+                                            }
+                                        </div>
                                     </div>
                                 </td>
-                                <td><i class="bi bi-envelope-at me-2 text-muted"></i>@m.Email</td>
-                                <td><i class="bi bi-telephone me-2 text-muted"></i>@m.PhoneNumber</td>
-                                <td>@m.MembershipDate.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <small class="text-dark"><i class="bi bi-envelope me-2"></i>@m.Email</small>
+                                        <small class="text-muted"><i class="bi bi-telephone me-2"></i>@m.PhoneNumber</small>
+                                    </div>
+                                </td>
+                                <td class="text-muted">
+                                    <i class="bi bi-calendar3 me-2"></i>@m.MembershipDate.ToString("MMM dd, yyyy")
+                                </td>
                                 <td class="text-center">
-                                    <div class="btn-group">
-                                        <a class="btn btn-sm btn-outline-primary" title="Details">
-                                            <i class="bi bi-eye"></i>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a asp-action="Profile" asp-route-id="@m.Id" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm">
+                                            View Profile
                                         </a>
-                                        <a class="btn btn-sm btn-outline-secondary" title="Edit">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light border rounded-circle shadow-sm" data-bs-toggle="dropdown">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                                <li><a asp-action="Edit" asp-route-id="@m.Id" class="dropdown-item py-2"><i class="bi bi-pencil me-2 text-muted"></i>Edit Details</a></li>
+                                                <li><a asp-action="Details" asp-route-id="@m.Id" class="dropdown-item py-2"><i class="bi bi-info-circle me-2 text-muted"></i>General Info</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><button onclick="confirmMemberDelete('@m.Id', '@m.Name')" class="dropdown-item py-2 text-danger"><i class="bi bi-trash me-2"></i>Remove Patron</button></li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -61,35 +104,58 @@
 </div>
 
 <style>
-    /* Professional touches for the Member List */
+    /* Gradient Avatar */
     .avatar-circle {
-        width: 35px;
-        height: 35px;
-        background-color: #e8eaf6;
-        color: #1a237e;
-        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+        color: white;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: bold;
-        font-size: 0.85rem;
     }
 
+    /* Soft Colors */
+    .bg-success-soft {
+        background-color: #ecfdf5;
+        color: #059669;
+    }
+
+    .bg-danger-soft {
+        background-color: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fee2e2;
+    }
+
+    .bg-light-blue {
+        background-color: #f0f4ff;
+    }
+
+    /* Modern Table Header */
     .table thead th {
-        font-weight: 500;
-        letter-spacing: 0.5px;
+        font-size: 0.75rem;
         text-transform: uppercase;
-        font-size: 0.8rem;
+        letter-spacing: 0.05em;
+        font-weight: 700;
     }
 
+    /* Row Hover Effect */
+    .table-hover tbody tr:hover {
+        background-color: #f8fafc;
+        cursor: pointer;
+    }
+
+    /* Animation */
     .animate-fade-in {
-        animation: fadeIn 0.5s ease-in;
+        animation: fadeIn 0.4s ease-out;
     }
 
     @@keyframes fadeIn {
         from {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(8px);
         }
 
         to {
@@ -98,3 +164,40 @@
         }
     }
 </style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Real-time Search Filter
+        document.getElementById('memberSearch').addEventListener('keyup', function() {
+            let value = this.value.toLowerCase();
+            let rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+            });
+        });
+
+        function confirmMemberDelete(id, name) {
+            Swal.fire({
+                title: 'Confirm Deletion',
+                text: `Removing ${name} will permanently delete their record. Proceed?`,
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, Delete Patron',
+                background: '#fff',
+                borderRadius: '1rem'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/Members/Delete/' + id;
+                    // Token handling code...
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+    </script>
+}

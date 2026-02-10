@@ -1,127 +1,209 @@
-﻿@{
-    ViewData["Title"] = "Librarian Dashboard";
-}
+﻿@model LibraryPro.Web.Models.ViewModels.DashboardViewModel
 
-<div class="container py-4 animate-fade-in">
-    <div class="p-5 mb-4 rounded-3 shadow-sm border-0 position-relative overflow-hidden"
-         style="background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%); color: white;">
-        <div class="row position-relative" style="z-index: 2;">
-            <div class="col-md-8">
-                <h1 class="display-4 fw-bold">Welcome back, Librarian</h1>
-                <p class="lead opacity-75">System Status: <span class="badge bg-success">Operational</span></p>
-                <hr class="my-4 opacity-25">
-                <p>Manage your library assets, monitor member activity, and track circulation in real-time.</p>
-                <div class="d-flex gap-2">
-                    <a asp-controller="Loans" asp-action="Issue" class="btn btn-warning fw-bold px-4 rounded-pill shadow">
-                        <i class="bi bi-plus-lg me-2"></i>Issue New Book
-                    </a>
-                    <a asp-controller="Books" asp-action="Index" class="btn btn-outline-light px-4 rounded-pill">
-                        View Catalog
-                    </a>
+<div class="container-fluid px-4 animate-fade-in">
+    <h2 class="fw-bold text-dark mb-1">System Overview</h2>
+    <p class="text-muted mb-4">Welcome back, Administrator. Here's what's happening today.</p>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-3 bg-white transition-lift">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-primary-soft p-3 me-3">
+                        <i class="bi bi-book text-primary fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-0 small uppercase fw-bold">Total Volume</h6>
+                        <h3 class="mb-0 fw-bold">@Model.TotalBooks</h3>
+                    </div>
                 </div>
             </div>
         </div>
-        <i class="bi bi-shield-check position-absolute bottom-0 end-0 m-4 opacity-10" style="font-size: 15rem;"></i>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-3 bg-white transition-lift">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-success-soft p-3 me-3">
+                        <i class="bi bi-people text-success fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-0 small uppercase fw-bold">Active Patrons</h6>
+                        <h3 class="mb-0 fw-bold">@Model.TotalMembers</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-3 bg-white transition-lift">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-warning-soft p-3 me-3">
+                        <i class="bi bi-arrow-repeat text-warning fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-0 small uppercase fw-bold">Live Loans</h6>
+                        <h3 class="mb-0 fw-bold">@Model.ActiveLoans</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-3 bg-white transition-lift">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-danger-soft p-3 me-3">
+                        <i class="bi bi-currency-rupee text-danger fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-0 small uppercase fw-bold">Unpaid Fines</h6>
+                        <h3 class="mb-0 fw-bold">₹@Model.TotalPendingFines.ToString("N0")</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <div class="card border-0 shadow-sm p-4 mb-4 overflow-hidden">
+        <div class="row align-items-center">
+            <div class="col-md-8 border-end">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Inventory Availability</h6>
+                        <small class="text-muted">Current shelf stock vs. total volume</small>
+                    </div>
+                    <span class="badge rounded-pill bg-primary-light text-primary px-3 py-2">
+                        @Model.AvailabilityRate.ToString("F1")% Available
+                    </span>
+                </div>
+
+                <div class="progress shadow-sm" style="height: 10px; border-radius: 20px; background-color: #f0f2f5;">
+                    <div class="progress-bar custom-gradient-bar"
+                         role="progressbar"
+                         style="width: @Model.AvailabilityRate%"
+                         aria-valuenow="@Model.AvailabilityRate"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                    </div>
+                </div>
+
+                <div class="mt-3 d-flex align-items-center">
+                    <i class="bi bi-info-circle-fill text-primary me-2 opacity-50"></i>
+                    <small class="text-muted">Monitoring <strong>@Model.TotalBooks</strong> physical items in real-time.</small>
+                </div>
+            </div>
+
+            <div class="col-md-4 text-center ps-md-4 mt-3 mt-md-0">
+                <p class="small text-muted mb-2">Ready to lend?</p>
+                <a asp-controller="Loans" asp-action="Issue" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm transition-lift">
+                    <i class="bi bi-plus-lg me-2"></i>Quick Issue
+                </a>
+            </div>
+        </div>
+    </div>
+
+
     <div class="row g-4">
-        <div class="col-md-3">
-            <div class="card h-100 border-0 shadow-sm hover-up">
-                <div class="card-body p-4 border-bottom border-4 border-primary rounded-top">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <p class="text-muted small fw-bold text-uppercase mb-1">Total Books</p>
-                            <h2 class="fw-bold mb-0">@ViewBag.TotalBooks</h2>
-                        </div>
-                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
-                            <i class="bi bi-book fs-3"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm p-4 h-100">
+                <h5 class="fw-bold mb-4">Borrowing Trends</h5>
+                <canvas id="loanChart" height="250"></canvas>
             </div>
         </div>
-
-        <div class="col-md-3">
-            <div class="card h-100 border-0 shadow-sm hover-up">
-                <div class="card-body p-4 border-bottom border-4 border-success rounded-top">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <p class="text-muted small fw-bold text-uppercase mb-1">Active Members</p>
-                            <h2 class="fw-bold mb-0">@ViewBag.TotalMembers</h2>
-                        </div>
-                        <div class="bg-success bg-opacity-10 p-3 rounded-circle text-success">
-                            <i class="bi bi-people fs-3"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card h-100 border-0 shadow-sm hover-up">
-                <div class="card-body p-4 border-bottom border-4 border-warning rounded-top">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <p class="text-muted small fw-bold text-uppercase mb-1">In Circulation</p>
-                            <h2 class="fw-bold mb-0">@ViewBag.ActiveLoans</h2>
-                        </div>
-                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle text-warning">
-                            <i class="bi bi-arrow-left-right fs-3"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card h-100 border-0 shadow-sm hover-up">
-                <div class="card-body p-4 border-bottom border-4 border-danger rounded-top">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <p class="text-muted small fw-bold text-uppercase mb-1">Overdue Items</p>
-                            <h2 class="fw-bold mb-0 text-danger">@ViewBag.OverdueLoans</h2>
-                        </div>
-                        <div class="bg-danger bg-opacity-10 p-3 rounded-circle text-danger">
-                            <i class="bi bi-exclamation-octagon fs-3"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm p-4 h-100">
+                <h5 class="fw-bold mb-4">Popular Genres</h5>
+                <canvas id="genreChart"></canvas>
             </div>
         </div>
     </div>
 </div>
 
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+               // Inside your Scripts section, before creating charts:
+        const genreData = @Json.Serialize(Model.GenreCounts);
+
+        if (genreData.length === 0) {
+            // Optional: Hide the chart and show a "No Data" message
+            document.getElementById('genreChart').parentElement.innerHTML =
+                '<div class="text-center py-5 text-muted"><i class="bi bi-pie-chart fs-1 opacity-25"></i><p>No genre data available</p></div>';
+        } else {
+            // ... existing Chart.js code ...
+        }
+
+        // Genre Doughnut Chart
+        const ctxGenre = document.getElementById('genreChart').getContext('2d');
+        new Chart(ctxGenre, {
+            type: 'doughnut',
+            data: {
+                labels: @Json.Serialize(Model.GenreLabels),
+                datasets: [{
+                    data: @Json.Serialize(Model.GenreCounts),
+                    backgroundColor: ['#1a237e', '#ffc107', '#4caf50', '#f44336', '#9c27b0'],
+                    borderWidth: 0
+                }]
+            },
+            options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // Loan Trends Chart
+        const ctxLoan = document.getElementById('loanChart').getContext('2d');
+        new Chart(ctxLoan, {
+            type: 'line',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Books Issued',
+                    data: [12, 19, 15, 25],
+                    borderColor: '#1a237e',
+                    backgroundColor: 'rgba(26, 35, 126, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    </script>
+}
+
 <style>
-    .hover-up {
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    .bg-primary-soft {
+        background: #e8eaf6;
     }
 
-        .hover-up:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important;
-        }
-
-    .animate-fade-in {
-        animation: fadeIn 0.8s ease-out;
+    .bg-success-soft {
+        background: #e8f5e9;
     }
 
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .bg-warning-soft {
+        background: #fffde7;
     }
 
-    .border-primary {
-        border-color: #1a237e !important;
+    .bg-danger-soft {
+        background: #ffebee;
     }
 
-    .text-primary {
-        color: #1a237e !important;
+    .transition-lift:hover {
+        transform: translateY(-5px);
+        transition: 0.3s;
+    }
+
+    .custom-gradient-bar {
+        background: linear-gradient(90deg, #1a237e 0%, #3949ab 100%);
+        border-radius: 20px;
+        transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth growing animation on load */
+        box-shadow: 0 4px 10px rgba(26, 35, 126, 0.2);
+    }
+
+    /* Light background for the badge */
+    .bg-primary-light {
+        background-color: #e8eaf6;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    /* General card polish */
+    .card {
+        transition: all 0.3s ease;
     }
 </style>

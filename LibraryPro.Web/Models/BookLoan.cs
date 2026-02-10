@@ -27,16 +27,16 @@ namespace LibraryPro.Web.Models.Entities
         {
             get
             {
-                var calculationDate = IsReturned ? (ReturnDate ?? DateTime.Now) : DateTime.Now;
-                if (calculationDate > DueDate)
-                {
-                    var overdueDays = (calculationDate - DueDate).Days;
-                    return overdueDays * 2.00m; // Charging $2.00 per day
-                }
-                return 0.00m;
+                if (IsReturned || DateTime.Now <= DueDate)
+                    return 0;
+
+                // Define your daily rate in INR (e.g., 10 Rupees per day)
+                const decimal dailyRateINR = 10.00m;
+
+                var lateDays = (DateTime.Now - DueDate).Days;
+                return lateDays * dailyRateINR;
             }
         }
-
         public bool IsReturned { get; set; } = false;
     }
 }

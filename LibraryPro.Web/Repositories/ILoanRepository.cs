@@ -4,9 +4,9 @@ namespace LibraryPro.Web.Repositories
 {
     public interface ILoanRepository
     {
-        Task CreateLoanAsync(BookLoan loan);
-        Task<IEnumerable<BookLoan>> GetAllLoansAsync();
-        Task<BookLoan?> GetLoanByIdAsync(int id);
-        Task UpdateLoanAsync(BookLoan loan);
+        Task<IEnumerable<BookLoan>> GetAllLoansAsync(); // Renamed
+        Task<BookLoan?> GetLoanByIdAsync(int id);      // Renamed
+        Task CreateLoanAsync(BookLoan loan);           // Renamed
+        Task UpdateLoanAsync(BookLoan loan);           // Renamed
     }
 }

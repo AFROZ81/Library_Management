@@ -24,8 +24,10 @@
         </div>
         <div class="col-md-4">
             <div class="card border-0 shadow-sm bg-white p-3 border-start border-4 border-danger">
-                <small class="text-muted text-uppercase fw-bold">Overdue Items</small>
-                <h4 class="mb-0 fw-bold text-danger">@Model.Count(l => !l.IsReturned && l.CalculateLateFee > 0)</h4>
+                <small class="text-muted text-uppercase fw-bold">Pending Fines (INR)</small>
+                <h4 class="mb-0 fw-bold text-danger">
+                    ₹@Model.Where(l => !l.IsReturned).Sum(l => l.CalculateLateFee).ToString("N2", new System.Globalization.CultureInfo("en-IN"))
+                </h4>
             </div>
         </div>
         <div class="col-md-4">
@@ -72,8 +74,9 @@
                                     @if (loan.CalculateLateFee > 0)
                                     {
                                         <span class="text-danger fw-bold">
-                                            <i class="bi bi-currency-dollar"></i>@loan.CalculateLateFee.ToString("N2")
+                                            ₹@loan.CalculateLateFee.ToString("N2", new System.Globalization.CultureInfo("en-IN"))
                                         </span>
+                                        <div class="small text-danger" style="font-size: 0.7rem;">Overdue</div>
                                     }
                                     else
                                     {
