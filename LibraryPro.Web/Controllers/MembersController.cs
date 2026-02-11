@@ -17,7 +17,6 @@ namespace LibraryPro.Web.Controllers
             _memberRepo = memberRepo;
             _loanRepo = loanRepo;
         }
-
         public async Task<IActionResult> Index()
         {
             var members = await _memberRepo.GetAllAsync();

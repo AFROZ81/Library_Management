@@ -15,22 +15,44 @@ namespace LibraryPro.Web.Controllers
         }
 
         // GET: All Books
-        public async Task<IActionResult> Index(string searchString)
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
         {
+            ViewData["CurrentSort"] = sortOrder;
+            // Toggle logic for sorting
+            ViewData["TitleSortParm"] = String.IsNullOrEmpty(sortOrder) ? "title_desc" : "";
+            ViewData["AuthorSortParm"] = sortOrder == "Author" ? "author_desc" : "Author";
+            ViewData["YearSortParm"] = sortOrder == "Year" ? "year_desc" : "Year";
+
+            if (searchString != null) pageNumber = 1;
+            else searchString = currentFilter;
+
+            ViewData["CurrentFilter"] = searchString;
+
             var books = await _bookRepo.GetAllAsync();
 
+            // 1. Search Filter
             if (!string.IsNullOrEmpty(searchString))
             {
-                // Updated to search within the Genre list as well
                 books = books.Where(b => b.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase)
                                       || b.Author.Contains(searchString, StringComparison.OrdinalIgnoreCase)
                                       || b.Genre.Any(g => g.Contains(searchString, StringComparison.OrdinalIgnoreCase)));
             }
 
-            ViewData["CurrentFilter"] = searchString;
-            return View(books);
-        }
+            // 2. Advanced Sorting
+            books = sortOrder switch
+            {
+                "title_desc" => books.OrderByDescending(b => b.Title),
+                "Author" => books.OrderBy(b => b.Author),
+                "author_desc" => books.OrderByDescending(b => b.Author),
+                "Year" => books.OrderBy(b => b.PublicationYear),
+                "year_desc" => books.OrderByDescending(b => b.PublicationYear),
+                _ => books.OrderBy(b => b.Title),
+            };
 
+            // 3. Pagination
+            int pageSize = 8;
+            return View(await PaginatedList<Book>.CreateAsync(books, pageNumber ?? 1, pageSize));
+        }
         // GET: Create Book Form
         public IActionResult Create() => View();
 

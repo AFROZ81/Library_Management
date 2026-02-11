@@ -1,7 +1,7 @@
-﻿@model IEnumerable<LibraryPro.Web.Models.Entities.Book>
+﻿@model PaginatedList<LibraryPro.Web.Models.Entities.Book>
 
 @{
-    ViewData["Title"] = "Book Inventory";
+    ViewData["Title"] = "Digital Catalog";
 }
 
 <div class="container mt-4 animate-fade-in">
@@ -15,156 +15,213 @@
         </a>
     </div>
 
-    <div class="card border-0 shadow-sm mb-5" style="background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px);">
+    <div class="card border-0 shadow-sm mb-4" style="z-index: 1020;">
         <div class="card-body p-3">
-            <form asp-action="Index" method="get" class="row g-2">
-                <div class="col-md-9">
+            <form asp-action="Index" method="get" class="row g-3 align-items-center">
+                <input type="hidden" name="sortOrder" value="@ViewData["CurrentSort"]" />
+
+                <div class="col-lg-7 col-md-6">
                     <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0 text-muted">
-                            <i class="bi bi-search"></i>
-                        </span>
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" name="searchString" class="form-control border-start-0 ps-0"
-                               placeholder="Search by title, author, or genre..."
-                               value="@ViewData["CurrentFilter"]" />
+                               placeholder="Search titles, authors, or genres..." value="@ViewData["CurrentFilter"]">
                     </div>
                 </div>
-                <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary w-100">Filter Results</button>
-                    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-clockwise"></i></a>
+
+                <div class="col-lg-5 col-md-6 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1 fw-bold">
+                        <i class="bi bi-filter me-2"></i>Filter Results
+                    </button>
+
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle h-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-sort-down-alt me-1"></i> Sort
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0">
+                            <li class="dropdown-header text-uppercase small fw-bold">Sort Collection By</li>
+                            <li><a class="dropdown-item py-2" asp-action="Index" asp-route-sortOrder="@ViewData["TitleSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]"><i class="bi bi-fonts me-2"></i> Title</a></li>
+                            <li><a class="dropdown-item py-2" asp-action="Index" asp-route-sortOrder="@ViewData["AuthorSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]"><i class="bi bi-person me-2"></i> Author</a></li>
+                            <li><a class="dropdown-item py-2" asp-action="Index" asp-route-sortOrder="@ViewData["YearSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]"><i class="bi bi-calendar3 me-2"></i> Publication Year</a></li>
+                        </ul>
+                    </div>
+
+                    <a asp-action="Index" class="btn btn-light border h-100" title="Reset Filters">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </a>
                 </div>
             </form>
         </div>
     </div>
 
     <div class="row">
-        @foreach (var item in Model)
+        @if (!Model.Any())
         {
-            <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 border-0 shadow-sm book-card">
-                    <div class="availability-bar @(item.AvailableCopies > 0 ? "bg-success" : "bg-danger")"></div>
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-journal-x fs-1 text-muted"></i>
+                <h4 class="mt-3 text-muted">No books found in the archive</h4>
+                <p>Try refining your search or adding a new book.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm book-card">
+                        <div class="availability-bar @(item.AvailableCopies > 0 ? "bg-success" : "bg-danger")"></div>
 
-                    <div class="card-body p-4">
-                        <div class="d-flex flex-wrap gap-1 mb-2">
-                            @if (item.Genre != null && item.Genre.Any())
-                            {
-                                foreach (var g in item.Genre)
+                        <div class="card-body p-4">
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                @if (item.Genre != null && item.Genre.Any())
                                 {
-                                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1" style="font-size: 0.7rem;">
-                                        @g
-                                    </span>
+                                    foreach (var g in item.Genre)
+                                    {
+                                        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1" style="font-size: 0.7rem;">@g</span>
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                <span class="badge bg-light text-muted rounded-pill px-2 py-1" style="font-size: 0.7rem;">Uncategorized</span>
-                            }
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-start mb-1">
-                            <h5 class="card-title fw-bold text-dark mb-0">@item.Title</h5>
-                            <small class="text-muted fw-bold ms-2">@item.PublicationYear</small>
-                        </div>
-
-                        <p class="text-muted small mb-3">by <span class="text-dark fw-medium">@item.Author</span></p>
-
-                        <div class="d-flex align-items-center justify-content-between bg-light rounded p-2 mb-3">
-                            <div class="text-center border-end pe-3">
-                                <small class="d-block text-muted x-small text-uppercase">Stock</small>
-                                <span class="fw-bold">@item.TotalCopies</span>
                             </div>
-                            <div class="text-center ps-2">
-                                <small class="d-block text-muted x-small text-uppercase">Available</small>
-                                <span class="fw-bold @(item.AvailableCopies > 0 ? "text-success" : "text-danger")">
-                                    @item.AvailableCopies
-                                </span>
+
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h5 class="card-title fw-bold text-dark mb-0 text-truncate" title="@item.Title">@item.Title</h5>
+                                <small class="text-muted fw-bold ms-2">@item.PublicationYear</small>
+                            </div>
+
+                            <p class="text-muted small mb-3">by <span class="text-dark fw-medium">@item.Author</span></p>
+
+                            <div class="d-flex align-items-center justify-content-between bg-light rounded p-2 mb-3">
+                                <div class="text-center border-end pe-3">
+                                    <small class="d-block text-muted x-small text-uppercase">Stock</small>
+                                    <span class="fw-bold">@item.TotalCopies</span>
+                                </div>
+                                <div class="text-center ps-2">
+                                    <small class="d-block text-muted x-small text-uppercase">Available</small>
+                                    <span class="fw-bold @(item.AvailableCopies > 0 ? "text-success" : "text-danger")">@item.AvailableCopies</span>
+                                </div>
                             </div>
                         </div>
 
-                        <code class="small text-muted d-block">ISBN: @(string.IsNullOrEmpty(item.ISBN) ? "N/A" : item.ISBN)</code>
-                    </div>
-
-                    <div class="card-footer bg-transparent border-0 p-4 pt-0">
-                        <div class="btn-group w-100 shadow-sm">
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-pencil-square me-1"></i> Edit
-                            </a>
-
-                            <button type="button" class="btn btn-outline-danger btn-sm"
-                                    onclick="confirmDelete('@item.Id', '@item.Title')">
-                                <i class="bi bi-trash me-1"></i> Remove
-                            </button>
+                        <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                            <div class="btn-group w-100 shadow-sm">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDelete('@item.Id', '@item.Title')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            }
         }
     </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-4 mb-5">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                    <a class="page-link shadow-sm" asp-action="Index"
+                       asp-route-pageNumber="@(Model.PageIndex - 1)"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                        <a class="page-link shadow-sm" asp-action="Index"
+                           asp-route-pageNumber="@i"
+                           asp-route-sortOrder="@ViewData["CurrentSort"]"
+                           asp-route-currentFilter="@ViewData["CurrentFilter"]">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                    <a class="page-link shadow-sm" asp-action="Index"
+                       asp-route-pageNumber="@(Model.PageIndex + 1)"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
 </div>
 
 <style>
     .book-card {
         transition: all 0.3s ease;
-        overflow: hidden;
+        border-radius: 12px;
     }
 
         .book-card:hover {
-            transform: translateY(-10px);
+            transform: translateY(-8px);
             box-shadow: 0 1rem 3rem rgba(0,0,0,0.1) !important;
         }
 
     .availability-bar {
-        height: 4px;
+        height: 5px;
         width: 100%;
+        border-radius: 12px 12px 0 0;
     }
 
     .x-small {
         font-size: 0.65rem;
     }
 
-    .animate-fade-in {
-        animation: fadeIn 0.5s ease-out;
+    .pagination .page-link {
+        border: none;
+        margin: 0 3px;
+        border-radius: 8px;
+        color: #333;
     }
 
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
+    .pagination .page-item.active .page-link {
+        background-color: #0d6efd;
+        color: white;
+    }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    /* Ensure the filter bar stays above the book cards */
+    .card.border-0.shadow-sm.mb-4 {
+        position: relative;
+        z-index: 1020; /* Higher than Bootstrap's default for cards */
+    }
+
+    /* Force the dropdown menu to be at the very front */
+    .dropdown-menu {
+        z-index: 1050 !important;
+    }
+
+    /* Optional: Smooth out the card hover so it doesn't 'jump' over the menu */
+    .book-card {
+        z-index: 1;
     }
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function confirmDelete(id, title) {
             Swal.fire({
                 title: 'Delete Book?',
-                text: `Are you sure you want to remove "${title}"?`,
+                text: `Removing "${title}" cannot be undone.`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, Delete it!'
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Confirm Delete'
             }).then((result) => {
                 if (result.isConfirmed) {
                     const form = document.createElement('form');
                     form.method = 'POST';
-                    // UPDATE: Pointing directly to the Delete action
                     form.action = '/Books/Delete/' + id;
-
-                    const token = $('input[name="__RequestVerificationToken"]').val();
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
                     const hiddenToken = document.createElement('input');
-                    hiddenToken.type = 'hidden';
-                    hiddenToken.name = '__RequestVerificationToken';
-                    hiddenToken.value = token;
+                    hiddenToken.type = 'hidden'; hiddenToken.name = '__RequestVerificationToken'; hiddenToken.value = token;
                     form.appendChild(hiddenToken);
-
                     document.body.appendChild(form);
                     form.submit();
                 }
