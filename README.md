@@ -1,10 +1,5 @@
 # 📚 LibraryPro: Digital Collection Archive
 
-[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen)](#)
-[![Framework](https://img.shields.io/badge/Framework-ASP.NET%20Core%208.0-blue)](https://dotnet.microsoft.com/)
-[![Database](https://img.shields.io/badge/Database-EF%20Core%20SQL%20Server-red)](#)
-[![UI](https://img.shields.io/badge/UI-Bootstrap%205%20%2B%20SASS-blueviolet)](https://getbootstrap.com/)
-
 **LibraryPro** is a high-performance, responsive Digital Catalog Management System designed to handle modern library volumes with a focus on user experience and real-time inventory tracking. 
 
 The application is built using a **"Fixed Viewport Architecture"**, creating a professional desktop-app feel where the navigation and pagination are always locked in view, while the collection scrolls independently.
