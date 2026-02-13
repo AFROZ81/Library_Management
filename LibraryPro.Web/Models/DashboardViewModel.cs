@@ -16,10 +16,10 @@ namespace LibraryPro.Web.Models.ViewModels
         public List<int> MonthlyLoanStats { get; set; } = new();
         public List<string> WeeklyLabels { get; set; } = new();
         public List<int> WeeklyIssueCounts { get; set; } = new();
-        public List<LibraryPro.Web.Models.Entities.BookLoan> CriticalOverdueLoans { get; set; } = new();
-        public List<TopBorrowerDTO> TopBorrowers { get; set; } = new List<TopBorrowerDTO>();
+        public List<BookLoan> CriticalOverdueLoans { get; set; } = new();
+        public List<BorrowerStatsViewModel> TopBorrowers { get; set; } = new();
     }
-    public class TopBorrowerDTO
+    public class BorrowerStatsViewModel
     {
         public string MemberName { get; set; }
         public string MemberEmail { get; set; }

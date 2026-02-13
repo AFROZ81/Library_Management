@@ -181,13 +181,24 @@
         });
 
         // Genre Chart Fix
+                // Genre Chart Fix
         new Chart(document.getElementById('genreChart'), {
             type: 'doughnut',
             data: {
                 labels: @Json.Serialize(Model.GenreLabels),
                 datasets: [{
                     data: @Json.Serialize(Model.GenreCounts),
-                    backgroundColor: ['#0d6efd', '#ffc107', '#198754', '#dc3545'],
+                    // Expanded palette to prevent color repetition
+                    backgroundColor: [
+                        '#0d6efd', // Blue
+                        '#ffc107', // Yellow
+                        '#198754', // Green
+                        '#dc3545', // Red
+                        '#6610f2', // Indigo
+                        '#fd7e14', // Orange
+                        '#20c997', // Teal
+                        '#0dcaf0'  // Cyan
+                    ],
                     borderWidth: 2,
                     borderColor: '#ffffff'
                 }]
@@ -195,7 +206,17 @@
             options: {
                 ...chartOptions,
                 cutout: '75%',
-                plugins: { legend: { display: true, position: 'bottom' } }
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: { size: 11 }
+                        }
+                    }
+                }
             }
         });
     </script>
