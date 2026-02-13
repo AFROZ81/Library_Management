@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using LibraryPro.Web.Models;
 using LibraryPro.Web.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibraryPro.Web.Data
 {
@@ -10,6 +11,7 @@ namespace LibraryPro.Web.Data
         public DbSet<Book> Books { get; set; }
         public DbSet<Member> Members { get; set; }
         public DbSet<BookLoan> BookLoans { get; set; }
+        public DbSet<FinePayment> FinePayments { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

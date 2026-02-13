@@ -22,19 +22,20 @@ namespace LibraryPro.Web.Models.Entities
         public DateTime DueDate { get; set; } = DateTime.Now.AddDays(14); // Default 2-week loan
         public DateTime? ReturnDate { get; set; } // Null until book is returned
 
+        public decimal AmountPaid { get; set; } = 0;
+
         [NotMapped] // This tells EF Core NOT to create a column in SSMS for this
         public decimal CalculateLateFee
         {
             get
             {
-                if (IsReturned || DateTime.Now <= DueDate)
-                    return 0;
+                if (IsReturned || DueDate >= DateTime.Now.Date) return 0;
 
-                // Define your daily rate in INR (e.g., 10 Rupees per day)
-                const decimal dailyRateINR = 10.00m;
+                int daysOverdue = (DateTime.Now.Date - DueDate.Date).Days;
+                decimal totalFee = daysOverdue * 10; // e.g., 10 rupees per day
 
-                var lateDays = (DateTime.Now - DueDate).Days;
-                return lateDays * dailyRateINR;
+                // Subtract what they already paid to get the "Current Fine"
+                return Math.Max(0, totalFee - AmountPaid);
             }
         }
         public bool IsReturned { get; set; } = false;

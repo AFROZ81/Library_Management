@@ -24,7 +24,7 @@ namespace LibraryPro.Web.Controllers
 
             // Create a lookup for members who have overdue books
             var overdueMemberIds = allLoans
-                .Where(l => !l.IsReturned && l.DueDate < DateTime.Now)
+                .Where(l => !l.IsReturned && l.DueDate.Date < DateTime.Now.Date)
                 .Select(l => l.MemberId)
                 .Distinct()
                 .ToList();
@@ -44,14 +44,30 @@ namespace LibraryPro.Web.Controllers
             }
             return View(member);
         }
-
         public async Task<IActionResult> Details(int id)
         {
+            // 1. Get the member entity
             var member = await _memberRepo.GetByIdAsync(id);
             if (member == null) return NotFound();
-            return View(member);
-        }
 
+            // 2. Get the loans for this member (ensure you include Book data)
+            var allLoans = await _loanRepo.GetLoansByMemberIdAsync(id);
+
+            // 3. MAP the entity data into the ViewModel (The Missing Step!)
+            var viewModel = new MemberProfileViewModel
+            {
+                MemberId = member.Id,
+                Name = member.Name,
+                Email = member.Email,
+                // Calculate fines and separate active vs history
+                TotalUnpaidFine = allLoans.Where(l => !l.IsReturned).Sum(l => l.CalculateLateFee),
+                ActiveLoans = allLoans.Where(l => !l.IsReturned).ToList(),
+                PastHistory = allLoans.Where(l => l.IsReturned).ToList()
+            };
+
+            // 4. Pass the VIEWMODEL to the view (not 'member')
+            return View(viewModel);
+        }
         public async Task<IActionResult> Edit(int id)
         {
             var member = await _memberRepo.GetByIdAsync(id);
@@ -106,19 +122,17 @@ namespace LibraryPro.Web.Controllers
 
             return View(viewModel);
         }
+
         [HttpPost]
-        public async Task<IActionResult> PayFine(int memberId)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PayFine(int memberId) // Make sure this name matches the 'name' attribute in your <input type="hidden">
         {
-            var loans = await _loanRepo.GetAllLoansAsync();
-            var memberLoans = loans.Where(l => l.MemberId == memberId && !l.IsReturned);
+            if (memberId == 0) return BadRequest();
 
-            foreach (var loan in memberLoans)
-            {
-                // In a real-world app, you'd mark the fine as 'Paid' 
-                // For now, we can reset the metadata or log the transaction
-            }
+            await _loanRepo.ClearMemberFinesAsync(memberId);
 
-            return RedirectToAction(nameof(Profile), new { id = memberId });
+            TempData["SuccessMessage"] = "Fines cleared successfully!";
+            return RedirectToAction(nameof(Details), new { id = memberId });
         }
     }
 }

@@ -8,5 +8,7 @@ namespace LibraryPro.Web.Repositories
         Task<BookLoan?> GetLoanByIdAsync(int id);      // Renamed
         Task CreateLoanAsync(BookLoan loan);           // Renamed
         Task UpdateLoanAsync(BookLoan loan);           // Renamed
+        Task ClearMemberFinesAsync(int memberId);
+        Task<IEnumerable<BookLoan>> GetLoansByMemberIdAsync(int memberId);
     }
 }

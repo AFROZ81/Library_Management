@@ -1,33 +1,230 @@
-﻿@model LibraryPro.Web.Models.Entities.Member
+﻿@model LibraryPro.Web.Models.MemberProfileViewModel
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card border-0 shadow-lg overflow-hidden">
-                <div class="p-4 text-center text-white" style="background-color: #1a237e;">
-                    <div class="rounded-circle bg-white text-primary d-inline-flex align-items-center justify-content-center mb-3" style="width:80px; height:80px; font-size: 2rem; font-weight: bold;">
-                        @Model.Name.Substring(0, 1).ToUpper()
+<div class="container py-5 animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Patrons</a></li>
+                <li class="breadcrumb-item active">@Model.Name</li>
+            </ol>
+        </nav>
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.MemberId" class="btn btn-outline-primary rounded-pill px-3 shadow-sm">
+                <i class="bi bi-pencil-square me-2"></i>Edit
+            </a>
+            <button class="btn btn-outline-dark rounded-pill px-3 shadow-sm" onclick="window.print()">
+                <i class="bi bi-printer me-2"></i>Print Statement
+            </button>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-lg mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+                <div>@TempData["SuccessMessage"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center p-4">
+                    <div class="avatar-header mx-auto mb-3 shadow">
+                        @Model.Name[0].ToString().ToUpper()
                     </div>
-                    <h3 class="mb-0">@Model.Name</h3>
-                    <p class="small opacity-75">Member since @Model.MembershipDate.ToShortDateString()</p>
+                    <h4 class="fw-bold text-dark mb-1">@Model.Name</h4>
+                    <span class="badge bg-success-soft text-success rounded-pill px-3 mb-3">Active Account</span>
+
+                    <div class="text-start mt-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-envelope text-muted me-3 fs-5"></i>
+                            <div>
+                                <small class="text-muted d-block">Email Address</small>
+                                <span class="fw-medium">@Model.Email</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-hash text-muted me-3 fs-5"></i>
+                            <div>
+                                <small class="text-muted d-block">Member ID</small>
+                                <span class="fw-medium">#@Model.MemberId.ToString("D5")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm overflow-hidden">
+                <div class="card-header bg-dark text-white fw-bold py-3">
+                    <i class="bi bi-wallet2 me-2"></i>Financial Standing
                 </div>
                 <div class="card-body p-4">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span class="text-muted"><i class="bi bi-envelope me-2"></i>Email</span>
-                            <span class="fw-bold">@Model.Email</span>
+                    <div class="text-center mb-4">
+                        <small class="text-muted text-uppercase fw-bold">Outstanding Balance</small>
+                        <h2 class="display-6 fw-bold @(Model.TotalUnpaidFine > 0 ? "text-danger" : "text-success")">
+                            ₹@Model.TotalUnpaidFine.ToString("N2")
+                        </h2>
+                    </div>
+
+                    @if (Model.TotalUnpaidFine > 0)
+                    {
+                        <form asp-controller="Members" asp-action="PayFine" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="memberId" value="@Model.MemberId" />
+                            <button type="submit" class="btn btn-danger w-100 py-2 fw-bold rounded-3 shadow-sm">
+                                <i class="bi bi-cash-stack me-2"></i>Settle Outstanding Fine
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="bg-light rounded-3 p-3 text-center border border-dashed">
+                            <i class="bi bi-shield-check text-success fs-3"></i>
+                            <p class="small text-muted mb-0 mt-2">No pending dues. Account is in good standing.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom-0 p-3">
+                    <ul class="nav nav-pills nav-justified gap-2" id="memberTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active fw-bold py-2 shadow-sm" id="loans-tab" data-bs-toggle="pill" data-bs-target="#loans-content" type="button" role="tab">
+                                <span class="text-inherit"><i class="bi bi-book me-2"></i>Active Loans (@Model.ActiveLoans.Count)</span>
+                            </button>
                         </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span class="text-muted"><i class="bi bi-telephone me-2"></i>Phone</span>
-                            <span class="fw-bold">@Model.PhoneNumber</span>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-bold py-2 shadow-sm border" id="history-tab" data-bs-toggle="pill" data-bs-target="#history-content" type="button" role="tab">
+                                <span class="text-inherit"><i class="bi bi-clock-history me-2"></i>Borrowing History</span>
+                            </button>
                         </li>
                     </ul>
-                    <div class="mt-4 d-grid gap-2">
-                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit Profile</a>
-                        <a asp-action="Index" class="btn btn-link text-muted">Back to Directory</a>
+                </div>
+
+                <div class="card-body pt-0">
+                    <div class="tab-content mt-3" id="memberTabsContent">
+                        <div class="tab-pane fade show active" id="loans-content" role="tabpanel" aria-labelledby="loans-tab">
+                            @if (!Model.ActiveLoans.Any())
+                            {
+                                <div class="text-center py-5 opacity-50">
+                                    <i class="bi bi-journal-check display-4"></i>
+                                    <p class="mt-2">No books currently checked out.</p>
+                                </div>
+                            }
+                            else
+                            {
+                                @foreach (var loan in Model.ActiveLoans)
+                                {
+                                    <div class="d-flex align-items-center justify-content-between p-3 mb-3 border rounded-3 transition-lift">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary text-white p-3 rounded-3 me-3">
+                                                <i class="bi bi-book"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-bold mb-0">@loan.Book.Title</h6>
+                                                <small class="@(loan.DueDate < DateTime.Now.Date ? "text-danger fw-bold" : "text-muted")">
+                                                    Due: @loan.DueDate.ToString("MMM dd, yyyy")
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <form asp-controller="Loans" asp-action="Return" method="post">
+                                            <input type="hidden" name="loanId" value="@loan.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-primary px-3 rounded-pill">Process Return</button>
+                                        </form>
+                                    </div>
+                                }
+                            }
+                        </div>
+
+                        <div class="tab-pane fade" id="history-content" role="tabpanel" aria-labelledby="history-tab">
+                            <div class="table-responsive">
+                                <table class="table align-middle table-hover">
+                                    <thead class="bg-light small text-muted">
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Borrowed</th>
+                                            <th>Returned</th>
+                                            <th class="text-end">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var hist in Model.PastHistory.OrderByDescending(x => x.ReturnDate))
+                                        {
+                                            <tr>
+                                                <td class="fw-bold">@hist.Book.Title</td>
+                                                <td class="small">@hist.LoanDate.ToShortDateString()</td>
+                                                <td class="small">@hist.ReturnDate?.ToShortDateString()</td>
+                                                <td class="text-end">
+                                                    <span class="badge bg-success-soft text-success rounded-pill">Returned</span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .avatar-header {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(45deg, #1a237e, #3949ab);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 800;
+        border-radius: 50%;
+        border: 4px solid #fff;
+    }
+
+    .bg-success-soft {
+        background-color: #e8f5e9;
+    }
+
+    /* Fixed Nav Styles */
+    .nav-pills .nav-link {
+        color: #444 !important; /* Dark grey for inactive tabs */
+        opacity: 1 !important;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 50px !important;
+        margin: 0 2px;
+    }
+
+        .nav-pills .nav-link.active {
+            background-color: #1a237e !important;
+            color: #ffffff !important;
+            border-color: #1a237e;
+        }
+
+    .transition-lift:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    @@media print {
+        .btn, .nav, .breadcrumb, form {
+            display: none !important;
+        }
+
+        .card {
+            border: 1px solid #ddd !important;
+            box-shadow: none !important;
+        }
+    }
+</style>
