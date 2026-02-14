@@ -85,38 +85,46 @@ namespace LibraryPro.Web.Controllers
         // POST: Books/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Book book)
+public async Task<IActionResult> Edit(int id, Book book)
+{
+    if (id != book.Id) return NotFound();
+
+    if (ModelState.IsValid)
+    {
+        try
         {
-            if (id != book.Id) return NotFound();
+            // 1. Fetch the tracked entity
+            var existingBook = await _bookRepo.GetByIdAsync(id);
+            if (existingBook == null) return NotFound();
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    // CRITICAL: We need to preserve AvailableCopies logic
-                    // If you increase TotalCopies, we should increase AvailableCopies by the same amount
-                    var existingBook = await _bookRepo.GetByIdAsync(id);
-                    if (existingBook != null)
-                    {
-                        int difference = book.TotalCopies - existingBook.TotalCopies;
-                        book.AvailableCopies = existingBook.AvailableCopies + difference;
+            // 2. Calculate copy differences
+            int difference = book.TotalCopies - existingBook.TotalCopies;
+            
+            // 3. Update the tracked entity's properties manually
+            existingBook.Title = book.Title;
+            existingBook.Author = book.Author;
+            existingBook.ISBN = book.ISBN;
+            existingBook.Genre = book.Genre;
+            existingBook.PublicationYear = book.PublicationYear;
+            existingBook.TotalCopies = book.TotalCopies;
+            
+            // Update available copies based on the change in stock
+            existingBook.AvailableCopies += difference;
+            if (existingBook.AvailableCopies < 0) existingBook.AvailableCopies = 0;
 
-                        // Prevent available copies from going negative
-                        if (book.AvailableCopies < 0) book.AvailableCopies = 0;
-                    }
-
-                    await _bookRepo.UpdateAsync(book);
-                }
-                catch (Exception)
-                {
-                    ModelState.AddModelError("", "Unable to save changes. Try again.");
-                    return View(book);
-                }
-                return RedirectToAction(nameof(Index));
-            }
+            // 4. Save the tracked entity
+            await _bookRepo.UpdateAsync(existingBook);
+        }
+        catch (Exception ex)
+        {
+            // Helpful for debugging: check ex.Message in your debugger
+            ModelState.AddModelError("", "Unable to save changes. Try again.");
             return View(book);
         }
-
+        return RedirectToAction(nameof(Index));
+    }
+    return View(book);
+}
         // GET: Books/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {

@@ -23,5 +23,6 @@ namespace LibraryPro.Web.Models.Entities
 
         // Navigation property for the loans we will create later
         public ICollection<Book>? BorrowedBooks { get; set; }
+        public virtual ICollection<BookLoan> Loans { get; set; } = new List<BookLoan>();
     }
 }

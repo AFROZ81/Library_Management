@@ -16,6 +16,11 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
         :root {
             --primary-navy: #1a237e;
             --accent-yellow: #ffc107;
@@ -25,8 +30,9 @@
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #f4f7f9;
-            /* Added padding so fixed navbar doesn't cover top content */
             padding-top: 85px;
+            display: flex;
+            flex-direction: column; /* Stacks header, main, and footer vertically */
             transition: all 0.3s ease;
         }
 
@@ -116,10 +122,11 @@
 
         /* --- Footer & Container --- */
         .main-container {
-            min-height: 80vh;
+            flex: 1 0 auto;
         }
 
         footer {
+            flex-shrink: 0; /* Ensures the footer doesn't get squashed */
             background: #fff;
             padding: 30px 0;
             border-top: 1px solid #e9ecef;

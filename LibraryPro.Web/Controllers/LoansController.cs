@@ -20,8 +20,16 @@ namespace LibraryPro.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var loans = await _loanRepo.GetAllLoansAsync();
-            return View(loans);
+            // Fetch all loans including Member and Book data
+            var allLoans = await _loanRepo.GetAllLoansAsync();
+
+            // Group by member so each member is unique in the main list
+            var memberSummary = allLoans
+                .GroupBy(l => l.MemberId)
+                .Select(g => g.First().Member)
+                .ToList();
+
+            return View(memberSummary);
         }
 
         public async Task<IActionResult> Issue()

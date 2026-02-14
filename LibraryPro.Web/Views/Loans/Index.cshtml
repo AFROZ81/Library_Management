@@ -1,6 +1,11 @@
-﻿@model IEnumerable<LibraryPro.Web.Models.Entities.BookLoan>
+﻿@model IEnumerable<LibraryPro.Web.Models.Entities.Member>
+
+@{
+    ViewData["Title"] = "Loan Operations";
+}
 
 <div class="container py-5 animate-fade-in">
+    @* --- Header Section --- *@
     <div class="row align-items-end mb-4">
         <div class="col-lg-6">
             <h2 class="fw-bold text-dark mb-1"><i class="bi bi-arrow-left-right text-primary me-2"></i>Loan Operations</h2>
@@ -10,7 +15,7 @@
             <div class="d-inline-flex gap-2">
                 <div class="input-group shadow-sm" style="width: 300px;">
                     <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-                    <input type="text" id="loanSearch" class="form-control border-start-0" placeholder="Search book or member...">
+                    <input type="text" id="loanSearch" class="form-control border-start-0" placeholder="Search member name...">
                 </div>
                 <a asp-action="Issue" class="btn btn-primary fw-bold px-4 shadow-sm rounded-pill">
                     <i class="bi bi-plus-lg me-2"></i>Issue Book
@@ -19,20 +24,23 @@
         </div>
     </div>
 
+    @* --- Stats Cards Section --- *@
     <div class="row g-3 mb-4">
         @{
-            var activeCount = Model.Count(l => !l.IsReturned);
-            var overdueCount = Model.Count(l => !l.IsReturned && l.DueDate < DateTime.Now);
-            var returnRate = Model.Any() ? (Model.Count(l => l.IsReturned) * 100 / Model.Count()) : 0;
+            // Flatten all loans from all members to calculate library-wide totals
+            var allLoans = Model.SelectMany(m => m.Loans).ToList();
+
+            var activeCount = allLoans.Count(l => !l.IsReturned);
+            var overdueCount = allLoans.Count(l => !l.IsReturned && l.DueDate < DateTime.Now);
+            var totalReturned = allLoans.Count(l => l.IsReturned);
+            var returnRate = allLoans.Any() ? (totalReturned * 100 / allLoans.Count()) : 0;
+            var totalFine = allLoans.Where(l => !l.IsReturned).Sum(l => l.CalculateLateFee);
         }
         <div class="col-md-3">
             <div class="card border-0 shadow-sm p-3">
                 <div class="d-flex align-items-center">
                     <div class="stats-icon bg-primary-soft text-primary me-3"><i class="bi bi-journal-bookmark"></i></div>
-                    <div>
-                        <h4 class="mb-0 fw-bold">@activeCount</h4>
-                        <small class="text-muted">Currently Out</small>
-                    </div>
+                    <div><h4 class="mb-0 fw-bold">@activeCount</h4><small class="text-muted">Currently Out</small></div>
                 </div>
             </div>
         </div>
@@ -40,10 +48,7 @@
             <div class="card border-0 shadow-sm p-3">
                 <div class="d-flex align-items-center">
                     <div class="stats-icon bg-danger-soft text-danger me-3"><i class="bi bi-exclamation-octagon"></i></div>
-                    <div>
-                        <h4 class="mb-0 fw-bold">@overdueCount</h4>
-                        <small class="text-muted">Overdue Items</small>
-                    </div>
+                    <div><h4 class="mb-0 fw-bold">@overdueCount</h4><small class="text-muted">Overdue Items</small></div>
                 </div>
             </div>
         </div>
@@ -51,10 +56,7 @@
             <div class="card border-0 shadow-sm p-3">
                 <div class="d-flex align-items-center">
                     <div class="stats-icon bg-success-soft text-success me-3"><i class="bi bi-graph-up-arrow"></i></div>
-                    <div>
-                        <h4 class="mb-0 fw-bold">@returnRate%</h4>
-                        <small class="text-muted">Return Rate</small>
-                    </div>
+                    <div><h4 class="mb-0 fw-bold">@returnRate%</h4><small class="text-muted">Return Rate</small></div>
                 </div>
             </div>
         </div>
@@ -63,7 +65,7 @@
                 <div class="d-flex align-items-center">
                     <div class="stats-icon bg-warning-soft text-warning me-3"><i class="bi bi-currency-rupee"></i></div>
                     <div>
-                        <h4 class="mb-0 fw-bold">₹@Model.Where(l => !l.IsReturned).Sum(l => l.CalculateLateFee).ToString("N0")</h4>
+                        <h4 class="mb-0 fw-bold">₹@totalFine.ToString("N0")</h4>
                         <small class="text-muted">Uncollected Fines</small>
                     </div>
                 </div>
@@ -71,106 +73,122 @@
         </div>
     </div>
 
+    @* --- Main Table --- *@
     <div class="card shadow-sm border-0 overflow-hidden">
-        <div class="card-header bg-white py-3 border-bottom-0">
-            <div class="d-flex justify-content-between align-items-center">
-                <h6 class="fw-bold mb-0 text-uppercase small text-muted">Transaction Registry</h6>
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle rounded-pill" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-filter me-1"></i> Filter Status
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">All Transactions</a></li>
-                        <li><a class="dropdown-item text-danger" href="#">Only Overdue</a></li>
-                        <li><a class="dropdown-item text-success" href="#">Only Returned</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0" id="loansTable">
-                <thead class="bg-light border-top">
-                    <tr class="text-muted small">
-                        <th class="ps-4">Item Information</th>
-                        <th>Member Details</th>
-                        <th>Timeline</th>
-                        <th>Financials</th>
-                        <th>Status</th>
-                        <th class="text-center">Manage</th>
+            <table class="table align-middle mb-0" id="loansTable">
+                <thead class="bg-dark text-white">
+                    <tr class="small">
+                        <th class="ps-4 py-3">Member Name</th>
+                        <th>Contact Email</th>
+                        <th>Phone</th>
+                        <th class="text-center">Active Loans</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end pe-4">Details</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var loan in Model)
+                    @foreach (var m in Model)
                     {
-                        var isOverdue = loan.CalculateLateFee > 0 && !loan.IsReturned;
-                        var daysRemaining = (loan.DueDate - DateTime.Now).Days;
+                        var collapseId = "memberLoans" + m.Id;
+                        var memberActiveLoans = m.Loans.Where(l => !l.IsReturned).ToList();
+                        var isOverdue = memberActiveLoans.Any(l => l.DueDate < DateTime.Now);
 
-                        <tr class="loan-row">
+                        <tr class="member-row" data-bs-toggle="collapse" data-bs-target="#@collapseId" style="cursor: pointer;">
                             <td class="ps-4">
                                 <div class="d-flex align-items-center">
-                                    <div class="book-cover-sm me-3">
-                                        <i class="bi bi-book text-muted"></i>
-                                    </div>
+                                    <div class="avatar-circle me-3">@m.Name.Substring(0, 1).ToUpper()</div>
                                     <div>
-                                        <div class="fw-bold text-dark">@loan.Book.Title</div>
-                                        <div class="text-muted x-small">ISBN: @loan.Book.ISBN</div>
+                                        <span class="fw-bold d-block text-dark">@m.Name</span>
+                                        <small class="text-muted">ID: #@m.Id.ToString("D4")</small>
                                     </div>
                                 </div>
                             </td>
-                            <td>
-                                <div class="fw-medium">@loan.Member.Name</div>
-                                <div class="text-muted x-small">ID: #@loan.Member.Id.ToString("D4")</div>
-                            </td>
-                            <td>
-                                <div class="small @(isOverdue ? "text-danger fw-bold" : "text-dark")">
-                                    @loan.DueDate.ToString("MMM dd")
-                                </div>
-                                @if (!loan.IsReturned)
-                                {
-                                    <div class="x-small @(isOverdue ? "text-danger" : "text-muted")">
-                                        @(isOverdue ? $"{Math.Abs(daysRemaining)} days late" : $"{daysRemaining} days left")
-                                    </div>
-                                }
-                            </td>
-                            <td>
-                                @if (loan.CalculateLateFee > 0)
-                                {
-                                    <div class="text-danger fw-bold">₹@loan.CalculateLateFee.ToString("N0")</div>
-                                }
-                                else
-                                {
-                                    <span class="text-muted x-small">--</span>
-                                }
-                            </td>
-                            <td>
-                                @if (loan.IsReturned)
-                                {
-                                    <span class="badge bg-success-soft text-success border border-success border-opacity-25 rounded-pill">Settled</span>
-                                }
-                                else
-                                {
-                                    <span class="badge @(isOverdue ? "bg-danger" : "bg-primary") rounded-pill">@(isOverdue ? "Overdue" : "Active")</span>
-                                }
+                            <td>@m.Email</td>
+                            <td>@m.PhoneNumber</td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark border rounded-pill px-3">
+                                    @memberActiveLoans.Count Books
+                                </span>
                             </td>
                             <td class="text-center">
-                                <div class="dropdown">
-                                    <button class="btn btn-light btn-sm rounded-circle" data-bs-toggle="dropdown">
-                                        <i class="bi bi-three-dots-vertical"></i>
-                                    </button>
-                                    <ul class="dropdown-menu shadow border-0">
-                                        @if (!loan.IsReturned)
+                                @if (isOverdue)
+                                {
+                                    <span class="badge bg-danger-soft text-danger rounded-pill">Overdue Items</span>
+                                }
+                                else if (memberActiveLoans.Any())
+                                {
+                                    <span class="badge bg-primary-soft text-primary rounded-pill">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success-soft text-success rounded-pill">Clear</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <i class="bi bi-chevron-down text-muted"></i>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="6" class="p-0 border-0">
+                                <div class="collapse" id="@collapseId">
+                                    <div class="p-4 bg-light border-bottom">
+                                        <h6 class="fw-bold mb-3"><i class="bi bi-journal-text me-2"></i>Current Books with @m.Name</h6>
+
+                                        @if (memberActiveLoans.Any())
                                         {
-                                            <li>
-                                                <form asp-action="Return" method="post">
-                                                    <input type="hidden" name="loanId" value="@loan.Id" />
-                                                    <button type="submit" class="dropdown-item text-primary"><i class="bi bi-arrow-return-left me-2"></i>Mark Returned</button>
-                                                </form>
-                                            </li>
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li><a class="dropdown-item" href="mailto:@loan.Member.Email"><i class="bi bi-bell me-2"></i>Send Reminder</a></li>
+                                            <div class="table-responsive rounded-3 shadow-sm bg-white">
+                                                <table class="table table-sm mb-0">
+                                                    <thead class="table-light small">
+                                                        <tr>
+                                                            <th class="ps-3">Book Title</th>
+                                                            <th>Due Date</th>
+                                                            <th>Fine</th>
+                                                            <th class="text-end pe-3">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var loan in memberActiveLoans)
+                                                        {
+                                                            var loanOverdue = loan.DueDate < DateTime.Now;
+                                                            <tr>
+                                                                <td class="ps-3">
+                                                                    <span class="fw-medium">@loan.Book.Title</span><br />
+                                                                    <small class="text-muted">ISBN: @loan.Book.ISBN</small>
+                                                                </td>
+                                                                <td class="@(loanOverdue ? "text-danger fw-bold" : "")">
+                                                                    @loan.DueDate.ToString("MMM dd, yyyy")
+                                                                </td>
+                                                                <td>
+                                                                    @if (loan.CalculateLateFee > 0)
+                                                                    {
+                                                                        <span class="text-danger">₹@loan.CalculateLateFee</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span class="text-muted">--</span>
+                                                                    }
+                                                                </td>
+                                                                <td class="text-end pe-3">
+                                                                    <form asp-action="Return" method="post" class="d-inline">
+                                                                        <input type="hidden" name="loanId" value="@loan.Id" />
+                                                                        <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill">Mark Returned</button>
+                                                                    </form>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         }
-                                        <li><a class="dropdown-item" asp-controller="Members" asp-action="Details" asp-route-id="@loan.Member.Id"><i class="bi bi-person me-2"></i>View Member</a></li>
-                                    </ul>
+                                        else
+                                        {
+                                            <div class="text-center py-3 text-muted small border rounded bg-white">
+                                                No active books currently borrowed.
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -182,24 +200,17 @@
 </div>
 
 <style>
-    .x-small {
-        font-size: 0.75rem;
-    }
-
-    .bg-primary-soft {
-        background-color: #eef2ff;
-    }
-
-    .bg-danger-soft {
-        background-color: #fff1f2;
-    }
-
-    .bg-success-soft {
-        background-color: #f0fdf4;
-    }
-
-    .bg-warning-soft {
-        background-color: #fffbeb;
+    .avatar-circle {
+        width: 35px;
+        height: 35px;
+        background: #6366f1;
+        color: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.9rem;
     }
 
     .stats-icon {
@@ -212,38 +223,59 @@
         font-size: 1.25rem;
     }
 
-    .book-cover-sm {
-        width: 35px;
-        height: 45px;
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .bg-primary-soft {
+        background-color: #eef2ff;
+        color: #4f46e5;
     }
 
-    .loan-row {
-        transition: all 0.2s;
+    .bg-danger-soft {
+        background-color: #fef2f2;
+        color: #dc2626;
     }
 
-        .loan-row:hover {
-            background-color: #fcfcfd;
+    .bg-success-soft {
+        background-color: #f0fdf4;
+        color: #16a34a;
+    }
+
+    .bg-warning-soft {
+        background-color: #fffbeb;
+        color: #d97706;
+    }
+
+    .member-row:hover {
+        background-color: #f8fafc !important;
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
         }
 
-    .dropdown-item {
-        font-size: 0.9rem;
-        padding: 0.5rem 1rem;
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 
 <script>
-    // Live Search Logic
     document.getElementById('loanSearch').addEventListener('keyup', function() {
         let val = this.value.toLowerCase();
-        let rows = document.querySelectorAll('#loansTable tbody tr');
+        let rows = document.querySelectorAll('#loansTable tbody .member-row');
         rows.forEach(row => {
-            row.style.display = row.innerText.toLowerCase().includes(val) ? '' : 'none';
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(val) ? '' : 'none';
+            // Hide the associated collapse row if the main row is hidden
+            let nextRow = row.nextElementSibling;
+            if (nextRow && nextRow.querySelector('.collapse')) {
+                nextRow.style.display = text.includes(val) ? '' : 'none';
+            }
         });
     });
 </script>
