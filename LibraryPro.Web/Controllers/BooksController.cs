@@ -85,7 +85,7 @@ namespace LibraryPro.Web.Controllers
         // POST: Books/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-public async Task<IActionResult> Edit(int id, Book book)
+        public async Task<IActionResult> Edit(int id, Book book)
 {
     if (id != book.Id) return NotFound();
 
@@ -136,20 +136,23 @@ public async Task<IActionResult> Edit(int id, Book book)
             return View(book);
         }
 
-        // POST: Books/Delete/5
-        // This handles the actual deletion
-        [HttpPost]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteConfirmed([FromRoute] int id) // Add [FromRoute]
         {
-            var book = await _bookRepo.GetByIdAsync(id);
-            if (book != null)
-            {
-                await _bookRepo.DeleteAsync(id); // Using the repo instead of _context
-            }
-
-            // Redirect back to the index so the user sees the updated list
+            await _bookRepo.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
+        }
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+
+            // Use the repository instead of the context
+            var book = await _bookRepo.GetByIdAsync(id.Value);
+
+            if (book == null) return NotFound();
+
+            return View(book);
         }
     }
 }

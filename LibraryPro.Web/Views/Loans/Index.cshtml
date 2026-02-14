@@ -31,7 +31,7 @@
             var allLoans = Model.SelectMany(m => m.Loans).ToList();
 
             var activeCount = allLoans.Count(l => !l.IsReturned);
-            var overdueCount = allLoans.Count(l => !l.IsReturned && l.DueDate < DateTime.Now);
+            var overdueCount = allLoans.Count(l => !l.IsReturned && l.DueDate.Date < DateTime.Now.Date);
             var totalReturned = allLoans.Count(l => l.IsReturned);
             var returnRate = allLoans.Any() ? (totalReturned * 100 / allLoans.Count()) : 0;
             var totalFine = allLoans.Where(l => !l.IsReturned).Sum(l => l.CalculateLateFee);
@@ -92,7 +92,7 @@
                     {
                         var collapseId = "memberLoans" + m.Id;
                         var memberActiveLoans = m.Loans.Where(l => !l.IsReturned).ToList();
-                        var isOverdue = memberActiveLoans.Any(l => l.DueDate < DateTime.Now);
+                        var isOverdue = memberActiveLoans.Any(l => l.DueDate.Date < DateTime.Now.Date);
 
                         <tr class="member-row" data-bs-toggle="collapse" data-bs-target="#@collapseId" style="cursor: pointer;">
                             <td class="ps-4">
@@ -151,7 +151,7 @@
                                                     <tbody>
                                                         @foreach (var loan in memberActiveLoans)
                                                         {
-                                                            var loanOverdue = loan.DueDate < DateTime.Now;
+                                                            var loanOverdue = loan.DueDate.Date < DateTime.Now.Date;
                                                             <tr>
                                                                 <td class="ps-3">
                                                                     <span class="fw-medium">@loan.Book.Title</span><br />

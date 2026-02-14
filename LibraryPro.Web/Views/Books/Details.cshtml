@@ -1,0 +1,151 @@
+﻿@model LibraryPro.Web.Models.Entities.Book
+
+<div class="main-viewport animate-fade-in">
+    <div class="container py-5">
+        <div class="mb-4">
+            <a asp-action="Index" class="text-decoration-none text-muted fw-bold small uppercase-tracking">
+                <i class="bi bi-arrow-left me-2"></i> Back to Archive
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-lg rounded-5 overflow-hidden details-main-card">
+            <div class="accent-bar"></div>
+
+            <div class="card-body p-5">
+                <div class="row">
+                    <div class="col-12 text-center mb-5">
+                        <div class="book-icon-badge mb-3">
+                            <i class="bi bi-book-half"></i>
+                        </div>
+                        <h1 class="display-4 fw-900 text-dark mb-2">@Model.Title</h1>
+                        <p class="fs-4 text-primary-gradient fw-medium">@Model.Author</p>
+
+                        <div class="d-flex justify-content-center gap-2 mt-3">
+                            @if (Model.Genre != null)
+                            {
+                                @foreach (var g in Model.Genre)
+                                {
+                                    <span class="badge rounded-pill bg-light text-dark border px-3">@g</span>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <div class="col-lg-10 mx-auto">
+                        <div class="row g-4 mb-5">
+                            <div class="col-md-4">
+                                <div class="info-stat-card">
+                                    <span class="stat-label">ISBN-13</span>
+                                    <span class="stat-value">@Model.ISBN</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-stat-card">
+                                    <span class="stat-label">Published</span>
+                                    <span class="stat-value">@Model.PublicationYear</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-stat-card">
+                                    <span class="stat-label">Status</span>
+                                    <span class="stat-value @(Model.AvailableCopies > 0 ? "text-success" : "text-danger")">
+                                        @(Model.AvailableCopies > 0 ? "Available" : "Checked Out")
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="inventory-hero-box p-5 rounded-5 mb-5 text-center">
+                            <h5 class="fw-bold mb-4 opacity-75">Archive Availability</h5>
+                            <div class="display-2 fw-900 mb-2">@Model.AvailableCopies <span class="fs-4 text-muted">/ @Model.TotalCopies</span></div>
+
+                            <div class="progress rounded-pill mx-auto mb-3" style="height: 12px; max-width: 500px;">
+                                @{
+                                    var percent = (Model.TotalCopies > 0) ? (Model.AvailableCopies * 100 / Model.TotalCopies) : 0;
+                                }
+                                <div class="progress-bar bg-primary-gradient" style="width: @percent%"></div>
+                            </div>
+                            <p class="small fw-bold text-muted">TOTAL VOLUMES IN COLLECTION</p>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-3">
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-dark btn-lg rounded-pill px-5 shadow">
+                                <i class="bi bi-pencil-square me-2"></i> Edit Record
+                            </a>
+                            <button onclick="window.print()" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                                <i class="bi bi-printer me-2"></i> Print Tag
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-900 {
+        font-weight: 900;
+    }
+
+    .uppercase-tracking {
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .details-main-card {
+        background: #fff;
+        position: relative;
+    }
+
+    .accent-bar {
+        height: 8px;
+        background: var(--primary-gradient);
+    }
+
+    .book-icon-badge {
+        width: 80px;
+        height: 80px;
+        background: #f8fafc;
+        border-radius: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: #4f46e5;
+        border: 1px solid #e2e8f0;
+    }
+
+    .info-stat-card {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 20px;
+        text-align: center;
+        border: 1px solid #edf2f7;
+        height: 100%;
+    }
+
+    .stat-label {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #94a3b8;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .stat-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .inventory-hero-box {
+        background: linear-gradient(to bottom, #f1f5f9, #ffffff);
+        border: 2px dashed #e2e8f0;
+    }
+
+    .bg-primary-gradient {
+        background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%) !important;
+    }
+</style>
