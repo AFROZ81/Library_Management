@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<LibraryPro.Web.Models.Entities.Member>
+@Html.AntiForgeryToken()
 
 @{
     ViewData["Title"] = "Library Members";
@@ -152,6 +153,17 @@
         animation: fadeIn 0.4s ease-out;
     }
 
+    .swal2-toast-custom {
+        border-radius: 12px !important;
+        padding: 1rem !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Matching the progress bar to your primary gradient */
+    .swal2-timer-progress-bar-custom {
+        background: var(--primary-gradient) !important;
+    }
+
     @@keyframes fadeIn {
         from {
             opacity: 0;
@@ -168,7 +180,26 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Real-time Search Filter
+        // 1. TOAST NOTIFICATION LOGIC
+        const successMessage = '@TempData["Success"]';
+        if (successMessage) {
+            Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                customClass: {
+                    popup: 'swal2-toast-custom',
+                    timerProgressBar: 'swal2-timer-progress-bar-custom'
+                }
+            }).fire({
+                icon: 'success',
+                title: successMessage
+            });
+        }
+
+        // 2. REAL-TIME SEARCH
         document.getElementById('memberSearch').addEventListener('keyup', function() {
             let value = this.value.toLowerCase();
             let rows = document.querySelectorAll('tbody tr');
@@ -177,23 +208,34 @@
             });
         });
 
+        // 3. FIXED DELETE LOGIC (Solves Error 400)
         function confirmMemberDelete(id, name) {
             Swal.fire({
                 title: 'Confirm Deletion',
                 text: `Removing ${name} will permanently delete their record. Proceed?`,
-                icon: 'error',
+                icon: 'warning', // Changed to warning for better UX
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
                 cancelButtonColor: '#64748b',
                 confirmButtonText: 'Yes, Delete Patron',
                 background: '#fff',
-                borderRadius: '1rem'
+                customClass: { popup: 'rounded-4' }
             }).then((result) => {
                 if (result.isConfirmed) {
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = '/Members/Delete/' + id;
-                    // Token handling code...
+
+                    // THE FIX: Grabbing the Anti-Forgery Token
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                    if (token) {
+                        const tokenInput = document.createElement('input');
+                        tokenInput.type = 'hidden';
+                        tokenInput.name = '__RequestVerificationToken';
+                        tokenInput.value = token.value;
+                        form.appendChild(tokenInput);
+                    }
+
                     document.body.appendChild(form);
                     form.submit();
                 }

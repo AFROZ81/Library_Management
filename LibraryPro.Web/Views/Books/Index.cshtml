@@ -350,11 +350,42 @@
         opacity: 0.5;
         background-color: #f8fafc !important;
     }
+
+    /* Custom Toast Styling */
+    .swal2-toast-custom {
+        border-radius: 12px !important;
+        padding: 1rem !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Matching the progress bar to your primary gradient */
+    .swal2-timer-progress-bar-custom {
+        background: var(--primary-gradient) !important;
+    }
 </style>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        const successMessage = '@TempData["Success"]';
+        if (successMessage) {
+            Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                customClass: {
+                    popup: 'swal2-toast-custom',
+                    timerProgressBar: 'swal2-timer-progress-bar-custom'
+                }
+            }).fire({
+                icon: 'success',
+                iconColor: '#4f46e5',
+                title: `<span class="fw-bold text-dark">${successMessage}</span>`
+            });
+        }
+
         function confirmDelete(id, title) {
             Swal.fire({
                 title: 'Confirm Removal',

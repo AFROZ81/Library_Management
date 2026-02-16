@@ -66,6 +66,7 @@ namespace LibraryPro.Web.Controllers
                 book.AvailableCopies = book.TotalCopies;
 
                 await _bookRepo.AddAsync(book);
+                TempData["Success"] = "New volume has been added.";
                 return RedirectToAction(nameof(Index));
             }
             return View(book);
@@ -141,6 +142,7 @@ namespace LibraryPro.Web.Controllers
         public async Task<IActionResult> DeleteConfirmed([FromRoute] int id) // Add [FromRoute]
         {
             await _bookRepo.DeleteAsync(id);
+            TempData["Success"] = "The volume has been permanently removed.";
             return RedirectToAction(nameof(Index));
         }
         public async Task<IActionResult> Details(int? id)

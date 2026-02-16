@@ -40,6 +40,7 @@ namespace LibraryPro.Web.Controllers
             if (ModelState.IsValid)
             {
                 await _memberRepo.AddAsync(member);
+                TempData["Success"] = $"Member '{member.Name}' registered successfully!"; 
                 return RedirectToAction(nameof(Index));
             }
             return View(member);
@@ -84,6 +85,7 @@ namespace LibraryPro.Web.Controllers
             if (ModelState.IsValid)
             {
                 await _memberRepo.UpdateAsync(member);
+                TempData["Success"] = "Member details updated successfully."; // ADD THIS
                 return RedirectToAction(nameof(Index));
             }
             return View(member);
@@ -97,6 +99,7 @@ namespace LibraryPro.Web.Controllers
             if (member != null)
             {
                 await _memberRepo.DeleteAsync(id);
+                TempData["Success"] = "Member record removed permanently."; // ADD THIS
             }
             return RedirectToAction(nameof(Index));
         }
