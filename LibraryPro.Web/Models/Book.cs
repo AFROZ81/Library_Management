@@ -8,10 +8,10 @@ namespace LibraryPro.Web.Models.Entities
         public int Id { get; set; }
 
         [Required, StringLength(200)]
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         [Required]
-        public string Author { get; set; }
+        public string? Author { get; set; }
 
         public string? ISBN { get; set; }
 

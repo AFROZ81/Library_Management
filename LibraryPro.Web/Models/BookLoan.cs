@@ -11,12 +11,12 @@ namespace LibraryPro.Web.Models.Entities
         [Required]
         public int BookId { get; set; }
         [ForeignKey("BookId")]
-        public Book Book { get; set; }
+        public Book? Book { get; set; }
 
         [Required]
         public int MemberId { get; set; }
         [ForeignKey("MemberId")]
-        public Member Member { get; set; }
+        public Member? Member { get; set; }
 
         public DateTime LoanDate { get; set; } = DateTime.Now;
         public DateTime DueDate { get; set; } = DateTime.Now.AddDays(14); // Default 2-week loan

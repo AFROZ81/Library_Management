@@ -115,7 +115,7 @@ namespace LibraryPro.Web.Controllers
             // 4. Save the tracked entity
             await _bookRepo.UpdateAsync(existingBook);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // Helpful for debugging: check ex.Message in your debugger
             ModelState.AddModelError("", "Unable to save changes. Try again.");

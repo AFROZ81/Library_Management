@@ -11,7 +11,7 @@ namespace LibraryPro.Web.Models
         public DateTime PaymentDate { get; set; } = DateTime.Now;
 
         // Navigation properties
-        public virtual Member Member { get; set; }
-        public virtual BookLoan Loan { get; set; }
+        public virtual Member? Member { get; set; }
+        public virtual BookLoan? Loan { get; set; }
     }
 }

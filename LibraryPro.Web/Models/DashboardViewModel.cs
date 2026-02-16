@@ -21,8 +21,8 @@ namespace LibraryPro.Web.Models.ViewModels
     }
     public class BorrowerStatsViewModel
     {
-        public string MemberName { get; set; }
-        public string MemberEmail { get; set; }
+        public string? MemberName { get; set; }
+        public string? MemberEmail { get; set; }
         public int LoanCount { get; set; }
     }
 }
