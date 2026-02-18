@@ -150,11 +150,11 @@ namespace LibraryPro.Web.Controllers
             if (id == null) return NotFound();
 
             // Use the repository instead of the context
-            var book = await _bookRepo.GetByIdAsync(id.Value);
+            var books = await _bookRepo.GetByIdAsync(id.Value);
 
-            if (book == null) return NotFound();
+            if (books == null) return NotFound();
 
-            return View(book);
+            return View(books);
         }
     }
 }
