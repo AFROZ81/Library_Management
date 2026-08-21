@@ -1,0 +1,449 @@
+/* ==========================================
+   LibraryPro Enterprise Light Auth CSS
+   ========================================== */
+
+:root {
+    --auth-font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    
+    /* Light Palette Tokens */
+    --primary-indigo: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-light: #eef2ff;
+    --accent-emerald: #10b981;
+    --accent-sky: #0ea5e9;
+    
+    --light-bg: #f4f6fb;
+    --light-card: #ffffff;
+    --text-dark: #0f172a;
+    --text-slate: #475569;
+    --text-muted: #64748b;
+    --border-light: #e2e8f0;
+    --border-hover: #cbd5e1;
+
+    /* Shadows & Radii */
+    --shadow-card: 0 25px 50px -12px rgba(79, 70, 229, 0.12), 0 10px 25px -5px rgba(15, 23, 42, 0.04);
+    --shadow-input: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+    --shadow-btn: 0 4px 14px rgba(79, 70, 229, 0.3);
+    
+    --radius-md: 12px;
+    --radius-card: 24px;
+    --radius-full: 9999px;
+}
+
+body.auth-page-wrapper {
+    font-family: var(--auth-font);
+    background-color: var(--light-bg);
+    color: var(--text-dark);
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Ambient Light Background Glows */
+.ambient-background-light {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 0%, #eef2ff 0%, #f4f6fb 70%);
+}
+
+.light-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    animation: floatOrbLight 12s infinite alternate ease-in-out;
+}
+
+.orb-1 {
+    width: 450px;
+    height: 450px;
+    background: radial-gradient(circle, rgba(199, 210, 254, 0.8) 0%, rgba(238, 242, 255, 0) 70%);
+    top: -100px;
+    left: 15%;
+}
+
+.orb-2 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(186, 230, 253, 0.7) 0%, rgba(244, 246, 251, 0) 70%);
+    bottom: -150px;
+    right: 15%;
+    animation-delay: -4s;
+}
+
+.orb-3 {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(221, 214, 254, 0.6) 0%, rgba(244, 246, 251, 0) 70%);
+    top: 35%;
+    right: 30%;
+    animation-delay: -8s;
+}
+
+.light-grid-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(99, 102, 241, 0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+}
+
+@keyframes floatOrbLight {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(30px, 20px) scale(1.05); }
+    100% { transform: translate(-20px, 35px) scale(0.95); }
+}
+
+/* Header Brand Pill */
+.brand-header-pill {
+    background: #ffffff;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-full);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.brand-icon-sm {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--primary-indigo), var(--accent-sky));
+    border-radius: 8px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.text-indigo { color: var(--primary-indigo) !important; }
+.bg-indigo-subtle { background-color: var(--primary-light) !important; }
+.fw-extrabold { font-weight: 800; }
+.text-slate { color: var(--text-dark); }
+
+/* ==========================================
+   Single 3D Flip Card Container
+   ========================================== */
+
+.auth-flip-container {
+    perspective: 1200px;
+    width: 100%;
+    max-width: 450px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-flip-inner {
+    display: grid;
+    grid-template-areas: "card";
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: 100%;
+}
+
+.auth-flip-inner.flipped {
+    transform: rotateY(180deg);
+}
+
+.card-face-front,
+.card-face-back {
+    grid-area: card;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    background: var(--light-card);
+    border-radius: var(--radius-card);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: var(--shadow-card);
+    padding: 2.25rem 2rem;
+    width: 100%;
+}
+
+.card-face-back {
+    transform: rotateY(180deg);
+}
+
+/* Auth Header inside Card */
+.card-brand-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.card-brand-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--primary-indigo) 0%, #6366f1 100%);
+    color: #ffffff;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.25);
+    margin-bottom: 0.75rem;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    letter-spacing: -0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.card-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+/* Mode Switcher Tabs */
+.auth-mode-tabs {
+    display: flex;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.75rem;
+}
+
+.auth-mode-btn {
+    flex: 1;
+    padding: 0.55rem 0.85rem;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    transition: all 0.25s ease;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+}
+
+.auth-mode-btn.active {
+    background: #ffffff;
+    color: var(--primary-indigo);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* Form Inputs */
+.form-group-light {
+    margin-bottom: 1.25rem;
+}
+
+.form-label-light {
+    display: block;
+    font-size: 0.825rem;
+    font-weight: 700;
+    color: var(--text-slate);
+    margin-bottom: 0.35rem;
+}
+
+.input-wrapper-light {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon-left {
+    position: absolute;
+    left: 0.9rem;
+    color: #94a3b8;
+    font-size: 1.05rem;
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+.input-control-light {
+    width: 100%;
+    padding: 0.7rem 1rem 0.7rem 2.6rem;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: var(--text-dark);
+    background-color: #ffffff;
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-input);
+}
+
+.input-control-light:focus {
+    outline: none;
+    border-color: var(--primary-indigo);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+}
+
+.input-control-light:focus + .input-icon-left,
+.input-wrapper-light:focus-within .input-icon-left {
+    color: var(--primary-indigo);
+}
+
+.toggle-pass-btn {
+    position: absolute;
+    right: 0.75rem;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.05rem;
+    padding: 0.25rem 0.4rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.toggle-pass-btn:hover {
+    color: var(--primary-indigo);
+}
+
+/* Form Checkbox */
+.form-check-light {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.35rem;
+}
+
+.form-check-input-light {
+    width: 17px;
+    height: 17px;
+    border-radius: 4px;
+    border: 1.5px solid var(--border-light);
+    cursor: pointer;
+    accent-color: var(--primary-indigo);
+}
+
+.form-check-label-light {
+    font-size: 0.825rem;
+    color: var(--text-slate);
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Action Submit Button */
+.btn-submit-light {
+    width: 100%;
+    padding: 0.8rem 1.25rem;
+    font-size: 0.925rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--primary-indigo) 0%, var(--primary-hover) 100%);
+    border: none;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-btn);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-submit-light:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(79, 70, 229, 0.4);
+    background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%);
+}
+
+.btn-submit-light:active {
+    transform: translateY(0);
+}
+
+.btn-submit-emerald {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important;
+}
+
+.btn-submit-emerald:hover {
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* Quick Fill Demo Pills */
+.demo-box-light {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px dashed var(--border-light);
+}
+
+.demo-title-light {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.demo-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.demo-btn-pill {
+    background: #f8fafc;
+    border: 1px solid var(--border-light);
+    padding: 0.3rem 0.65rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.demo-btn-pill:hover {
+    background: var(--primary-light);
+    color: var(--primary-indigo);
+    border-color: var(--primary-indigo);
+    transform: translateY(-1px);
+}
+
+/* Validation Alert Light */
+.validation-light {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: var(--radius-md);
+    padding: 0.75rem 0.9rem;
+    margin-bottom: 1.25rem;
+    color: #991b1b;
+    font-size: 0.825rem;
+}
+
+.validation-light ul {
+    margin: 0;
+    padding-left: 1.1rem;
+}
+
+.field-validation-error {
+    color: #dc2626;
+    font-size: 0.775rem;
+    margin-top: 0.25rem;
+    display: block;
+    font-weight: 500;
+}
+
+/* Footer Link Toggles */
+.auth-switch-link {
+    font-weight: 700;
+    color: var(--primary-indigo);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.auth-switch-link:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+@media (max-width: 575.98px) {
+    .card-face-front,
+    .card-face-back {
+        padding: 1.75rem 1.25rem;
+    }
+}

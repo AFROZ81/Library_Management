@@ -1,10 +1,12 @@
 ﻿using LibraryPro.Web.Models.Entities;
 using LibraryPro.Web.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace LibraryPro.Web.Controllers
 {
+    [Authorize]
     public class LoansController : Controller
     {
         private readonly ILoanRepository _loanRepo;
@@ -32,6 +34,7 @@ namespace LibraryPro.Web.Controllers
             return View(memberSummary);
         }
 
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> Issue()
         {
             // Get data for dropdowns
@@ -46,6 +49,7 @@ namespace LibraryPro.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> Issue(BookLoan loan)
         {
             // Professional Tip: Remove validation for navigation properties 
@@ -84,6 +88,7 @@ namespace LibraryPro.Web.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> Return(int loanId)
         {
             var loan = await _loanRepo.GetLoanByIdAsync(loanId);

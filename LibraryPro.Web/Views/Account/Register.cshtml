@@ -1,0 +1,169 @@
+@model LibraryPro.Web.Models.ViewModels.RegisterViewModel
+
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Create Account";
+}
+
+<div class="auth-flip-container">
+    <div class="auth-flip-inner flipped" id="authFlipInner">
+        
+        <!-- ==========================================
+             FRONT FACE: SIGN IN FORM (FOR FLIP SWITCH)
+             ========================================== -->
+        <div class="card-face-front">
+            <div class="card-brand-header">
+                <div class="card-brand-icon">
+                    <i class="bi bi-book-half"></i>
+                </div>
+                <h1 class="card-title">Welcome Back</h1>
+                <p class="card-subtitle">Sign in to manage your library account & books.</p>
+            </div>
+
+            <!-- Mode Switcher Pills -->
+            <div class="auth-mode-tabs">
+                <button type="button" class="auth-mode-btn trigger-flip-login">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                </button>
+                <button type="button" class="auth-mode-btn active trigger-flip-register">
+                    <i class="bi bi-person-plus me-1"></i> Create Account
+                </button>
+            </div>
+
+            <form asp-action="Login" method="post" id="loginFormQuick" class="auth-submit-form">
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+                <!-- Email Input -->
+                <div class="form-group-light">
+                    <label class="form-label-light">Email Address</label>
+                    <div class="input-wrapper-light">
+                        <i class="bi bi-envelope input-icon-left"></i>
+                        <input name="Email" type="email" class="input-control-light" placeholder="user@librarypro.com" required />
+                    </div>
+                </div>
+
+                <!-- Password Input -->
+                <div class="form-group-light">
+                    <label class="form-label-light">Password</label>
+                    <div class="input-wrapper-light">
+                        <i class="bi bi-shield-lock input-icon-left"></i>
+                        <input name="Password" id="LoginPasswordFlip" type="password" class="input-control-light" placeholder="••••••••" required />
+                        <button type="button" class="toggle-pass-btn" data-target="LoginPasswordFlip">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-submit-light">
+                    <span class="btn-text">Sign In to Portal</span>
+                    <div class="spinner-border spinner-border-sm d-none" role="status"></div>
+                    <i class="bi bi-arrow-right me-0 ms-1"></i>
+                </button>
+            </form>
+
+            <div class="text-center mt-3 pt-2">
+                <span class="text-muted small">Don't have an account? </span>
+                <a href="@Url.Action("Register", "Account")" class="auth-switch-link trigger-flip-register">
+                    Create Account <i class="bi bi-arrow-right-short ms-0"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             BACK FACE: REGISTER FORM
+             ========================================== -->
+        <div class="card-face-back">
+            <div class="card-brand-header">
+                <div class="card-brand-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 8px 16px rgba(16, 185, 129, 0.25);">
+                    <i class="bi bi-person-plus-fill"></i>
+                </div>
+                <h1 class="card-title">Create Account</h1>
+                <p class="card-subtitle">Register to borrow books & access library resources.</p>
+            </div>
+
+            <!-- Mode Switcher Pills -->
+            <div class="auth-mode-tabs">
+                <button type="button" class="auth-mode-btn trigger-flip-login">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                </button>
+                <button type="button" class="auth-mode-btn active trigger-flip-register">
+                    <i class="bi bi-person-plus me-1"></i> Create Account
+                </button>
+            </div>
+
+            <form asp-action="Register" method="post" id="registerForm" class="auth-submit-form">
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+                @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                {
+                    <div class="validation-light">
+                        <div class="d-flex align-items-center gap-2 mb-1 fw-bold">
+                            <i class="bi bi-exclamation-triangle-fill"></i> Registration Issues
+                        </div>
+                        <div asp-validation-summary="ModelOnly"></div>
+                    </div>
+                }
+
+                <!-- Email Input -->
+                <div class="form-group-light">
+                    <label asp-for="Email" class="form-label-light">Email Address</label>
+                    <div class="input-wrapper-light">
+                        <i class="bi bi-envelope input-icon-left"></i>
+                        <input asp-for="Email" class="input-control-light" placeholder="name@domain.com" required autocomplete="email" />
+                    </div>
+                    <span asp-validation-for="Email" class="field-validation-error"></span>
+                </div>
+
+                <!-- Password Input -->
+                <div class="form-group-light">
+                    <label asp-for="Password" class="form-label-light">Password</label>
+                    <div class="input-wrapper-light">
+                        <i class="bi bi-shield-lock input-icon-left"></i>
+                        <input asp-for="Password" id="RegPassword" type="password" class="input-control-light" placeholder="Minimum 6 characters" required autocomplete="new-password" />
+                        <button type="button" class="toggle-pass-btn" data-target="RegPassword" title="Toggle visibility">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="field-validation-error"></span>
+                </div>
+
+                <!-- Confirm Password Input -->
+                <div class="form-group-light">
+                    <label asp-for="ConfirmPassword" class="form-label-light">Confirm Password</label>
+                    <div class="input-wrapper-light">
+                        <i class="bi bi-shield-check input-icon-left"></i>
+                        <input asp-for="ConfirmPassword" id="RegConfirmPassword" type="password" class="input-control-light" placeholder="Re-enter password" required autocomplete="new-password" />
+                        <button type="button" class="toggle-pass-btn" data-target="RegConfirmPassword" title="Toggle visibility">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="ConfirmPassword" class="field-validation-error"></span>
+                </div>
+
+                <p class="text-muted small mb-3">
+                    By registering, you agree to our <a href="javascript:void(0);" class="text-indigo text-decoration-none">Terms</a> & <a href="javascript:void(0);" class="text-indigo text-decoration-none">Privacy Policy</a>.
+                </p>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-submit-light btn-submit-emerald">
+                    <span class="btn-text">Create Free Account</span>
+                    <div class="spinner-border spinner-border-sm d-none" role="status"></div>
+                    <i class="bi bi-check-circle me-0 ms-1"></i>
+                </button>
+            </form>
+
+            <div class="text-center mt-3 pt-2">
+                <span class="text-muted small">Already registered? </span>
+                <a href="@Url.Action("Login", "Account")" class="auth-switch-link trigger-flip-login">
+                    Sign In here <i class="bi bi-arrow-right-short ms-0"></i>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

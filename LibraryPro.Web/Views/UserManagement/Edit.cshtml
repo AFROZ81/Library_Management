@@ -1,0 +1,76 @@
+@model LibraryPro.Web.Controllers.EditUserViewModel
+
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Edit User</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="UserName" class="form-label"></label>
+                            <input asp-for="UserName" class="form-control" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label class="form-label">Roles</label>
+                            <div class="border p-3 rounded">
+                                @foreach (var role in Model.AvailableRoles)
+                                {
+                                    <div class="form-check">
+                                        <input type="checkbox" 
+                                               name="SelectedRoles" 
+                                               value="@role" 
+                                               class="form-check-input" 
+                                               id="role_@role"
+                                               @(Model.CurrentRoles.Contains(role) ? "checked" : "") />
+                                        <label class="form-check-label" for="role_@role">@role</label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label class="form-label">Current Roles</label>
+                            <div>
+                                @if (Model.CurrentRoles.Any())
+                                {
+                                    @foreach (var role in Model.CurrentRoles)
+                                    {
+                                        <span class="badge bg-secondary me-1">@role</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No roles assigned</span>
+                                }
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

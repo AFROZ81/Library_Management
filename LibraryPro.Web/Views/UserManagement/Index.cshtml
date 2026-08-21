@@ -1,0 +1,98 @@
+@model List<LibraryPro.Web.Controllers.UserManagementViewModel>
+
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">User Management</h4>
+                    <a asp-action="Roles" class="btn btn-light btn-sm">Manage Roles</a>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Username</th>
+                                    <th>Roles</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in Model)
+                                {
+                                    <tr>
+                                        <td>@user.Email</td>
+                                        <td>@user.UserName</td>
+                                        <td>
+                                            @if (user.Roles.Any())
+                                            {
+                                                @foreach (var role in user.Roles)
+                                                {
+                                                    <span class="badge bg-secondary me-1">@role</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">No roles</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (user.IsLocked)
+                                            {
+                                                <span class="badge bg-danger">Locked</span>
+                                            }
+                                            else if (!user.IsEmailConfirmed)
+                                            {
+                                                <span class="badge bg-warning">Unconfirmed</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">Active</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <a asp-action="Edit" asp-route-id="@user.UserId" class="btn btn-sm btn-primary">Edit</a>
+                                            <form asp-action="ToggleLockout" asp-route-id="@user.UserId" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm @(user.IsLocked ? "btn-success" : "btn-warning")">
+                                                    @(user.IsLocked ? "Unlock" : "Lock")
+                                                </button>
+                                            </form>
+                                            <form asp-action="Delete" asp-route-id="@user.UserId" method="post" class="d-inline" 
+                                                  onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

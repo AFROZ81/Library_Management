@@ -1,10 +1,12 @@
 ﻿using LibraryPro.Web.Models;
 using LibraryPro.Web.Models.Entities;
 using LibraryPro.Web.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryPro.Web.Controllers
 {
+    [Authorize]
     public class MembersController : Controller
     {
         private readonly IMemberRepository _memberRepo;
@@ -32,9 +34,11 @@ namespace LibraryPro.Web.Controllers
             ViewBag.OverdueMemberIds = overdueMemberIds;
             return View(members);
         }
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public IActionResult Register() => View();
 
         [HttpPost]
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> Register(Member member)
         {
             if (ModelState.IsValid)
@@ -69,6 +73,7 @@ namespace LibraryPro.Web.Controllers
             // 4. Pass the VIEWMODEL to the view (not 'member')
             return View(viewModel);
         }
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> Edit(int id)
         {
             var member = await _memberRepo.GetByIdAsync(id);
@@ -78,6 +83,7 @@ namespace LibraryPro.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> Edit(int id, Member member)
         {
             if (id != member.Id) return NotFound();
@@ -93,6 +99,7 @@ namespace LibraryPro.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(int id)
         {
             var member = await _memberRepo.GetByIdAsync(id);

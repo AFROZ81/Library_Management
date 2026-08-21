@@ -1,10 +1,13 @@
-﻿using LibraryPro.Web.Models.Entities;
+﻿using LibraryPro.Web.Models;
+using LibraryPro.Web.Models.Entities;
 using LibraryPro.Web.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryPro.Web.Controllers
 {
+    [Authorize]
     public sealed class BooksController : Controller
     {
         private readonly IBookRepository _bookRepo;
@@ -54,10 +57,12 @@ namespace LibraryPro.Web.Controllers
             return View(await PaginatedList<Book>.CreateAsync(books, pageNumber ?? 1, pageSize));
         }
         // GET: Create Book Form
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public IActionResult Create() => View();
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> Create(Book book)
         {
             if (ModelState.IsValid)
@@ -73,6 +78,7 @@ namespace LibraryPro.Web.Controllers
         }
 
         // GET: Books/Edit/5
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -86,6 +92,7 @@ namespace LibraryPro.Web.Controllers
         // POST: Books/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> Edit(int id, Book book)
 {
     if (id != book.Id) return NotFound();
@@ -127,6 +134,7 @@ namespace LibraryPro.Web.Controllers
     return View(book);
 }
         // GET: Books/Delete/5
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -139,6 +147,7 @@ namespace LibraryPro.Web.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> DeleteConfirmed([FromRoute] int id) // Add [FromRoute]
         {
             await _bookRepo.DeleteAsync(id);

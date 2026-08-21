@@ -1,5 +1,6 @@
 using LibraryPro.Web.Models.ViewModels;
 using LibraryPro.Web.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 

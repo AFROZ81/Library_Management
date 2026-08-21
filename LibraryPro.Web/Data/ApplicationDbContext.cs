@@ -1,10 +1,12 @@
-﻿using LibraryPro.Web.Models;
+using LibraryPro.Web.Models;
 using LibraryPro.Web.Models.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace LibraryPro.Web.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
@@ -12,17 +14,53 @@ namespace LibraryPro.Web.Data
         public DbSet<Member> Members { get; set; }
         public DbSet<BookLoan> BookLoans { get; set; }
         public DbSet<FinePayment> FinePayments { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // This tells EF Core how to handle the List<string> Genre
+            // ValueComparer for List<string> Genre to eliminate EF Core warning 10620
+            var genreComparer = new ValueComparer<List<string>>(
+                (c1, c2) => (c1 == null && c2 == null) || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c.ToList());
+
+            // Handle List<string> Genre conversion
             modelBuilder.Entity<Book>()
                 .Property(b => b.Genre)
                 .HasConversion(
-                    v => string.Join(',', v),                // To Database: List -> "Fiction,History"
-                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() // From Database: String -> List
-                );
+                    v => string.Join(',', v),
+                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList(),
+                    genreComparer);
+
+            // Configure decimal precision to eliminate EF Core warnings 30000
+            modelBuilder.Entity<BookLoan>()
+                .Property(bl => bl.AmountPaid)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<FinePayment>()
+                .Property(fp => fp.Amount)
+                .HasPrecision(18, 2);
+
+            // Configure BookLoan relationships to prevent cascade delete cycles
+            modelBuilder.Entity<BookLoan>()
+                .HasOne(bl => bl.Book)
+                .WithMany()
+                .HasForeignKey(bl => bl.BookId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BookLoan>()
+                .HasOne(bl => bl.Member)
+                .WithMany(m => m.Loans)
+                .HasForeignKey(bl => bl.MemberId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure FinePayment relationship to prevent cascade delete cycles
+            modelBuilder.Entity<FinePayment>()
+                .HasOne(fp => fp.Member)
+                .WithMany()
+                .HasForeignKey(fp => fp.MemberId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

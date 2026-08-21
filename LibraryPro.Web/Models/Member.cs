@@ -21,8 +21,7 @@ namespace LibraryPro.Web.Models.Entities
         [Display(Name = "Join Date")]
         public DateTime MembershipDate { get; set; } = DateTime.Now;
 
-        // Navigation property for the loans we will create later
-        public ICollection<Book>? BorrowedBooks { get; set; }
+        // Navigation property for the loans
         public virtual ICollection<BookLoan> Loans { get; set; } = new List<BookLoan>();
     }
 }

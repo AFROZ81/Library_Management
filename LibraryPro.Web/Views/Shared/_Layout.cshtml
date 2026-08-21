@@ -156,27 +156,71 @@
 
                 <div class="navbar-collapse collapse justify-content-end" id="navbarContent">
                     <ul class="navbar-nav align-items-center">
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")"
-                               asp-controller="Home" asp-action="Index">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Books" ? "active" : "")"
-                               asp-controller="Books" asp-action="Index">Catalog</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Members" ? "active" : "")"
-                               asp-controller="Members" asp-action="Index">Members</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Loans" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
-                               asp-controller="Loans" asp-action="Index">Active Loans</a>
-                        </li>
-                        <li class="nav-item ms-md-3 mt-2 mt-md-0">
-                            <a class="nav-link btn-issue text-dark" asp-controller="Loans" asp-action="Issue">
-                                <i class="bi bi-plus-circle-fill me-1"></i>ISSUE BOOK
-                            </a>
-                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")"
+                                   asp-controller="Home" asp-action="Index">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Books" ? "active" : "")"
+                                   asp-controller="Books" asp-action="Index">Catalog</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Members" ? "active" : "")"
+                                   asp-controller="Members" asp-action="Index">Members</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Loans" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
+                                   asp-controller="Loans" asp-action="Index">Active Loans</a>
+                            </li>
+                            
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "UserManagement" ? "active" : "")"
+                                       asp-controller="UserManagement" asp-action="Index">
+                                        <i class="bi bi-people-fill me-1"></i>Users
+                                    </a>
+                                </li>
+                            }
+                            
+                            <li class="nav-item ms-md-3 mt-2 mt-md-0">
+                                <a class="nav-link btn-issue text-dark" asp-controller="Loans" asp-action="Issue">
+                                    <i class="bi bi-plus-circle-fill me-1"></i>ISSUE BOOK
+                                </a>
+                            </li>
+                            
+                            <li class="nav-item dropdown ms-md-2">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-person-circle me-1"></i>@User.Identity?.Name
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><span class="dropdown-item-text text-muted small">Logged in as</span></li>
+                                    <li><h6 class="dropdown-header">@User.Identity?.Name</h6></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item">Logout</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")"
+                                   asp-controller="Home" asp-action="Index">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
+                            </li>
+                            <li class="nav-item ms-md-3 mt-2 mt-md-0">
+                                <a class="nav-link btn-issue text-dark" asp-controller="Account" asp-action="Register">Register</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
