@@ -1,4 +1,4 @@
-﻿@model LibraryPro.Web.Models.ViewModels.DashboardViewModel
+@model LibraryPro.Web.Models.ViewModels.DashboardViewModel
 
 @{
     ViewData["Title"] = "Dashboard";
@@ -97,8 +97,8 @@
                             @foreach (var loan in Model.CriticalOverdueLoans)
                             {
                                 <tr>
-                                    <td class="ps-4 fw-bold">@loan.Member.Name</td>
-                                    <td>@loan.Book.Title</td>
+                                    <td class="ps-4 fw-bold">@loan.Member?.Name</td>
+                                    <td>@loan.Book?.Title</td>
                                     <td><span class="text-danger">@loan.DueDate.ToString("MMM dd")</span></td>
                                     <td class="text-end pe-4">
                                         <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Notify</button>

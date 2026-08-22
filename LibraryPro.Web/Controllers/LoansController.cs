@@ -1,4 +1,4 @@
-﻿using LibraryPro.Web.Models.Entities;
+using LibraryPro.Web.Models.Entities;
 using LibraryPro.Web.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -6,99 +6,93 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace LibraryPro.Web.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "LibrarianOrAdmin")]
     public class LoansController : Controller
     {
         private readonly ILoanRepository _loanRepo;
         private readonly IBookRepository _bookRepo;
         private readonly IMemberRepository _memberRepo;
+        private readonly ILibrarySettingsRepository _settingsRepo;
 
-        public LoansController(ILoanRepository loanRepo, IBookRepository bookRepo, IMemberRepository memberRepo)
+        public LoansController(
+            ILoanRepository loanRepo, 
+            IBookRepository bookRepo, 
+            IMemberRepository memberRepo,
+            ILibrarySettingsRepository settingsRepo)
         {
             _loanRepo = loanRepo;
             _bookRepo = bookRepo;
             _memberRepo = memberRepo;
+            _settingsRepo = settingsRepo;
         }
 
         public async Task<IActionResult> Index()
         {
-            // Fetch all loans including Member and Book data
-            var allLoans = await _loanRepo.GetAllLoansAsync();
-
-            // Group by member so each member is unique in the main list
-            var memberSummary = allLoans
-                .GroupBy(l => l.MemberId)
-                .Select(g => g.First().Member)
-                .ToList();
-
-            return View(memberSummary);
+            var members = await _memberRepo.GetAllAsync();
+            var settings = await _settingsRepo.GetSettingsAsync();
+            ViewBag.Settings = settings;
+            return View(members);
         }
 
-        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> Issue()
         {
-            // Get data for dropdowns
             var books = await _bookRepo.GetAllAsync();
             var members = await _memberRepo.GetAllAsync();
+            var settings = await _settingsRepo.GetSettingsAsync();
 
             ViewBag.Books = new SelectList(books.Where(b => b.AvailableCopies > 0), "Id", "Title");
             ViewBag.Members = new SelectList(members, "Id", "Name");
-
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Policy = "LibrarianOrAdmin")]
-        public async Task<IActionResult> Issue(BookLoan loan)
-        {
-            // Professional Tip: Remove validation for navigation properties 
-            // so the binder only cares about the IDs you sent.
-            ModelState.Remove("Book");
-            ModelState.Remove("Member");
-
-            if (loan.BookId <= 0 || loan.MemberId <= 0)
+            
+            var loan = new BookLoan
             {
-                ModelState.AddModelError("", "Please select both a book and a member.");
-            }
-
-            if (ModelState.IsValid)
-            {
-                var book = await _bookRepo.GetByIdAsync(loan.BookId);
-                if (book != null && book.AvailableCopies > 0)
-                {
-                    book.AvailableCopies--;
-                    await _bookRepo.UpdateAsync(book);
-                    await _loanRepo.CreateLoanAsync(loan);
-                    return RedirectToAction(nameof(Index));
-                }
-                else
-                {
-                    ModelState.AddModelError("", "This book is no longer available.");
-                }
-            }
-
-            // RELOAD DROPDOWNS: If validation fails, we MUST reload these or the page crashes/empties
-            var books = await _bookRepo.GetAllAsync();
-            var members = await _memberRepo.GetAllAsync();
-            ViewBag.Books = new SelectList(books.Where(b => b.AvailableCopies > 0), "Id", "Title");
-            ViewBag.Members = new SelectList(members, "Id", "Name");
+                LoanDate = DateTime.Now,
+                DueDate = DateTime.Now.AddDays(settings.DefaultLoanPeriodDays)
+            };
 
             return View(loan);
         }
 
         [HttpPost]
-        [Authorize(Policy = "LibrarianOrAdmin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Issue(BookLoan loan)
+        {
+            if (ModelState.IsValid)
+            {
+                var settings = await _settingsRepo.GetSettingsAsync();
+                var memberLoans = await _loanRepo.GetLoansByMemberIdAsync(loan.MemberId);
+                
+                if (memberLoans.Count(l => !l.IsReturned) >= settings.MaxBooksPerMember)
+                {
+                    TempData["Error"] = $"Member has reached the maximum limit of {settings.MaxBooksPerMember} active loans.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var book = await _bookRepo.GetByIdAsync(loan.BookId);
+                if (book != null && book.AvailableCopies > 0)
+                {
+                    book.AvailableCopies--;
+                    await _bookRepo.UpdateAsync(book);
+
+                    await _loanRepo.CreateLoanAsync(loan);
+                    TempData["Success"] = "Book issued successfully.";
+                    return RedirectToAction(nameof(Index));
+                }
+                TempData["Error"] = "Book is not available.";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Return(int loanId)
         {
             var loan = await _loanRepo.GetLoanByIdAsync(loanId);
             if (loan != null && !loan.IsReturned)
             {
-                // 1. Mark as returned
                 loan.IsReturned = true;
                 loan.ReturnDate = DateTime.Now;
+                await _loanRepo.UpdateLoanAsync(loan);
 
-                // 2. Increase Book Stock
                 var book = await _bookRepo.GetByIdAsync(loan.BookId);
                 if (book != null)
                 {
@@ -106,7 +100,32 @@ namespace LibraryPro.Web.Controllers
                     await _bookRepo.UpdateAsync(book);
                 }
 
-                await _loanRepo.UpdateLoanAsync(loan);
+                TempData["Success"] = "Book returned successfully.";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Renew(int loanId)
+        {
+            var loan = await _loanRepo.GetLoanByIdAsync(loanId);
+            var settings = await _settingsRepo.GetSettingsAsync();
+
+            if (loan != null && !loan.IsReturned)
+            {
+                if (loan.RenewalCount < settings.MaxRenewalAttempts)
+                {
+                    loan.RenewalCount++;
+                    loan.LastRenewalDate = DateTime.Now;
+                    loan.DueDate = loan.DueDate.AddDays(settings.DefaultLoanPeriodDays);
+                    await _loanRepo.UpdateLoanAsync(loan);
+                    TempData["Success"] = "Loan renewed successfully.";
+                }
+                else
+                {
+                    TempData["Error"] = "Maximum renewal attempts reached.";
+                }
             }
             return RedirectToAction(nameof(Index));
         }

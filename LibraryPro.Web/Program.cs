@@ -10,7 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options => 
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add Identity services
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
@@ -36,19 +37,14 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 // Add authorization policies
 builder.Services.AddAuthorization(options =>
 {
-    // Admin policy - Full access to all features
     options.AddPolicy("AdminOnly", policy => policy.RequireRole(Constants.Roles.Admin));
-    
-    // Librarian policy - Book management, loan management, member management
     options.AddPolicy("LibrarianOrAdmin", policy => 
         policy.RequireRole(Constants.Roles.Librarian, Constants.Roles.Admin));
-    
-    // Member policy - View catalog, personal loans, reservations
     options.AddPolicy("MemberOrAbove", policy => 
         policy.RequireRole(Constants.Roles.Member, Constants.Roles.Librarian, Constants.Roles.Admin));
 });
 
-// Configure authentication
+// Configure authentication cookies
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
@@ -58,11 +54,12 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
+// Register Core Repositories
 builder.Services.AddScoped<IBookRepository, BookRepository>();
-
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
-
 builder.Services.AddScoped<ILoanRepository, LoanRepository>();
+builder.Services.AddScoped<ILibrarySettingsRepository, LibrarySettingsRepository>();
+builder.Services.AddScoped<IBookReservationRepository, BookReservationRepository>();
 
 // Register DatabaseSeeder
 builder.Services.AddScoped<DatabaseSeeder>();
@@ -80,7 +77,6 @@ using (var scope = app.Services.CreateScope())
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -96,6 +92,5 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}")
     .WithStaticAssets();
-
 
 app.Run();

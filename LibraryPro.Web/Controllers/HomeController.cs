@@ -60,8 +60,8 @@ namespace LibraryPro.Web.Controllers
                 .GroupBy(l => l.MemberId)
                 .Select(g => new BorrowerStatsViewModel
                 {
-                    MemberName = g.First().Member.Name,
-                    MemberEmail = g.First().Member.Email,
+                    MemberName = g.First().Member?.Name,
+                    MemberEmail = g.First().Member?.Email,
                     LoanCount = g.Count()
                 })
                 .OrderByDescending(m => m.LoanCount)

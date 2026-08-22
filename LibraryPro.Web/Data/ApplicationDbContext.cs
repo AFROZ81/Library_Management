@@ -14,6 +14,8 @@ namespace LibraryPro.Web.Data
         public DbSet<Member> Members { get; set; }
         public DbSet<BookLoan> BookLoans { get; set; }
         public DbSet<FinePayment> FinePayments { get; set; }
+        public DbSet<LibrarySettings> LibrarySettings { get; set; }
+        public DbSet<BookReservation> BookReservations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,7 +44,11 @@ namespace LibraryPro.Web.Data
                 .Property(fp => fp.Amount)
                 .HasPrecision(18, 2);
 
-            // Configure BookLoan relationships to prevent cascade delete cycles
+            modelBuilder.Entity<LibrarySettings>()
+                .Property(ls => ls.DailyFineRate)
+                .HasPrecision(18, 2);
+
+            // Configure BookLoan relationships
             modelBuilder.Entity<BookLoan>()
                 .HasOne(bl => bl.Book)
                 .WithMany()
@@ -55,7 +61,20 @@ namespace LibraryPro.Web.Data
                 .HasForeignKey(bl => bl.MemberId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configure FinePayment relationship to prevent cascade delete cycles
+            // Configure BookReservation relationships
+            modelBuilder.Entity<BookReservation>()
+                .HasOne(br => br.Book)
+                .WithMany()
+                .HasForeignKey(br => br.BookId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BookReservation>()
+                .HasOne(br => br.Member)
+                .WithMany()
+                .HasForeignKey(br => br.MemberId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure FinePayment relationship
             modelBuilder.Entity<FinePayment>()
                 .HasOne(fp => fp.Member)
                 .WithMany()

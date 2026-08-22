@@ -1,4 +1,4 @@
-﻿@model IEnumerable<LibraryPro.Web.Models.Entities.Member>
+@model IEnumerable<LibraryPro.Web.Models.Entities.Member>
 @Html.AntiForgeryToken()
 
 @{
@@ -50,7 +50,7 @@
                             <tr>
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center">
-                                        <div class="avatar-circle me-3 shadow-sm">@m.Name.Substring(0, 1).ToUpper()</div>
+                                        <div class="avatar-circle me-3 shadow-sm">@(string.IsNullOrEmpty(m.Name) ? "M" : m.Name.Substring(0, 1).ToUpper())</div>
                                         <div>
                                             <span class="fw-bold d-block text-dark">@m.Name</span>
                                             @if (isOverdue)

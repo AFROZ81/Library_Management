@@ -1,4 +1,4 @@
-﻿using LibraryPro.Web.Models;
+using LibraryPro.Web.Models;
 using LibraryPro.Web.Models.Entities;
 using LibraryPro.Web.Repositories;
 using Microsoft.AspNetCore.Authorization;
@@ -36,9 +36,9 @@ namespace LibraryPro.Web.Controllers
             // 1. Search Filter
             if (!string.IsNullOrEmpty(searchString))
             {
-                books = books.Where(b => b.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase)
-                                      || b.Author.Contains(searchString, StringComparison.OrdinalIgnoreCase)
-                                      || b.Genre.Any(g => g.Contains(searchString, StringComparison.OrdinalIgnoreCase)));
+                books = books.Where(b => (b.Title != null && b.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                                      || (b.Author != null && b.Author.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                                      || (b.Genre != null && b.Genre.Any(g => g.Contains(searchString, StringComparison.OrdinalIgnoreCase))));
             }
 
             // 2. Advanced Sorting

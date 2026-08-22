@@ -1,4 +1,4 @@
-﻿@model LibraryPro.Web.Models.MemberProfileViewModel
+@model LibraryPro.Web.Models.MemberProfileViewModel
 
 @{
     ViewData["Title"] = "Member Info";
@@ -38,7 +38,7 @@
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body text-center p-4">
                     <div class="avatar-header mx-auto mb-3 shadow">
-                        @Model.Name[0].ToString().ToUpper()
+                        @Model.Name?[0].ToString().ToUpper()
                     </div>
                     <h4 class="fw-bold text-dark mb-1">@Model.Name</h4>
                     <span class="badge bg-success-soft text-success rounded-pill px-3 mb-3">Active Account</span>
@@ -132,7 +132,7 @@
                                                 <i class="bi bi-book"></i>
                                             </div>
                                             <div>
-                                                <h6 class="fw-bold mb-0">@loan.Book.Title</h6>
+                                                <h6 class="fw-bold mb-0">@loan.Book?.Title</h6>
                                                 <small class="@(loan.DueDate < DateTime.Now.Date ? "text-danger fw-bold" : "text-muted")">
                                                     Due: @loan.DueDate.ToString("MMM dd, yyyy")
                                                 </small>
@@ -162,7 +162,7 @@
                                         @foreach (var hist in Model.PastHistory.OrderByDescending(x => x.ReturnDate))
                                         {
                                             <tr>
-                                                <td class="fw-bold">@hist.Book.Title</td>
+                                                <td class="fw-bold">@hist.Book?.Title</td>
                                                 <td class="small">@hist.LoanDate.ToShortDateString()</td>
                                                 <td class="small">@hist.ReturnDate?.ToShortDateString()</td>
                                                 <td class="text-end">
