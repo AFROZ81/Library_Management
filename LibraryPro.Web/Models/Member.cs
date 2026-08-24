@@ -21,6 +21,11 @@ namespace LibraryPro.Web.Models.Entities
         [Display(Name = "Join Date")]
         public DateTime MembershipDate { get; set; } = DateTime.Now;
 
+        // Email preferences
+        public bool ReceiveOverdueNotices { get; set; } = true;
+        public bool ReceiveDueDateReminders { get; set; } = true;
+        public bool ReceiveReservationAlerts { get; set; } = true;
+
         // Navigation property for the loans
         public virtual ICollection<BookLoan> Loans { get; set; } = new List<BookLoan>();
     }

@@ -1,6 +1,7 @@
 using LibraryPro.Web.Models;
 using LibraryPro.Web.Models.Entities;
 using LibraryPro.Web.Repositories;
+using LibraryPro.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,10 +12,12 @@ namespace LibraryPro.Web.Controllers
     public sealed class BooksController : Controller
     {
         private readonly IBookRepository _bookRepo;
+        private readonly IImageService _imageService;
 
-        public BooksController(IBookRepository bookRepo)
+        public BooksController(IBookRepository bookRepo, IImageService imageService)
         {
             _bookRepo = bookRepo;
+            _imageService = imageService;
         }
 
         // GET: All Books
@@ -63,10 +66,28 @@ namespace LibraryPro.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "LibrarianOrAdmin")]
-        public async Task<IActionResult> Create(Book book)
+        public async Task<IActionResult> Create(Book book, IFormFile? imageFile)
         {
             if (ModelState.IsValid)
             {
+                // Handle image upload
+                if (imageFile != null)
+                {
+                    if (_imageService.ValidateImage(imageFile, out var errorMessage))
+                    {
+                        book.ImageUrl = await _imageService.SaveImageAsync(imageFile, "images/books");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("ImageFile", errorMessage);
+                        return View(book);
+                    }
+                }
+                else
+                {
+                    book.ImageUrl = _imageService.GetDefaultImagePath();
+                }
+
                 // Logic: Initial stock is always fully available
                 book.AvailableCopies = book.TotalCopies;
 
@@ -93,7 +114,7 @@ namespace LibraryPro.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "LibrarianOrAdmin")]
-        public async Task<IActionResult> Edit(int id, Book book)
+        public async Task<IActionResult> Edit(int id, Book book, IFormFile? imageFile)
 {
     if (id != book.Id) return NotFound();
 
@@ -105,10 +126,31 @@ namespace LibraryPro.Web.Controllers
             var existingBook = await _bookRepo.GetByIdAsync(id);
             if (existingBook == null) return NotFound();
 
-            // 2. Calculate copy differences
+            // 2. Handle image upload
+            if (imageFile != null)
+            {
+                if (_imageService.ValidateImage(imageFile, out var errorMessage))
+                {
+                    // Delete old image if it exists and is not the default
+                    if (existingBook.ImageUrl != null && 
+                        !existingBook.ImageUrl.Contains("default-book-cover"))
+                    {
+                        _imageService.DeleteImage(existingBook.ImageUrl);
+                    }
+                    
+                    existingBook.ImageUrl = await _imageService.SaveImageAsync(imageFile, "images/books");
+                }
+                else
+                {
+                    ModelState.AddModelError("ImageFile", errorMessage);
+                    return View(book);
+                }
+            }
+
+            // 3. Calculate copy differences
             int difference = book.TotalCopies - existingBook.TotalCopies;
             
-            // 3. Update the tracked entity's properties manually
+            // 4. Update the tracked entity's properties manually
             existingBook.Title = book.Title;
             existingBook.Author = book.Author;
             existingBook.ISBN = book.ISBN;
@@ -120,7 +162,7 @@ namespace LibraryPro.Web.Controllers
             existingBook.AvailableCopies += difference;
             if (existingBook.AvailableCopies < 0) existingBook.AvailableCopies = 0;
 
-            // 4. Save the tracked entity
+            // 5. Save the tracked entity
             await _bookRepo.UpdateAsync(existingBook);
         }
         catch (Exception)

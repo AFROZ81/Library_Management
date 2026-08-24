@@ -61,6 +61,19 @@ builder.Services.AddScoped<ILoanRepository, LoanRepository>();
 builder.Services.AddScoped<ILibrarySettingsRepository, LibrarySettingsRepository>();
 builder.Services.AddScoped<IBookReservationRepository, BookReservationRepository>();
 
+// Register Email Services
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddSingleton<EmailQueue>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+builder.Services.AddScoped<IEmailLogRepository, EmailLogRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddHostedService<EmailBackgroundService>();
+
+// Register Image Service
+builder.Services.Configure<ImageSettings>(builder.Configuration.GetSection("ImageSettings"));
+builder.Services.AddScoped<IImageService, ImageService>();
+
 // Register DatabaseSeeder
 builder.Services.AddScoped<DatabaseSeeder>();
 

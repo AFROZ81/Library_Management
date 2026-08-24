@@ -64,5 +64,24 @@ namespace LibraryPro.Web.Repositories
                 .Where(l => l.MemberId == memberId)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<BookLoan>> GetOverdueLoansAsync()
+        {
+            return await _context.BookLoans
+                .Include(l => l.Book)
+                .Include(l => l.Member)
+                .Where(l => !l.IsReturned && l.DueDate < DateTime.Now.Date)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<BookLoan>> GetLoansDueInDaysAsync(int days)
+        {
+            var targetDate = DateTime.Now.Date.AddDays(days);
+            return await _context.BookLoans
+                .Include(l => l.Book)
+                .Include(l => l.Member)
+                .Where(l => !l.IsReturned && l.DueDate.Date == targetDate)
+                .ToListAsync();
+        }
     }
 }

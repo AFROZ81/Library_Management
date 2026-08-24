@@ -16,6 +16,7 @@ namespace LibraryPro.Web.Data
         public DbSet<FinePayment> FinePayments { get; set; }
         public DbSet<LibrarySettings> LibrarySettings { get; set; }
         public DbSet<BookReservation> BookReservations { get; set; }
+        public DbSet<EmailLog> EmailLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

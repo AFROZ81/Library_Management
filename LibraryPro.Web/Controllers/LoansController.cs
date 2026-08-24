@@ -1,5 +1,6 @@
 using LibraryPro.Web.Models.Entities;
 using LibraryPro.Web.Repositories;
+using LibraryPro.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -13,17 +14,20 @@ namespace LibraryPro.Web.Controllers
         private readonly IBookRepository _bookRepo;
         private readonly IMemberRepository _memberRepo;
         private readonly ILibrarySettingsRepository _settingsRepo;
+        private readonly INotificationService _notificationService;
 
         public LoansController(
             ILoanRepository loanRepo, 
             IBookRepository bookRepo, 
             IMemberRepository memberRepo,
-            ILibrarySettingsRepository settingsRepo)
+            ILibrarySettingsRepository settingsRepo,
+            INotificationService notificationService)
         {
             _loanRepo = loanRepo;
             _bookRepo = bookRepo;
             _memberRepo = memberRepo;
             _settingsRepo = settingsRepo;
+            _notificationService = notificationService;
         }
 
         public async Task<IActionResult> Index()
@@ -68,12 +72,21 @@ namespace LibraryPro.Web.Controllers
                 }
 
                 var book = await _bookRepo.GetByIdAsync(loan.BookId);
-                if (book != null && book.AvailableCopies > 0)
+                var member = await _memberRepo.GetByIdAsync(loan.MemberId);
+                
+                if (book != null && book.AvailableCopies > 0 && member != null)
                 {
                     book.AvailableCopies--;
                     await _bookRepo.UpdateAsync(book);
 
                     await _loanRepo.CreateLoanAsync(loan);
+                    
+                    // Send welcome email if this is member's first loan
+                    if (memberLoans.Count() == 0)
+                    {
+                        await _notificationService.SendWelcomeEmailAsync(member);
+                    }
+                    
                     TempData["Success"] = "Book issued successfully.";
                     return RedirectToAction(nameof(Index));
                 }
