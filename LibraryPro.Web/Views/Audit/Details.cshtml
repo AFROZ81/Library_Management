@@ -1,0 +1,145 @@
+@model LibraryPro.Web.Models.Entities.AuditLog
+
+@{
+    ViewData["Title"] = "Audit Log Details";
+}
+
+<div class="container mt-5 animate-slide-up">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header text-white py-4" style="background-color: #1a237e;">
+                    <div class="d-flex align-items-center">
+                        <div class="display-6 me-3"><i class="bi bi-file-earmark-text"></i></div>
+                        <div>
+                            <h4 class="mb-0 fw-bold">Audit Log Details</h4>
+                            <p class="small opacity-75 mb-0">Detailed information about this audit event</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="fw-semibold text-secondary small text-uppercase">Timestamp</label>
+                            <p class="form-control-plaintext">@Model.FormattedTimestamp</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-semibold text-secondary small text-uppercase">Status</label>
+                            <p>
+                                @if (Model.IsSuccess)
+                                {
+                                    <span class="badge bg-success">Success</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Failed</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-semibold text-secondary small text-uppercase">User ID</label>
+                            <p class="form-control-plaintext">@Model.UserId</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-semibold text-secondary small text-uppercase">User Name</label>
+                            <p class="form-control-plaintext">@Model.UserName</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-semibold text-secondary small text-uppercase">Action</label>
+                            <p class="form-control-plaintext">@Model.Action</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-semibold text-secondary small text-uppercase">Operation Type</label>
+                            <p>
+                                <span class="badge @(Model.OperationType switch
+                                {
+                                    "Create" => "bg-success",
+                                    "Read" => "bg-info",
+                                    "Update" => "bg-warning",
+                                    "Delete" => "bg-danger",
+                                    "Login" => "bg-primary",
+                                    "Logout" => "bg-secondary",
+                                    _ => "bg-secondary"
+                                })">@Model.OperationType</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-semibold text-secondary small text-uppercase">Controller</label>
+                            <p class="form-control-plaintext">@Model.Controller</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-semibold text-secondary small text-uppercase">Action Name</label>
+                            <p class="form-control-plaintext">@Model.ActionName</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-semibold text-secondary small text-uppercase">IP Address</label>
+                            <p class="form-control-plaintext">@Model.IpAddress</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-semibold text-secondary small text-uppercase">Entity Type</label>
+                            <p class="form-control-plaintext">@Model.EntityType</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-semibold text-secondary small text-uppercase">Entity ID</label>
+                            <p class="form-control-plaintext">@Model.EntityId</p>
+                        </div>
+                        <div class="col-12">
+                            <label class="fw-semibold text-secondary small text-uppercase">Description</label>
+                            <p class="form-control-plaintext">@Model.Description</p>
+                        </div>
+                        <div class="col-12">
+                            <label class="fw-semibold text-secondary small text-uppercase">User Agent</label>
+                            <p class="form-control-plaintext small">@Model.UserAgent</p>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.OldValues))
+                        {
+                            <div class="col-12">
+                                <label class="fw-semibold text-secondary small text-uppercase">Old Values</label>
+                                <pre class="bg-light p-3 rounded small">@Model.OldValues</pre>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.NewValues))
+                        {
+                            <div class="col-12">
+                                <label class="fw-semibold text-secondary small text-uppercase">New Values</label>
+                                <pre class="bg-light p-3 rounded small">@Model.NewValues</pre>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                        {
+                            <div class="col-12">
+                                <label class="fw-semibold text-secondary small text-uppercase">Error Message</label>
+                                <div class="alert alert-danger small">@Model.ErrorMessage</div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-4">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Logs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .animate-slide-up {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

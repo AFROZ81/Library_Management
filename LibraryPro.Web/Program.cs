@@ -2,6 +2,7 @@ using LibraryPro.Web.Data;
 using LibraryPro.Web.Models;
 using LibraryPro.Web.Repositories;
 using LibraryPro.Web.Services;
+using LibraryPro.Web.Middleware;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -60,6 +61,7 @@ builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<ILoanRepository, LoanRepository>();
 builder.Services.AddScoped<ILibrarySettingsRepository, LibrarySettingsRepository>();
 builder.Services.AddScoped<IBookReservationRepository, BookReservationRepository>();
+builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 
 // Register Email Services
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
@@ -69,10 +71,17 @@ builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<IEmailLogRepository, EmailLogRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddHostedService<EmailBackgroundService>();
+builder.Services.AddHostedService<AuditLogCleanupService>();
 
 // Register Image Service
 builder.Services.Configure<ImageSettings>(builder.Configuration.GetSection("ImageSettings"));
 builder.Services.AddScoped<IImageService, ImageService>();
+
+// Register Report Service
+builder.Services.AddScoped<IReportService, ReportService>();
+
+// Register Recommendation Service
+builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 
 // Register DatabaseSeeder
 builder.Services.AddScoped<DatabaseSeeder>();
@@ -98,6 +107,9 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Add audit logging middleware
+app.UseAuditLogging();
 
 app.MapStaticAssets();
 

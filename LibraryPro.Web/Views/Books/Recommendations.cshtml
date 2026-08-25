@@ -1,0 +1,107 @@
+@model List<LibraryPro.Web.Models.BookRecommendation>
+
+@{
+    ViewData["Title"] = "Book Recommendations";
+}
+
+<div class="container mt-5 animate-slide-up">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header text-white py-4" style="background-color: #ffc107;">
+                    <div class="d-flex align-items-center">
+                        <div class="display-6 me-3"><i class="bi bi-star-fill"></i></div>
+                        <div>
+                            <h4 class="mb-0 fw-bold">Recommended for You</h4>
+                            <p class="small opacity-75 mb-0">Personalized book suggestions based on your preferences</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    @if (Model.Any())
+                    {
+                        <div class="row g-4">
+                            @foreach (var recommendation in Model)
+                            {
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
+                                        @if (!string.IsNullOrEmpty(recommendation.ImageUrl))
+                                        {
+                                            <img src="@recommendation.ImageUrl" class="card-img-top" alt="@recommendation.Title" style="height: 200px; object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                                <i class="bi bi-book text-muted" style="font-size: 3rem;"></i>
+                                            </div>
+                                        }
+                                        <div class="card-body">
+                                            <h5 class="card-title fw-bold">@recommendation.Title</h5>
+                                            <p class="card-text text-muted small mb-2">@recommendation.Author</p>
+                                            <div class="mb-2">
+                                                @foreach (var genre in recommendation.Genre)
+                                                {
+                                                    <span class="badge bg-secondary me-1">@genre</span>
+                                                }
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge bg-warning text-dark">@(recommendation.RelevanceScore.ToString("P0")) Match</span>
+                                            </div>
+                                            <p class="card-text small text-muted mt-2">@recommendation.RecommendationReason</p>
+                                        </div>
+                                        <div class="card-footer bg-white border-0">
+                                            <a asp-action="Details" asp-route-id="@recommendation.BookId" class="btn btn-primary btn-sm w-100">
+                                                View Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            No recommendations available at the moment. Start borrowing books to get personalized suggestions!
+                        </div>
+                    }
+
+                    <div class="mt-4">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Books
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-shadow:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        transform: translateY(-2px);
+    }
+
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

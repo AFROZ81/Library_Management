@@ -1,0 +1,113 @@
+@model LibraryPro.Web.Models.AdvancedSearchViewModel
+
+@{
+    ViewData["Title"] = "Advanced Search";
+}
+
+<div class="container mt-5 animate-slide-up">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header text-white py-4" style="background-color: #1a237e;">
+                    <div class="d-flex align-items-center">
+                        <div class="display-6 me-3"><i class="bi bi-search"></i></div>
+                        <div>
+                            <h4 class="mb-0 fw-bold">Advanced Search</h4>
+                            <p class="small opacity-75 mb-0">Find books with detailed filters</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    <form asp-action="AdvancedSearch" method="post">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label asp-for="SearchCriteria.Title" class="form-label fw-semibold text-secondary small text-uppercase">Title</label>
+                                <input asp-for="SearchCriteria.Title" class="form-control" placeholder="Search by title" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="SearchCriteria.Author" class="form-label fw-semibold text-secondary small text-uppercase">Author</label>
+                                <input asp-for="SearchCriteria.Author" class="form-control" placeholder="Search by author" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="SearchCriteria.ISBN" class="form-label fw-semibold text-secondary small text-uppercase">ISBN</label>
+                                <input asp-for="SearchCriteria.ISBN" class="form-control" placeholder="Search by ISBN" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="SearchCriteria.Genre" class="form-label fw-semibold text-secondary small text-uppercase">Genre</label>
+                                <input asp-for="SearchCriteria.Genre" class="form-control" placeholder="Search by genre" />
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="SearchCriteria.MinPublicationYear" class="form-label fw-semibold text-secondary small text-uppercase">Min Year</label>
+                                <input asp-for="SearchCriteria.MinPublicationYear" class="form-control" type="number" placeholder="From" />
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="SearchCriteria.MaxPublicationYear" class="form-label fw-semibold text-secondary small text-uppercase">Max Year</label>
+                                <input asp-for="SearchCriteria.MaxPublicationYear" class="form-control" type="number" placeholder="To" />
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="SearchCriteria.SortBy" class="form-label fw-semibold text-secondary small text-uppercase">Sort By</label>
+                                <select asp-for="SearchCriteria.SortBy" class="form-select">
+                                    <option value="">Select...</option>
+                                    <option value="title">Title</option>
+                                    <option value="author">Author</option>
+                                    <option value="publicationyear">Publication Year</option>
+                                    <option value="popularity">Popularity</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="SearchCriteria.SortOrder" class="form-label fw-semibold text-secondary small text-uppercase">Sort Order</label>
+                                <select asp-for="SearchCriteria.SortOrder" class="form-select">
+                                    <option value="">Select...</option>
+                                    <option value="asc">Ascending</option>
+                                    <option value="desc">Descending</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-check">
+                                    <input asp-for="SearchCriteria.AvailableOnly" class="form-check-input" />
+                                    <label asp-for="SearchCriteria.AvailableOnly" class="form-check-label">Show only available books</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-3 mt-5">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm py-3 transition-lift">
+                                <i class="bi bi-search me-2"></i>Search Books
+                            </button>
+                            <a asp-action="Index" class="btn btn-link text-decoration-none text-muted">
+                                <i class="bi bi-arrow-left me-1"></i> Back to Books
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .transition-lift {
+        transition: transform 0.2s;
+    }
+
+    .transition-lift:hover {
+        transform: translateY(-3px);
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

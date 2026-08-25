@@ -1,0 +1,189 @@
+@model LibraryPro.Web.Controllers.AuditLogIndexViewModel
+
+@{
+    ViewData["Title"] = "Audit Logs";
+}
+
+<div class="container mt-5 animate-slide-up">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header text-white py-4" style="background-color: #1a237e;">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="display-6 me-3"><i class="bi bi-shield-lock-fill"></i></div>
+                            <div>
+                                <h4 class="mb-0 fw-bold">Audit Logs</h4>
+                                <p class="small opacity-75 mb-0">System activity and security audit trail</p>
+                            </div>
+                        </div>
+                        <form asp-action="ClearOldLogs" method="post" class="d-flex align-items-center">
+                            <input type="number" name="retentionDays" class="form-control form-control-sm me-2" placeholder="Days" min="30" value="90" style="width: 100px;" />
+                            <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Are you sure you want to delete logs older than the specified days?');">
+                                <i class="bi bi-trash me-1"></i> Clear Old Logs
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    <!-- Filters -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <form asp-action="Index" method="get" class="row g-3">
+                                <div class="col-md-3">
+                                    <select name="operationType" class="form-select form-select-sm">
+                                        <option value="">All Operations</option>
+                                        @foreach (var op in ViewData["OperationTypes"] as List<string> ?? new List<string>())
+                                        {
+                                            <option value="@op" selected="@op == Model.OperationType">@op</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select name="entityType" class="form-select form-select-sm">
+                                        <option value="">All Entities</option>
+                                        @foreach (var entity in ViewData["EntityTypes"] as List<string> ?? new List<string>())
+                                        {
+                                            <option value="@entity" selected="@entity == Model.EntityType">@entity</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="date" name="startDate" class="form-control form-control-sm" value="@(Model.StartDate?.ToString("yyyy-MM-dd"))" />
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="date" name="endDate" class="form-control form-control-sm" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" />
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                                        <i class="bi bi-filter me-1"></i> Filter
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Audit Logs Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Controller</th>
+                                    <th>Operation</th>
+                                    <th>IP Address</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var log in Model.AuditLogs)
+                                {
+                                    <tr class="@(log.IsSuccess ? "" : "table-danger")">
+                                        <td>@log.FormattedTimestamp</td>
+                                        <td>
+                                            <div>@log.UserName</div>
+                                            <small class="text-muted">@log.UserId</small>
+                                        </td>
+                                        <td>@log.Action</td>
+                                        <td>@log.Controller</td>
+                                        <td>
+                                            <span class="badge @(log.OperationType switch
+                                            {
+                                                "Create" => "bg-success",
+                                                "Read" => "bg-info",
+                                                "Update" => "bg-warning",
+                                                "Delete" => "bg-danger",
+                                                "Login" => "bg-primary",
+                                                "Logout" => "bg-secondary",
+                                                _ => "bg-secondary"
+                                            })">@log.OperationType</span>
+                                        </td>
+                                        <td>@log.IpAddress</td>
+                                        <td>
+                                            @if (log.IsSuccess)
+                                            {
+                                                <span class="badge bg-success">Success</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Failed</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <a asp-action="Details" asp-route-id="@log.Id" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    @if (Model.TotalPages > 1)
+                    {
+                        <nav aria-label="Page navigation" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                @if (Model.CurrentPage > 1)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.CurrentPage - 1)" 
+                                           asp-route-operationType="@Model.OperationType" 
+                                           asp-route-entityType="@Model.EntityType"
+                                           asp-route-startDate="@Model.StartDate"
+                                           asp-route-endDate="@Model.EndDate">Previous</a>
+                                    </li>
+                                }
+
+                                @for (int i = 1; i <= Model.TotalPages; i++)
+                                {
+                                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                        <a class="page-link" asp-action="Index" asp-route-pageNumber="@i"
+                                           asp-route-operationType="@Model.OperationType"
+                                           asp-route-entityType="@Model.EntityType"
+                                           asp-route-startDate="@Model.StartDate"
+                                           asp-route-endDate="@Model.EndDate">@i</a>
+                                    </li>
+                                }
+
+                                @if (Model.CurrentPage < Model.TotalPages)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.CurrentPage + 1)"
+                                           asp-route-operationType="@Model.OperationType"
+                                           asp-route-entityType="@Model.EntityType"
+                                           asp-route-startDate="@Model.StartDate"
+                                           asp-route-endDate="@Model.EndDate">Next</a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .animate-slide-up {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

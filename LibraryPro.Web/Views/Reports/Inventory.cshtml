@@ -1,0 +1,120 @@
+@model LibraryPro.Web.Services.InventoryReportViewModel
+
+@{
+    ViewData["Title"] = "Inventory Status Report";
+}
+
+<div class="container mt-5 animate-slide-up">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header text-white py-4 d-flex justify-content-between align-items-center" style="background-color: #6c757d;">
+                    <div>
+                        <h4 class="mb-0 fw-bold">Inventory Status Report</h4>
+                        <p class="small opacity-75 mb-0">Generated: @Model.GeneratedAt.ToString("dd MMM yyyy HH:mm")</p>
+                    </div>
+                    <div>
+                        <a asp-action="InventoryPdf" class="btn btn-light btn-sm me-2">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+                        </a>
+                        <a asp-action="InventoryExcel" class="btn btn-success btn-sm">
+                            <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    <!-- Summary Cards -->
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm bg-secondary text-white">
+                                <div class="card-body text-center">
+                                    <h6 class="card-subtitle mb-2 opacity-75">Total Books</h6>
+                                    <h3 class="card-title fw-bold mb-0">@Model.TotalBooks</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h6 class="card-subtitle mb-2 opacity-75">Total Copies</h6>
+                                    <h3 class="card-title fw-bold mb-0">@Model.TotalCopies</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h6 class="card-subtitle mb-2 opacity-75">Available</h6>
+                                    <h3 class="card-title fw-bold mb-0">@Model.AvailableCopies</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm bg-warning text-dark">
+                                <div class="card-body text-center">
+                                    <h6 class="card-subtitle mb-2 opacity-75">Borrowed</h6>
+                                    <h3 class="card-title fw-bold mb-0">@Model.BorrowedCopies</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inventory Table -->
+                    <h5 class="fw-bold mb-3">Inventory Details</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Total Copies</th>
+                                    <th>Available</th>
+                                    <th>Borrowed</th>
+                                    <th>Genre</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.InventoryItems)
+                                {
+                                    <tr class="@(item.AvailableCopies == 0 ? "table-danger" : item.AvailableCopies < 3 ? "table-warning" : "")">
+                                        <td>@item.Title</td>
+                                        <td>@item.Author</td>
+                                        <td>@item.TotalCopies</td>
+                                        <td><strong>@item.AvailableCopies</strong></td>
+                                        <td>@item.BorrowedCopies</td>
+                                        <td>@string.Join(", ", item.Genre)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .animate-slide-up {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

@@ -1,0 +1,148 @@
+@{
+    ViewData["Title"] = "Reports Dashboard";
+}
+
+<div class="container mt-5 animate-slide-up">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header text-white py-4" style="background-color: #1a237e;">
+                    <div class="d-flex align-items-center">
+                        <div class="display-6 me-3"><i class="bi bi-bar-chart-fill"></i></div>
+                        <div>
+                            <h4 class="mb-0 fw-bold">Reports Dashboard</h4>
+                            <p class="small opacity-75 mb-0">Generate and export comprehensive library reports</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    <div class="row g-4">
+                        <!-- Circulation Reports -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
+                                <div class="card-body text-center p-4">
+                                    <div class="mb-3">
+                                        <i class="bi bi-book-half text-primary" style="font-size: 3rem;"></i>
+                                    </div>
+                                    <h5 class="card-title fw-bold mb-2">Circulation Reports</h5>
+                                    <p class="card-text text-muted small mb-3">Track book loans, returns, and borrowing patterns</p>
+                                    <a asp-action="Circulation" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-arrow-right me-1"></i> Generate
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Financial Reports -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
+                                <div class="card-body text-center p-4">
+                                    <div class="mb-3">
+                                        <i class="bi bi-currency-rupee text-success" style="font-size: 3rem;"></i>
+                                    </div>
+                                    <h5 class="card-title fw-bold mb-2">Financial Reports</h5>
+                                    <p class="card-text text-muted small mb-3">Fine collections and payment analytics</p>
+                                    <a asp-action="Financial" class="btn btn-success btn-sm">
+                                        <i class="bi bi-arrow-right me-1"></i> Generate
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Popular Books Reports -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
+                                <div class="card-body text-center p-4">
+                                    <div class="mb-3">
+                                        <i class="bi bi-star-fill text-warning" style="font-size: 3rem;"></i>
+                                    </div>
+                                    <h5 class="card-title fw-bold mb-2">Popular Books</h5>
+                                    <p class="card-text text-muted small mb-3">Most borrowed books analysis</p>
+                                    <a asp-action="PopularBooks" class="btn btn-warning btn-sm">
+                                        <i class="bi bi-arrow-right me-1"></i> Generate
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Member Activity Reports -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
+                                <div class="card-body text-center p-4">
+                                    <div class="mb-3">
+                                        <i class="bi bi-people-fill text-info" style="font-size: 3rem;"></i>
+                                    </div>
+                                    <h5 class="card-title fw-bold mb-2">Member Activity</h5>
+                                    <p class="card-text text-muted small mb-3">Member borrowing statistics and activity</p>
+                                    <a asp-action="MemberActivity" class="btn btn-info btn-sm">
+                                        <i class="bi bi-arrow-right me-1"></i> Generate
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Overdue Books Report -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
+                                <div class="card-body text-center p-4">
+                                    <div class="mb-3">
+                                        <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 3rem;"></i>
+                                    </div>
+                                    <h5 class="card-title fw-bold mb-2">Overdue Books</h5>
+                                    <p class="card-text text-muted small mb-3">Current overdue books and late fees</p>
+                                    <a asp-action="OverdueBooks" class="btn btn-danger btn-sm">
+                                        <i class="bi bi-arrow-right me-1"></i> Generate
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inventory Status Report -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
+                                <div class="card-body text-center p-4">
+                                    <div class="mb-3">
+                                        <i class="bi bi-box-seam-fill text-secondary" style="font-size: 3rem;"></i>
+                                    </div>
+                                    <h5 class="card-title fw-bold mb-2">Inventory Status</h5>
+                                    <p class="card-text text-muted small mb-3">Complete library inventory overview</p>
+                                    <a asp-action="Inventory" class="btn btn-secondary btn-sm">
+                                        <i class="bi bi-arrow-right me-1"></i> Generate
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-shadow:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        transform: translateY(-2px);
+    }
+
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

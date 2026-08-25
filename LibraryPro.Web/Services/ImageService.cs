@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.Processing;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace LibraryPro.Web.Services
 {
@@ -92,35 +91,54 @@ namespace LibraryPro.Web.Services
         {
             try
             {
-                using var image = await Image.LoadAsync(imagePath);
-
-                // Calculate new dimensions maintaining aspect ratio
-                int newWidth, newHeight;
-                double aspectRatio = (double)image.Width / image.Height;
-
-                if (image.Width > maxWidth || image.Height > maxHeight)
+                await Task.Run(() =>
                 {
-                    if (aspectRatio > 1)
+                    using var image = Image.FromFile(imagePath);
+
+                    // Calculate new dimensions maintaining aspect ratio
+                    int newWidth, newHeight;
+                    double aspectRatio = (double)image.Width / image.Height;
+
+                    if (image.Width > maxWidth || image.Height > maxHeight)
                     {
-                        newWidth = maxWidth;
-                        newHeight = (int)(maxWidth / aspectRatio);
+                        if (aspectRatio > 1)
+                        {
+                            newWidth = maxWidth;
+                            newHeight = (int)(maxWidth / aspectRatio);
+                        }
+                        else
+                        {
+                            newHeight = maxHeight;
+                            newWidth = (int)(maxHeight * aspectRatio);
+                        }
+
+                        var resizedImage = new Bitmap(newWidth, newHeight);
+                        using (var graphics = Graphics.FromImage(resizedImage))
+                        {
+                            graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                            graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                            graphics.DrawImage(image, 0, 0, newWidth, newHeight);
+                        }
+
+                        // Save with quality setting
+                        var jpegEncoder = GetEncoder(ImageFormat.Jpeg);
+                        var encoderParams = new EncoderParameters(1);
+                        encoderParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, (long)quality);
+                        resizedImage.Save(imagePath, jpegEncoder, encoderParams);
+                        resizedImage.Dispose();
                     }
                     else
                     {
-                        newHeight = maxHeight;
-                        newWidth = (int)(maxHeight * aspectRatio);
+                        // Save with quality setting even if not resized
+                        var jpegEncoder = GetEncoder(ImageFormat.Jpeg);
+                        var encoderParams = new EncoderParameters(1);
+                        encoderParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, (long)quality);
+                        image.Save(imagePath, jpegEncoder, encoderParams);
                     }
 
-                    image.Mutate(x => x.Resize(new ResizeOptions
-                    {
-                        Size = new Size(newWidth, newHeight),
-                        Mode = ResizeMode.Max
-                    }));
-                }
-
-                // Save with quality setting
-                var encoder = new JpegEncoder { Quality = quality };
-                await image.SaveAsync(imagePath, encoder);
+                    image.Dispose();
+                });
 
                 _logger.LogInformation("Image optimized successfully: {ImagePath}", imagePath);
                 return imagePath;
@@ -130,6 +148,19 @@ namespace LibraryPro.Web.Services
                 _logger.LogError(ex, "Error optimizing image: {ImagePath}", imagePath);
                 throw;
             }
+        }
+
+        private ImageCodecInfo GetEncoder(ImageFormat format)
+        {
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
+            foreach (ImageCodecInfo codec in codecs)
+            {
+                if (codec.FormatID == format.Guid)
+                {
+                    return codec;
+                }
+            }
+            return null;
         }
 
         public void DeleteImage(string imagePath)

@@ -1,0 +1,97 @@
+@model LibraryPro.Web.Controllers.PopularBooksReportViewModel
+
+@{
+    ViewData["Title"] = "Popular Books Report";
+}
+
+<div class="container mt-5 animate-slide-up">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header text-white py-4" style="background-color: #ffc107;">
+                    <div class="d-flex align-items-center">
+                        <div class="display-6 me-3"><i class="bi bi-star-fill"></i></div>
+                        <div>
+                            <h4 class="mb-0 fw-bold">Popular Books Report</h4>
+                            <p class="small opacity-75 mb-0">Generate most borrowed books analysis</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    <form asp-action="PopularBooks" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4"></div>
+
+                        <div class="mb-4">
+                            <label asp-for="StartDate" class="form-label fw-semibold text-secondary small text-uppercase">Start Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-calendar text-warning"></i></span>
+                                <input asp-for="StartDate" class="form-control border-start-0" type="date" />
+                            </div>
+                            <span asp-validation-for="StartDate" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="EndDate" class="form-label fw-semibold text-secondary small text-uppercase">End Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-calendar-check text-warning"></i></span>
+                                <input asp-for="EndDate" class="form-control border-start-0" type="date" />
+                            </div>
+                            <span asp-validation-for="EndDate" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="TopN" class="form-label fw-semibold text-secondary small text-uppercase">Top N Books</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-list-ol text-warning"></i></span>
+                                <input asp-for="TopN" class="form-control border-start-0" type="number" min="1" max="100" value="20" />
+                            </div>
+                            <span asp-validation-for="TopN" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid gap-3 mt-5">
+                            <button type="submit" class="btn btn-warning btn-lg fw-bold shadow-sm py-3 transition-lift text-dark">
+                                <i class="bi bi-bar-chart-fill me-2"></i>Generate Report
+                            </button>
+                            <a asp-action="Index" class="btn btn-link text-decoration-none text-muted">
+                                <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .transition-lift {
+        transition: transform 0.2s;
+    }
+
+    .transition-lift:hover {
+        transform: translateY(-3px);
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

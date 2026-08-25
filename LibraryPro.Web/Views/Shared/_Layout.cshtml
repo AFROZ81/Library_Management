@@ -47,8 +47,17 @@
                     <li class="nav-item">
                         <a class="nav-link text-white px-3" asp-area="" asp-controller="Reservations" asp-action="Index"><i class="bi bi-calendar-check me-1"></i> Reservations</a>
                     </li>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Librarian"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-white px-3" asp-area="" asp-controller="Reports" asp-action="Index"><i class="bi bi-file-earmark-bar-graph me-1"></i> Reports</a>
+                        </li>
+                    }
                     @if (User.IsInRole("Admin"))
                     {
+                        <li class="nav-item">
+                            <a class="nav-link text-white px-3" asp-area="" asp-controller="Audit" asp-action="Index"><i class="bi bi-shield-lock me-1"></i> Audit Logs</a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link text-white px-3" asp-area="" asp-controller="Settings" asp-action="Index"><i class="bi bi-gear me-1"></i> Settings</a>
                         </li>

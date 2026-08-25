@@ -13,11 +13,13 @@ namespace LibraryPro.Web.Controllers
     {
         private readonly IBookRepository _bookRepo;
         private readonly IImageService _imageService;
+        private readonly IRecommendationService _recommendationService;
 
-        public BooksController(IBookRepository bookRepo, IImageService imageService)
+        public BooksController(IBookRepository bookRepo, IImageService imageService, IRecommendationService recommendationService)
         {
             _bookRepo = bookRepo;
             _imageService = imageService;
+            _recommendationService = recommendationService;
         }
 
         // GET: All Books
@@ -58,6 +60,51 @@ namespace LibraryPro.Web.Controllers
             // 3. Pagination
             int pageSize = 8;
             return View(await PaginatedList<Book>.CreateAsync(books, pageNumber ?? 1, pageSize));
+        }
+
+        // GET: Advanced Search
+        public IActionResult AdvancedSearch()
+        {
+            var model = new AdvancedSearchViewModel
+            {
+                SearchCriteria = new SearchCriteria(),
+                PageNumber = 1,
+                PageSize = 12
+            };
+            return View(model);
+        }
+
+        // POST: Advanced Search
+        [HttpPost]
+        public async Task<IActionResult> AdvancedSearch(AdvancedSearchViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var books = await _recommendationService.AdvancedSearchAsync(
+                    model.SearchCriteria, 
+                    model.PageNumber, 
+                    model.PageSize);
+
+                model.TotalResults = books.Count;
+                return View("AdvancedSearchResults", model);
+            }
+
+            return View(model);
+        }
+
+        // GET: Recommendations
+        public async Task<IActionResult> Recommendations()
+        {
+            var userId = User.Identity?.Name;
+            var recommendations = await _recommendationService.GetRecommendationsAsync(userId, 10);
+            return View(recommendations);
+        }
+
+        // GET: Recommendations by Book
+        public async Task<IActionResult> RecommendationsByBook(int bookId)
+        {
+            var recommendations = await _recommendationService.GetRecommendationsByBookAsync(bookId, 5);
+            return PartialView("_BookRecommendations", recommendations);
         }
         // GET: Create Book Form
         [Authorize(Policy = "LibrarianOrAdmin")]

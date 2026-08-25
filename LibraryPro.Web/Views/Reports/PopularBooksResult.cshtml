@@ -1,0 +1,92 @@
+@model LibraryPro.Web.Services.PopularBooksReportViewModel
+
+@{
+    ViewData["Title"] = "Popular Books Report Results";
+}
+
+<div class="container mt-5 animate-slide-up">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header text-white py-4 d-flex justify-content-between align-items-center" style="background-color: #ffc107;">
+                    <div>
+                        <h4 class="mb-0 fw-bold">Popular Books Report Results</h4>
+                        <p class="small opacity-75 mb-0">@Model.StartDate.ToString("dd MMM yyyy") - @Model.EndDate.ToString("dd MMM yyyy")</p>
+                    </div>
+                    <div>
+                        <a asp-action="PopularBooksPdf" asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")" asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")" asp-route-topN="@Model.PopularBooks.Count" class="btn btn-light btn-sm me-2">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+                        </a>
+                        <a asp-action="PopularBooksExcel" asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")" asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")" asp-route-topN="@Model.PopularBooks.Count" class="btn btn-success btn-sm">
+                            <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    <!-- Summary -->
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Showing top <strong>@Model.PopularBooks.Count</strong> most borrowed books
+                    </div>
+
+                    <!-- Popular Books Table -->
+                    <h5 class="fw-bold mb-3">Most Borrowed Books</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Genre</th>
+                                    <th>Times Borrowed</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int rank = 1;
+                                }
+                                @foreach (var book in Model.PopularBooks)
+                                {
+                                    <tr>
+                                        <td><span class="badge bg-primary">@rank</span></td>
+                                        <td>@book.Title</td>
+                                        <td>@book.Author</td>
+                                        <td>@string.Join(", ", book.Genre)</td>
+                                        <td><strong>@book.TimesBorrowed</strong></td>
+                                    </tr>
+                                    rank++;
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .animate-slide-up {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
