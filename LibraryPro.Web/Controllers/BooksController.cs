@@ -14,12 +14,16 @@ namespace LibraryPro.Web.Controllers
         private readonly IBookRepository _bookRepo;
         private readonly IImageService _imageService;
         private readonly IRecommendationService _recommendationService;
+        private readonly IBarcodeService _barcodeService;
+        private readonly IExternalBookService _externalBookService;
 
-        public BooksController(IBookRepository bookRepo, IImageService imageService, IRecommendationService recommendationService)
+        public BooksController(IBookRepository bookRepo, IImageService imageService, IRecommendationService recommendationService, IBarcodeService barcodeService, IExternalBookService externalBookService)
         {
             _bookRepo = bookRepo;
             _imageService = imageService;
             _recommendationService = recommendationService;
+            _barcodeService = barcodeService;
+            _externalBookService = externalBookService;
         }
 
         // GET: All Books
@@ -106,6 +110,25 @@ namespace LibraryPro.Web.Controllers
             var recommendations = await _recommendationService.GetRecommendationsByBookAsync(bookId, 5);
             return PartialView("_BookRecommendations", recommendations);
         }
+
+        // GET: Lookup Book by ISBN
+        [Authorize(Policy = "LibrarianOrAdmin")]
+        public async Task<IActionResult> LookupByISBN(string isbn)
+        {
+            if (string.IsNullOrEmpty(isbn))
+            {
+                return Json(new { success = false, message = "ISBN is required" });
+            }
+
+            var metadata = await _externalBookService.SearchByISBNAsync(isbn);
+            if (metadata == null)
+            {
+                return Json(new { success = false, message = "Book not found" });
+            }
+
+            return Json(new { success = true, data = metadata });
+        }
+
         // GET: Create Book Form
         [Authorize(Policy = "LibrarianOrAdmin")]
         public IActionResult Create() => View();
@@ -117,6 +140,9 @@ namespace LibraryPro.Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Generate barcode for the book
+                book.Barcode = _barcodeService.GenerateBarcodeText(book.ISBN ?? book.Title ?? string.Empty);
+
                 // Handle image upload
                 if (imageFile != null)
                 {

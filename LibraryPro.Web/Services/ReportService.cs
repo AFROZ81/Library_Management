@@ -3,18 +3,14 @@ using LibraryPro.Web.Data;
 using LibraryPro.Web.Repositories;
 using LibraryPro.Web.Models;
 using Microsoft.EntityFrameworkCore;
-using QuestPDF.Fluent;
-using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
+using PdfSharpCore.Pdf;
+using PdfSharpCore.Drawing;
+using System.IO;
 
 namespace LibraryPro.Web.Services
 {
     public class ReportService : IReportService
     {
-        static ReportService()
-        {
-            QuestPDF.Settings.License = LicenseType.Community;
-        }
 
         private readonly ILoanRepository _loanRepository;
         private readonly IBookRepository _bookRepository;
@@ -83,103 +79,139 @@ namespace LibraryPro.Web.Services
                 var data = await GetCirculationReportDataAsync(startDate, endDate);
                 _logger.LogInformation("Retrieved circulation data: {TotalLoans} loans", data.TotalLoansIssued);
 
-                var document = Document.Create(container =>
+                var document = new PdfDocument();
+                document.Info.Title = "LibraryPro - Circulation Report";
+                document.Info.Author = "LibraryPro";
+                
+                var page = document.AddPage();
+                page.Size = PdfSharpCore.PageSize.A4;
+                page.Orientation = PdfSharpCore.PageOrientation.Portrait;
+                
+                var graphics = XGraphics.FromPdfPage(page);
+                var margin = 50;
+                var pageWidth = page.Width.Point;
+                var pageHeight = page.Height.Point;
+
+                // Fonts
+                var fontTitle = new XFont("Arial", 24, XFontStyle.Bold);
+                var fontSubtitle = new XFont("Arial", 14, XFontStyle.Bold);
+                var fontHeader = new XFont("Arial", 11, XFontStyle.Bold);
+                var fontNormal = new XFont("Arial", 10, XFontStyle.Regular);
+                var fontSmall = new XFont("Arial", 9, XFontStyle.Regular);
+
+                // Colors
+                var colorPrimary = XBrushes.DarkBlue;
+                var colorSecondary = XBrushes.Gray;
+                var colorTableHeader = XBrushes.LightGray;
+                var colorTableAlt = XBrushes.WhiteSmoke;
+                var colorBorder = XPens.LightGray;
+                var colorBorderDark = XPens.DarkGray;
+
+                // String formats for alignment
+                var formatLeft = new XStringFormat();
+                formatLeft.Alignment = XStringAlignment.Near;
+                formatLeft.LineAlignment = XLineAlignment.Center;
+                
+                var formatRight = new XStringFormat();
+                formatRight.Alignment = XStringAlignment.Far;
+                formatRight.LineAlignment = XLineAlignment.Center;
+
+                // Draw header background
+                graphics.DrawRectangle(XBrushes.LightBlue, margin, margin, pageWidth - 2 * margin, 80);
+                
+                // Title
+                graphics.DrawString("LibraryPro", fontTitle, colorPrimary, margin + 10, margin + 15);
+                graphics.DrawString("Circulation Report", fontSubtitle, XBrushes.Black, margin + 10, margin + 50);
+                
+                // Report info
+                graphics.DrawString($"Period: {startDate:dd MMM yyyy} - {endDate:dd MMM yyyy}", fontSmall, colorSecondary, margin + 10, margin + 70);
+
+                // Summary section
+                int y = margin + 100;
+                var summaryBoxHeight = 120;
+                
+                // Draw summary box
+                graphics.DrawRectangle(XBrushes.White, margin, y, pageWidth - 2 * margin, summaryBoxHeight);
+                graphics.DrawRectangle(colorBorderDark, margin, y, pageWidth - 2 * margin, summaryBoxHeight);
+                
+                // Summary title
+                graphics.DrawString("Summary", fontSubtitle, colorPrimary, margin + 10, y + 10);
+                
+                // Summary data in grid
+                var summaryY = y + 40;
+                var colWidth = (pageWidth - 2 * margin - 20) / 2;
+                
+                graphics.DrawString($"Total Loans Issued:", fontHeader, colorSecondary, margin + 10, summaryY, formatLeft);
+                graphics.DrawString(data.TotalLoansIssued.ToString(), fontHeader, XBrushes.Black, margin + 10 + colWidth - 10, summaryY, formatRight);
+                
+                graphics.DrawString($"Total Loans Returned:", fontHeader, colorSecondary, margin + 10 + colWidth, summaryY, formatLeft);
+                graphics.DrawString(data.TotalLoansReturned.ToString(), fontHeader, XBrushes.Black, margin + 10 + colWidth + colWidth - 10, summaryY, formatRight);
+                
+                summaryY += 30;
+                graphics.DrawString($"Active Loans:", fontHeader, colorSecondary, margin + 10, summaryY, formatLeft);
+                graphics.DrawString(data.ActiveLoans.ToString(), fontHeader, XBrushes.Blue, margin + 10 + colWidth - 10, summaryY, formatRight);
+                
+                graphics.DrawString($"Avg Duration (days):", fontHeader, colorSecondary, margin + 10 + colWidth, summaryY, formatLeft);
+                graphics.DrawString($"{data.AverageLoanDuration:F1}", fontHeader, XBrushes.Black, margin + 10 + colWidth + colWidth - 10, summaryY, formatRight);
+
+                y += summaryBoxHeight + 20;
+                
+                // Table section
+                graphics.DrawString("Daily Circulation", fontSubtitle, colorPrimary, margin, y);
+                y += 25;
+
+                // Table header
+                var tableY = y;
+                var rowHeight = 25;
+                var col1Width = 120;
+                var col2Width = 100;
+                var col3Width = 100;
+                var tableWidth = col1Width + col2Width + col3Width;
+
+                // Draw header background
+                graphics.DrawRectangle(colorTableHeader, margin, tableY, tableWidth, rowHeight);
+                graphics.DrawRectangle(colorBorderDark, margin, tableY, tableWidth, rowHeight);
+
+                // Header text with proper alignment
+                var headerX = margin + 5;
+                graphics.DrawString("Date", fontHeader, XBrushes.Black, headerX, tableY + 8, formatLeft);
+                graphics.DrawString("Issued", fontHeader, XBrushes.Black, headerX + col1Width + 5, tableY + 8, formatLeft);
+                graphics.DrawString("Returned", fontHeader, XBrushes.Black, headerX + col1Width + col2Width + 5, tableY + 8, formatLeft);
+
+                // Table rows
+                y = tableY + rowHeight;
+                int rowCount = 0;
+                
+                foreach (var daily in data.DailyCirculation)
                 {
-                    container.Page(page =>
+                    // Alternate row colors
+                    if (rowCount % 2 == 0)
                     {
-                        page.Size(PageSizes.A4);
-                        page.Margin(2, Unit.Centimetre);
-                        page.DefaultTextStyle(x => x.FontSize(10));
+                        graphics.DrawRectangle(colorTableAlt, margin, y, tableWidth, rowHeight);
+                    }
+                    
+                    // Draw row border
+                    graphics.DrawRectangle(colorBorder, margin, y, tableWidth, rowHeight);
+                    
+                    // Row text with proper alignment
+                    graphics.DrawString(daily.Date.ToString("dd MMM yyyy"), fontNormal, XBrushes.Black, headerX, y + 8, formatLeft);
+                    graphics.DrawString(daily.LoansIssued.ToString(), fontNormal, XBrushes.Black, headerX + col1Width + 5, y + 8, formatLeft);
+                    graphics.DrawString(daily.LoansReturned.ToString(), fontNormal, XBrushes.Black, headerX + col1Width + col2Width + 5, y + 8, formatLeft);
+                    
+                    y += rowHeight;
+                    rowCount++;
+                }
 
-                        page.Header().Element(container =>
-                        {
-                            container.Row(row =>
-                            {
-                                row.RelativeItem().Column(column =>
-                                {
-                                    column.Item().Text("LibraryPro").Bold().FontSize(20).FontColor(Colors.Blue.Darken2);
-                                    column.Item().Text("Circulation Report").FontSize(14);
-                                    column.Item().Text($"Period: {startDate:dd MMM yyyy} - {endDate:dd MMM yyyy}").FontSize(10).FontColor(Colors.Grey.Darken1);
-                                });
-                            });
-                        });
+                // Footer
+                var footerY = pageHeight - 30;
+                graphics.DrawLine(colorBorder, margin, footerY, pageWidth - margin, footerY);
+                graphics.DrawString($"LibraryPro - Confidential Document | Page 1 of 1", fontSmall, colorSecondary, margin, footerY + 10, formatLeft);
 
-                        page.Content().Element(container =>
-                        {
-                            container.PaddingVertical(1, Unit.Centimetre);
-
-                            // Summary Section
-                            container.Column(column =>
-                            {
-                                column.Item().Element(element =>
-                                {
-                                    element.Border(1).Padding(10).Background(Colors.Grey.Lighten3);
-                                    element.Row(row =>
-                                    {
-                                        row.ConstantItem(150).Text("Total Loans Issued:").Bold();
-                                        row.ConstantItem(100).Text(data.TotalLoansIssued.ToString());
-                                    });
-                                    element.Row(row =>
-                                    {
-                                        row.ConstantItem(150).Text("Total Loans Returned:").Bold();
-                                        row.ConstantItem(100).Text(data.TotalLoansReturned.ToString());
-                                    });
-                                    element.Row(row =>
-                                    {
-                                        row.ConstantItem(150).Text("Active Loans:").Bold();
-                                        row.ConstantItem(100).Text(data.ActiveLoans.ToString());
-                                    });
-                                    element.Row(row =>
-                                    {
-                                        row.ConstantItem(150).Text("Avg Duration (days):").Bold();
-                                        row.ConstantItem(100).Text($"{data.AverageLoanDuration:F1}");
-                                    });
-                                });
-
-                                column.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
-
-                                // Daily Circulation Table
-                                column.Item().Text("Daily Circulation").Bold().FontSize(12);
-                                column.Item().PaddingTop(10);
-
-                                column.Item().Table(table =>
-                                {
-                                    table.ColumnsDefinition(columns =>
-                                    {
-                                        columns.ConstantColumn(100);
-                                        columns.ConstantColumn(100);
-                                        columns.ConstantColumn(100);
-                                    });
-
-                                    table.Header(header =>
-                                    {
-                                        header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Date").Bold();
-                                        header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Issued").Bold();
-                                        header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Returned").Bold();
-                                    });
-
-                                    foreach (var daily in data.DailyCirculation)
-                                    {
-                                        table.Cell().Element(cell => cell.Padding(5)).Text(daily.Date.ToString("dd MMM yyyy"));
-                                        table.Cell().Element(cell => cell.Padding(5)).Text(daily.LoansIssued.ToString());
-                                        table.Cell().Element(cell => cell.Padding(5)).Text(daily.LoansReturned.ToString());
-                                    }
-                                });
-                            });
-                        });
-
-                        page.Footer().AlignCenter().Text(x =>
-                        {
-                            x.Span("Page ");
-                            x.CurrentPageNumber();
-                        });
-                    });
-                });
-
-                _logger.LogInformation("PDF document created successfully, generating PDF bytes");
-                var pdfBytes = document.GeneratePdf();
-                _logger.LogInformation("PDF generation completed successfully, size: {Size} bytes", pdfBytes.Length);
-                return pdfBytes;
+                _logger.LogInformation("PDF generation completed successfully");
+                
+                using var stream = new MemoryStream();
+                document.Save(stream, false);
+                return stream.ToArray();
             }
             catch (Exception ex)
             {
@@ -278,95 +310,147 @@ namespace LibraryPro.Web.Services
 
         public async Task<byte[]> GenerateFinancialReportPdfAsync(DateTime startDate, DateTime endDate)
         {
-            var data = await GetFinancialReportDataAsync(startDate, endDate);
-
-            var document = Document.Create(container =>
+            try
             {
-                container.Page(page =>
+                _logger.LogInformation("Starting PDF generation for financial report from {StartDate} to {EndDate}", startDate, endDate);
+                var data = await GetFinancialReportDataAsync(startDate, endDate);
+                _logger.LogInformation("Retrieved financial data: {TotalPayments} payments", data.TotalPayments);
+
+                var document = new PdfDocument();
+                document.Info.Title = "LibraryPro - Financial Report";
+                document.Info.Author = "LibraryPro";
+                
+                var page = document.AddPage();
+                page.Size = PdfSharpCore.PageSize.A4;
+                page.Orientation = PdfSharpCore.PageOrientation.Portrait;
+                
+                var graphics = XGraphics.FromPdfPage(page);
+                var margin = 50;
+                var pageWidth = page.Width.Point;
+                var pageHeight = page.Height.Point;
+
+                // Fonts
+                var fontTitle = new XFont("Arial", 24, XFontStyle.Bold);
+                var fontSubtitle = new XFont("Arial", 14, XFontStyle.Bold);
+                var fontHeader = new XFont("Arial", 11, XFontStyle.Bold);
+                var fontNormal = new XFont("Arial", 10, XFontStyle.Regular);
+                var fontSmall = new XFont("Arial", 9, XFontStyle.Regular);
+
+                // Colors
+                var colorPrimary = XBrushes.DarkBlue;
+                var colorSecondary = XBrushes.Gray;
+                var colorTableHeader = XBrushes.LightGray;
+                var colorTableAlt = XBrushes.WhiteSmoke;
+                var colorBorder = XPens.LightGray;
+                var colorBorderDark = XPens.DarkGray;
+
+                // String formats for alignment
+                var formatLeft = new XStringFormat();
+                formatLeft.Alignment = XStringAlignment.Near;
+                formatLeft.LineAlignment = XLineAlignment.Center;
+                
+                var formatRight = new XStringFormat();
+                formatRight.Alignment = XStringAlignment.Far;
+                formatRight.LineAlignment = XLineAlignment.Center;
+
+                // Draw header background
+                graphics.DrawRectangle(XBrushes.LightBlue, margin, margin, pageWidth - 2 * margin, 80);
+                
+                // Title
+                graphics.DrawString("LibraryPro", fontTitle, colorPrimary, margin + 10, margin + 15);
+                graphics.DrawString("Financial Report", fontSubtitle, XBrushes.Black, margin + 10, margin + 50);
+                
+                // Report info
+                graphics.DrawString($"Period: {startDate:dd MMM yyyy} - {endDate:dd MMM yyyy}", fontSmall, colorSecondary, margin + 10, margin + 70);
+
+                // Summary section
+                int y = margin + 100;
+                var summaryBoxHeight = 100;
+                
+                // Draw summary box
+                graphics.DrawRectangle(XBrushes.White, margin, y, pageWidth - 2 * margin, summaryBoxHeight);
+                graphics.DrawRectangle(colorBorderDark, margin, y, pageWidth - 2 * margin, summaryBoxHeight);
+                
+                // Summary title
+                graphics.DrawString("Summary", fontSubtitle, colorPrimary, margin + 10, y + 10);
+                
+                // Summary data in grid
+                var summaryY = y + 40;
+                var colWidth = (pageWidth - 2 * margin - 20) / 3;
+                
+                graphics.DrawString($"Total Fines Collected:", fontHeader, colorSecondary, margin + 10, summaryY, formatLeft);
+                graphics.DrawString($"₹{data.TotalFinesCollected:F2}", fontHeader, XBrushes.Green, margin + 10 + colWidth - 10, summaryY, formatRight);
+                
+                graphics.DrawString($"Total Payments:", fontHeader, colorSecondary, margin + 10 + colWidth, summaryY, formatLeft);
+                graphics.DrawString(data.TotalPayments.ToString(), fontHeader, XBrushes.Black, margin + 10 + colWidth + colWidth - 10, summaryY, formatRight);
+                
+                graphics.DrawString($"Average Payment:", fontHeader, colorSecondary, margin + 10 + colWidth * 2, summaryY, formatLeft);
+                graphics.DrawString($"₹{data.AveragePaymentAmount:F2}", fontHeader, XBrushes.Black, margin + 10 + colWidth * 2 + colWidth - 10, summaryY, formatRight);
+
+                y += summaryBoxHeight + 20;
+                
+                // Table section
+                graphics.DrawString("Payment Records", fontSubtitle, colorPrimary, margin, y);
+                y += 25;
+
+                // Table header
+                var tableY = y;
+                var rowHeight = 25;
+                var col1Width = 100;
+                var col2Width = 200;
+                var col3Width = 80;
+                var tableWidth = col1Width + col2Width + col3Width;
+
+                // Draw header background
+                graphics.DrawRectangle(colorTableHeader, margin, tableY, tableWidth, rowHeight);
+                graphics.DrawRectangle(colorBorderDark, margin, tableY, tableWidth, rowHeight);
+
+                // Header text with proper alignment
+                var headerX = margin + 5;
+                graphics.DrawString("Date", fontHeader, XBrushes.Black, headerX, tableY + 8, formatLeft);
+                graphics.DrawString("Member", fontHeader, XBrushes.Black, headerX + col1Width + 5, tableY + 8, formatLeft);
+                graphics.DrawString("Amount", fontHeader, XBrushes.Black, headerX + col1Width + col2Width + 5, tableY + 8, formatLeft);
+
+                // Table rows
+                y = tableY + rowHeight;
+                int rowCount = 0;
+                
+                foreach (var payment in data.Payments.Take(50))
                 {
-                    page.Size(PageSizes.A4);
-                    page.Margin(2, Unit.Centimetre);
-                    page.DefaultTextStyle(x => x.FontSize(10));
-
-                    page.Header().Element(container =>
+                    // Alternate row colors
+                    if (rowCount % 2 == 0)
                     {
-                        container.Row(row =>
-                        {
-                            row.RelativeItem().Column(column =>
-                            {
-                                column.Item().Text("LibraryPro").Bold().FontSize(20).FontColor(Colors.Blue.Darken2);
-                                column.Item().Text("Financial Report").FontSize(14);
-                                column.Item().Text($"Period: {startDate:dd MMM yyyy} - {endDate:dd MMM yyyy}").FontSize(10).FontColor(Colors.Grey.Darken1);
-                            });
-                        });
-                    });
+                        graphics.DrawRectangle(colorTableAlt, margin, y, tableWidth, rowHeight);
+                    }
+                    
+                    // Draw row border
+                    graphics.DrawRectangle(colorBorder, margin, y, tableWidth, rowHeight);
+                    
+                    // Row text with proper alignment
+                    graphics.DrawString(payment.PaymentDate.ToString("dd MMM yyyy"), fontNormal, XBrushes.Black, headerX, y + 8, formatLeft);
+                    graphics.DrawString(payment.MemberName, fontNormal, XBrushes.Black, headerX + col1Width + 5, y + 8, formatLeft);
+                    graphics.DrawString($"₹{payment.Amount:F2}", fontNormal, XBrushes.Green, headerX + col1Width + col2Width + 5, y + 8, formatLeft);
+                    
+                    y += rowHeight;
+                    rowCount++;
+                }
 
-                    page.Content().Element(container =>
-                    {
-                        container.PaddingVertical(1, Unit.Centimetre);
+                // Footer
+                var footerY = pageHeight - 30;
+                graphics.DrawLine(colorBorder, margin, footerY, pageWidth - margin, footerY);
+                graphics.DrawString($"LibraryPro - Confidential Document | Page 1 of 1", fontSmall, colorSecondary, margin, footerY + 10, formatLeft);
 
-                        container.Column(column =>
-                        {
-                            column.Item().Element(element =>
-                            {
-                                element.Border(1).Padding(10).Background(Colors.Grey.Lighten3);
-                                element.Row(row =>
-                                {
-                                    row.ConstantItem(200).Text("Total Fines Collected:").Bold();
-                                    row.ConstantItem(100).Text($"₹{data.TotalFinesCollected:F2}");
-                                });
-                                element.Row(row =>
-                                {
-                                    row.ConstantItem(200).Text("Total Payments:").Bold();
-                                    row.ConstantItem(100).Text(data.TotalPayments.ToString());
-                                });
-                                element.Row(row =>
-                                {
-                                    row.ConstantItem(200).Text("Average Payment:").Bold();
-                                    row.ConstantItem(100).Text($"₹{data.AveragePaymentAmount:F2}");
-                                });
-                            });
-
-                            column.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
-
-                            column.Item().Text("Payment Records").Bold().FontSize(12);
-                            column.Item().PaddingTop(10);
-
-                            column.Item().Table(table =>
-                            {
-                                table.ColumnsDefinition(columns =>
-                                {
-                                    columns.ConstantColumn(100);
-                                    columns.RelativeColumn();
-                                    columns.ConstantColumn(80);
-                                });
-
-                                table.Header(header =>
-                                {
-                                    header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Date").Bold();
-                                    header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Member").Bold();
-                                    header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Amount").Bold();
-                                });
-
-                                foreach (var payment in data.Payments.Take(50))
-                                {
-                                    table.Cell().Element(cell => cell.Padding(5)).Text(payment.PaymentDate.ToString("dd MMM yyyy"));
-                                    table.Cell().Element(cell => cell.Padding(5)).Text(payment.MemberName);
-                                    table.Cell().Element(cell => cell.Padding(5)).Text($"₹{payment.Amount:F2}");
-                                }
-                            });
-                        });
-                    });
-
-                    page.Footer().AlignCenter().Text(x =>
-                    {
-                        x.Span("Page ");
-                        x.CurrentPageNumber();
-                    });
-                });
-            });
-
-            return document.GeneratePdf();
+                _logger.LogInformation("PDF generation completed successfully");
+                
+                using var stream = new MemoryStream();
+                document.Save(stream, false);
+                return stream.ToArray();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating financial PDF report");
+                throw new InvalidOperationException($"Failed to generate PDF: {ex.Message}", ex);
+            }
         }
 
         public async Task<byte[]> GenerateFinancialReportExcelAsync(DateTime startDate, DateTime endDate)
@@ -447,78 +531,127 @@ namespace LibraryPro.Web.Services
 
         public async Task<byte[]> GeneratePopularBooksReportPdfAsync(DateTime startDate, DateTime endDate, int topN = 20)
         {
-            var data = await GetPopularBooksReportDataAsync(startDate, endDate, topN);
-
-            var document = Document.Create(container =>
+            try
             {
-                container.Page(page =>
+                _logger.LogInformation("Starting PDF generation for popular books report from {StartDate} to {EndDate}", startDate, endDate);
+                var data = await GetPopularBooksReportDataAsync(startDate, endDate, topN);
+                _logger.LogInformation("Retrieved popular books data: {TotalBooks} books", data.PopularBooks.Count);
+
+                var document = new PdfDocument();
+                document.Info.Title = "LibraryPro - Popular Books Report";
+                document.Info.Author = "LibraryPro";
+                
+                var page = document.AddPage();
+                page.Size = PdfSharpCore.PageSize.A4;
+                page.Orientation = PdfSharpCore.PageOrientation.Portrait;
+                
+                var graphics = XGraphics.FromPdfPage(page);
+                var margin = 50;
+                var pageWidth = page.Width.Point;
+                var pageHeight = page.Height.Point;
+
+                // Fonts
+                var fontTitle = new XFont("Arial", 24, XFontStyle.Bold);
+                var fontSubtitle = new XFont("Arial", 14, XFontStyle.Bold);
+                var fontHeader = new XFont("Arial", 11, XFontStyle.Bold);
+                var fontNormal = new XFont("Arial", 10, XFontStyle.Regular);
+                var fontSmall = new XFont("Arial", 9, XFontStyle.Regular);
+
+                // Colors
+                var colorPrimary = XBrushes.DarkBlue;
+                var colorSecondary = XBrushes.Gray;
+                var colorTableHeader = XBrushes.LightGray;
+                var colorTableAlt = XBrushes.WhiteSmoke;
+                var colorBorder = XPens.LightGray;
+                var colorBorderDark = XPens.DarkGray;
+
+                // String formats for alignment
+                var formatLeft = new XStringFormat();
+                formatLeft.Alignment = XStringAlignment.Near;
+                formatLeft.LineAlignment = XLineAlignment.Center;
+                
+                var formatRight = new XStringFormat();
+                formatRight.Alignment = XStringAlignment.Far;
+                formatRight.LineAlignment = XLineAlignment.Center;
+
+                // Draw header background
+                graphics.DrawRectangle(XBrushes.LightBlue, margin, margin, pageWidth - 2 * margin, 80);
+                
+                // Title
+                graphics.DrawString("LibraryPro", fontTitle, colorPrimary, margin + 10, margin + 15);
+                graphics.DrawString("Popular Books Report", fontSubtitle, XBrushes.Black, margin + 10, margin + 50);
+                
+                // Report info
+                graphics.DrawString($"Period: {startDate:dd MMM yyyy} - {endDate:dd MMM yyyy}", fontSmall, colorSecondary, margin + 10, margin + 70);
+
+                // Table section
+                int y = margin + 100;
+                graphics.DrawString($"Top {data.PopularBooks.Count} Most Borrowed Books", fontSubtitle, colorPrimary, margin, y);
+                y += 25;
+
+                // Table header
+                var tableY = y;
+                var rowHeight = 25;
+                var col1Width = 40;
+                var col2Width = 220;
+                var col3Width = 220;
+                var col4Width = 60;
+                var tableWidth = col1Width + col2Width + col3Width + col4Width;
+
+                // Draw header background
+                graphics.DrawRectangle(colorTableHeader, margin, tableY, tableWidth, rowHeight);
+                graphics.DrawRectangle(colorBorderDark, margin, tableY, tableWidth, rowHeight);
+
+                // Header text with proper alignment
+                var headerX = margin + 5;
+                graphics.DrawString("#", fontHeader, XBrushes.Black, headerX, tableY + 8, formatLeft);
+                graphics.DrawString("Title", fontHeader, XBrushes.Black, headerX + col1Width + 5, tableY + 8, formatLeft);
+                graphics.DrawString("Author", fontHeader, XBrushes.Black, headerX + col1Width + col2Width + 5, tableY + 8, formatLeft);
+                graphics.DrawString("Borrowed", fontHeader, XBrushes.Black, headerX + col1Width + col2Width + col3Width + 5, tableY + 8, formatLeft);
+
+                // Table rows
+                y = tableY + rowHeight;
+                int rowCount = 0;
+                int rank = 1;
+                
+                foreach (var book in data.PopularBooks)
                 {
-                    page.Size(PageSizes.A4);
-                    page.Margin(2, Unit.Centimetre);
-                    page.DefaultTextStyle(x => x.FontSize(10));
-
-                    page.Header().Element(container =>
+                    // Alternate row colors
+                    if (rowCount % 2 == 0)
                     {
-                        container.Row(row =>
-                        {
-                            row.RelativeItem().Column(column =>
-                            {
-                                column.Item().Text("LibraryPro").Bold().FontSize(20).FontColor(Colors.Blue.Darken2);
-                                column.Item().Text("Popular Books Report").FontSize(14);
-                                column.Item().Text($"Period: {startDate:dd MMM yyyy} - {endDate:dd MMM yyyy}").FontSize(10).FontColor(Colors.Grey.Darken1);
-                            });
-                        });
-                    });
+                        graphics.DrawRectangle(colorTableAlt, margin, y, tableWidth, rowHeight);
+                    }
+                    
+                    // Draw row border
+                    graphics.DrawRectangle(colorBorder, margin, y, tableWidth, rowHeight);
+                    
+                    // Row text with proper alignment
+                    graphics.DrawString(rank.ToString(), fontNormal, XBrushes.Black, headerX, y + 8, formatLeft);
+                    graphics.DrawString(book.Title, fontNormal, XBrushes.Black, headerX + col1Width + 5, y + 8, formatLeft);
+                    graphics.DrawString(book.Author, fontNormal, XBrushes.Black, headerX + col1Width + col2Width + 5, y + 8, formatLeft);
+                    graphics.DrawString(book.TimesBorrowed.ToString(), fontNormal, XBrushes.Blue, headerX + col1Width + col2Width + col3Width + 5, y + 8, formatLeft);
+                    
+                    y += rowHeight;
+                    rowCount++;
+                    rank++;
+                }
 
-                    page.Content().Element(container =>
-                    {
-                        container.PaddingVertical(1, Unit.Centimetre);
+                // Footer
+                var footerY = pageHeight - 30;
+                graphics.DrawLine(colorBorder, margin, footerY, pageWidth - margin, footerY);
+                graphics.DrawString($"LibraryPro - Confidential Document | Page 1 of 1", fontSmall, colorSecondary, margin, footerY + 10, formatLeft);
 
-                        container.Column(column =>
-                        {
-                            column.Item().Text($"Top {data.PopularBooks.Count} Most Borrowed Books").Bold().FontSize(12);
-                            column.Item().PaddingTop(10);
-
-                            column.Item().Table(table =>
-                            {
-                                table.ColumnsDefinition(columns =>
-                                {
-                                    columns.ConstantColumn(40);
-                                    columns.RelativeColumn();
-                                    columns.RelativeColumn();
-                                    columns.ConstantColumn(60);
-                                });
-
-                                table.Header(header =>
-                                {
-                                    header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("#").Bold();
-                                    header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Title").Bold();
-                                    header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Author").Bold();
-                                    header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Borrowed").Bold();
-                                });
-
-                                int rank = 1;
-                                foreach (var book in data.PopularBooks)
-                                {
-                                    table.Cell().Element(cell => cell.Padding(5)).Text(rank.ToString());
-                                    table.Cell().Element(cell => cell.Padding(5)).Text(book.Title);
-                                    table.Cell().Element(cell => cell.Padding(5)).Text(book.Author);
-                                    table.Cell().Element(cell => cell.Padding(5)).Text(book.TimesBorrowed.ToString());
-                                    rank++;
-                                }
-                            });
-                        });
-                    });
-
-                    page.Footer().AlignCenter().Text(x =>
-                    {
-                        x.Span("Page ");
-                        x.CurrentPageNumber();
-                    });
-                });
-            });
-
-            return document.GeneratePdf();
+                _logger.LogInformation("PDF generation completed successfully");
+                
+                using var stream = new MemoryStream();
+                document.Save(stream, false);
+                return stream.ToArray();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating popular books PDF report");
+                throw new InvalidOperationException($"Failed to generate PDF: {ex.Message}", ex);
+            }
         }
 
         public async Task<byte[]> GeneratePopularBooksReportExcelAsync(DateTime startDate, DateTime endDate, int topN = 20)
@@ -601,88 +734,142 @@ namespace LibraryPro.Web.Services
 
         public async Task<byte[]> GenerateMemberActivityReportPdfAsync(DateTime startDate, DateTime endDate)
         {
-            var data = await GetMemberActivityReportDataAsync(startDate, endDate);
-
-            var document = Document.Create(container =>
+            try
             {
-                container.Page(page =>
+                _logger.LogInformation("Starting PDF generation for member activity report from {StartDate} to {EndDate}", startDate, endDate);
+                var data = await GetMemberActivityReportDataAsync(startDate, endDate);
+                _logger.LogInformation("Retrieved member activity data: {TotalMembers} members", data.ActiveMembers);
+
+                var document = new PdfDocument();
+                document.Info.Title = "LibraryPro - Member Activity Report";
+                document.Info.Author = "LibraryPro";
+                
+                var page = document.AddPage();
+                page.Size = PdfSharpCore.PageSize.A4;
+                page.Orientation = PdfSharpCore.PageOrientation.Portrait;
+                
+                var graphics = XGraphics.FromPdfPage(page);
+                var margin = 50;
+                var pageWidth = page.Width.Point;
+                var pageHeight = page.Height.Point;
+
+                // Fonts
+                var fontTitle = new XFont("Arial", 24, XFontStyle.Bold);
+                var fontSubtitle = new XFont("Arial", 14, XFontStyle.Bold);
+                var fontHeader = new XFont("Arial", 11, XFontStyle.Bold);
+                var fontNormal = new XFont("Arial", 10, XFontStyle.Regular);
+                var fontSmall = new XFont("Arial", 9, XFontStyle.Regular);
+
+                // Colors
+                var colorPrimary = XBrushes.DarkBlue;
+                var colorSecondary = XBrushes.Gray;
+                var colorTableHeader = XBrushes.LightGray;
+                var colorTableAlt = XBrushes.WhiteSmoke;
+                var colorBorder = XPens.LightGray;
+                var colorBorderDark = XPens.DarkGray;
+
+                // String formats for alignment
+                var formatLeft = new XStringFormat();
+                formatLeft.Alignment = XStringAlignment.Near;
+                formatLeft.LineAlignment = XLineAlignment.Center;
+                
+                var formatRight = new XStringFormat();
+                formatRight.Alignment = XStringAlignment.Far;
+                formatRight.LineAlignment = XLineAlignment.Center;
+
+                // Draw header background
+                graphics.DrawRectangle(XBrushes.LightBlue, margin, margin, pageWidth - 2 * margin, 80);
+                
+                // Title
+                graphics.DrawString("LibraryPro", fontTitle, colorPrimary, margin + 10, margin + 15);
+                graphics.DrawString("Member Activity Report", fontSubtitle, XBrushes.Black, margin + 10, margin + 50);
+                
+                // Report info
+                graphics.DrawString($"Period: {startDate:dd MMM yyyy} - {endDate:dd MMM yyyy}", fontSmall, colorSecondary, margin + 10, margin + 70);
+
+                // Summary section
+                int y = margin + 100;
+                var summaryBoxHeight = 80;
+                
+                // Draw summary box
+                graphics.DrawRectangle(XBrushes.White, margin, y, pageWidth - 2 * margin, summaryBoxHeight);
+                graphics.DrawRectangle(colorBorderDark, margin, y, pageWidth - 2 * margin, summaryBoxHeight);
+                
+                // Summary title
+                graphics.DrawString("Summary", fontSubtitle, colorPrimary, margin + 10, y + 10);
+                
+                // Summary data
+                var summaryY = y + 40;
+                graphics.DrawString($"Active Members:", fontHeader, colorSecondary, margin + 10, summaryY, formatLeft);
+                graphics.DrawString(data.ActiveMembers.ToString(), fontHeader, XBrushes.Blue, margin + 10 + 150, summaryY, formatLeft);
+
+                y += summaryBoxHeight + 20;
+                
+                // Table section
+                graphics.DrawString("Member Activities", fontSubtitle, colorPrimary, margin, y);
+                y += 25;
+
+                // Table header
+                var tableY = y;
+                var rowHeight = 25;
+                var col1Width = 180;
+                var col2Width = 180;
+                var col3Width = 60;
+                var col4Width = 80;
+                var tableWidth = col1Width + col2Width + col3Width + col4Width;
+
+                // Draw header background
+                graphics.DrawRectangle(colorTableHeader, margin, tableY, tableWidth, rowHeight);
+                graphics.DrawRectangle(colorBorderDark, margin, tableY, tableWidth, rowHeight);
+
+                // Header text with proper alignment
+                var headerX = margin + 5;
+                graphics.DrawString("Member", fontHeader, XBrushes.Black, headerX, tableY + 8, formatLeft);
+                graphics.DrawString("Email", fontHeader, XBrushes.Black, headerX + col1Width + 5, tableY + 8, formatLeft);
+                graphics.DrawString("Books", fontHeader, XBrushes.Black, headerX + col1Width + col2Width + 5, tableY + 8, formatLeft);
+                graphics.DrawString("Fines Paid", fontHeader, XBrushes.Black, headerX + col1Width + col2Width + col3Width + 5, tableY + 8, formatLeft);
+
+                // Table rows
+                y = tableY + rowHeight;
+                int rowCount = 0;
+                
+                foreach (var activity in data.MemberActivities.Take(50))
                 {
-                    page.Size(PageSizes.A4);
-                    page.Margin(2, Unit.Centimetre);
-                    page.DefaultTextStyle(x => x.FontSize(10));
-
-                    page.Header().Element(container =>
+                    // Alternate row colors
+                    if (rowCount % 2 == 0)
                     {
-                        container.Row(row =>
-                        {
-                            row.RelativeItem().Column(column =>
-                            {
-                                column.Item().Text("LibraryPro").Bold().FontSize(20).FontColor(Colors.Blue.Darken2);
-                                column.Item().Text("Member Activity Report").FontSize(14);
-                                column.Item().Text($"Period: {startDate:dd MMM yyyy} - {endDate:dd MMM yyyy}").FontSize(10).FontColor(Colors.Grey.Darken1);
-                            });
-                        });
-                    });
+                        graphics.DrawRectangle(colorTableAlt, margin, y, tableWidth, rowHeight);
+                    }
+                    
+                    // Draw row border
+                    graphics.DrawRectangle(colorBorder, margin, y, tableWidth, rowHeight);
+                    
+                    // Row text with proper alignment
+                    graphics.DrawString(activity.MemberName, fontNormal, XBrushes.Black, headerX, y + 8, formatLeft);
+                    graphics.DrawString(activity.Email, fontNormal, XBrushes.Black, headerX + col1Width + 5, y + 8, formatLeft);
+                    graphics.DrawString(activity.BooksBorrowed.ToString(), fontNormal, XBrushes.Black, headerX + col1Width + col2Width + 5, y + 8, formatLeft);
+                    graphics.DrawString($"₹{activity.TotalFinesPaid:F2}", fontNormal, XBrushes.Green, headerX + col1Width + col2Width + col3Width + 5, y + 8, formatLeft);
+                    
+                    y += rowHeight;
+                    rowCount++;
+                }
 
-                    page.Content().Element(container =>
-                    {
-                        container.PaddingVertical(1, Unit.Centimetre);
+                // Footer
+                var footerY = pageHeight - 30;
+                graphics.DrawLine(colorBorder, margin, footerY, pageWidth - margin, footerY);
+                graphics.DrawString($"LibraryPro - Confidential Document | Page 1 of 1", fontSmall, colorSecondary, margin, footerY + 10, formatLeft);
 
-                        container.Column(column =>
-                        {
-                            column.Item().Element(element =>
-                            {
-                                element.Border(1).Padding(10).Background(Colors.Grey.Lighten3);
-                                element.Row(row =>
-                                {
-                                    row.ConstantItem(150).Text("Active Members:").Bold();
-                                    row.ConstantItem(100).Text(data.ActiveMembers.ToString());
-                                });
-                            });
-
-                            column.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
-
-                            column.Item().Text("Member Activities").Bold().FontSize(12);
-                            column.Item().PaddingTop(10);
-
-                            column.Item().Table(table =>
-                            {
-                                table.ColumnsDefinition(columns =>
-                                {
-                                    columns.RelativeColumn();
-                                    columns.RelativeColumn();
-                                    columns.ConstantColumn(80);
-                                    columns.ConstantColumn(80);
-                                });
-
-                                table.Header(header =>
-                                {
-                                    header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Member").Bold();
-                                    header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Email").Bold();
-                                    header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Books").Bold();
-                                    header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Fines Paid").Bold();
-                                });
-
-                                foreach (var activity in data.MemberActivities.Take(50))
-                                {
-                                    table.Cell().Element(cell => cell.Padding(5)).Text(activity.MemberName);
-                                    table.Cell().Element(cell => cell.Padding(5)).Text(activity.Email);
-                                    table.Cell().Element(cell => cell.Padding(5)).Text(activity.BooksBorrowed.ToString());
-                                    table.Cell().Element(cell => cell.Padding(5)).Text($"₹{activity.TotalFinesPaid:F2}");
-                                }
-                            });
-                        });
-                    });
-
-                    page.Footer().AlignCenter().Text(x =>
-                    {
-                        x.Span("Page ");
-                        x.CurrentPageNumber();
-                    });
-                });
-            });
-
-            return document.GeneratePdf();
+                _logger.LogInformation("PDF generation completed successfully");
+                
+                using var stream = new MemoryStream();
+                document.Save(stream, false);
+                return stream.ToArray();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating member activity PDF report");
+                throw new InvalidOperationException($"Failed to generate PDF: {ex.Message}", ex);
+            }
         }
 
         public async Task<byte[]> GenerateMemberActivityReportExcelAsync(DateTime startDate, DateTime endDate)
@@ -764,88 +951,133 @@ namespace LibraryPro.Web.Services
 
         public async Task<byte[]> GenerateOverdueBooksReportPdfAsync()
         {
-            var data = await GetOverdueBooksReportDataAsync();
-
-            var document = Document.Create(container =>
+            try
             {
-                container.Page(page =>
+                _logger.LogInformation("Starting PDF generation for overdue books report");
+                var data = await GetOverdueBooksReportDataAsync();
+                _logger.LogInformation("Retrieved overdue books data: {TotalBooks} books", data.TotalOverdueBooks);
+
+                var document = new PdfDocument();
+                document.Info.Title = "LibraryPro - Overdue Books Report";
+                document.Info.Author = "LibraryPro";
+                
+                var page = document.AddPage();
+                page.Size = PdfSharpCore.PageSize.A4;
+                page.Orientation = PdfSharpCore.PageOrientation.Portrait;
+                
+                var graphics = XGraphics.FromPdfPage(page);
+                var margin = 50;
+                var pageWidth = page.Width.Point;
+                var pageHeight = page.Height.Point;
+
+                // Fonts
+                var fontTitle = new XFont("Arial", 24, XFontStyle.Bold);
+                var fontSubtitle = new XFont("Arial", 14, XFontStyle.Bold);
+                var fontHeader = new XFont("Arial", 11, XFontStyle.Bold);
+                var fontNormal = new XFont("Arial", 10, XFontStyle.Regular);
+                var fontSmall = new XFont("Arial", 9, XFontStyle.Regular);
+
+                // Colors
+                var colorPrimary = XBrushes.DarkBlue;
+                var colorSecondary = XBrushes.Gray;
+                var colorTableHeader = XBrushes.LightGray;
+                var colorTableAlt = XBrushes.WhiteSmoke;
+                var colorBorder = XPens.LightGray;
+                var colorBorderDark = XPens.DarkGray;
+
+                // Draw header background
+                graphics.DrawRectangle(XBrushes.LightBlue, margin, margin, pageWidth - 2 * margin, 80);
+                
+                // Title
+                graphics.DrawString("LibraryPro", fontTitle, colorPrimary, margin + 10, margin + 15);
+                graphics.DrawString("Overdue Books Report", fontSubtitle, XBrushes.Black, margin + 10, margin + 50);
+                
+                // Report info
+                graphics.DrawString($"Generated: {data.GeneratedAt:dd MMM yyyy HH:mm}", fontSmall, colorSecondary, margin + 10, margin + 70);
+
+                // Summary section
+                int y = margin + 100;
+                var summaryBoxHeight = 80;
+                
+                // Draw summary box
+                graphics.DrawRectangle(XBrushes.White, margin, y, pageWidth - 2 * margin, summaryBoxHeight);
+                graphics.DrawRectangle(colorBorderDark, margin, y, pageWidth - 2 * margin, summaryBoxHeight);
+                
+                // Summary title
+                graphics.DrawString("Summary", fontSubtitle, colorPrimary, margin + 10, y + 10);
+                
+                // Summary data
+                var summaryY = y + 40;
+                graphics.DrawString($"Total Overdue:", fontHeader, colorSecondary, margin + 10, summaryY);
+                graphics.DrawString(data.TotalOverdueBooks.ToString(), fontHeader, XBrushes.Red, margin + 10 + 150, summaryY);
+
+                y += summaryBoxHeight + 20;
+                
+                // Table section
+                graphics.DrawString("Overdue Books", fontSubtitle, colorPrimary, margin, y);
+                y += 25;
+
+                // Table header
+                var tableY = y;
+                var rowHeight = 25;
+                var col1Width = 200;
+                var col2Width = 150;
+                var col3Width = 60;
+                var col4Width = 60;
+                var tableWidth = col1Width + col2Width + col3Width + col4Width;
+
+                // Draw header background
+                graphics.DrawRectangle(colorTableHeader, margin, tableY, tableWidth, rowHeight);
+                graphics.DrawRectangle(colorBorderDark, margin, tableY, tableWidth, rowHeight);
+
+                // Header text
+                var headerX = margin + 5;
+                graphics.DrawString("Book", fontHeader, XBrushes.Black, headerX, tableY + 8);
+                graphics.DrawString("Member", fontHeader, XBrushes.Black, headerX + col1Width, tableY + 8);
+                graphics.DrawString("Days", fontHeader, XBrushes.Black, headerX + col1Width + col2Width, tableY + 8);
+                graphics.DrawString("Fee", fontHeader, XBrushes.Black, headerX + col1Width + col2Width + col3Width, tableY + 8);
+
+                // Table rows
+                y = tableY + rowHeight;
+                int rowCount = 0;
+                
+                foreach (var overdue in data.OverdueBooks.Take(50))
                 {
-                    page.Size(PageSizes.A4);
-                    page.Margin(2, Unit.Centimetre);
-                    page.DefaultTextStyle(x => x.FontSize(10));
-
-                    page.Header().Element(container =>
+                    // Alternate row colors
+                    if (rowCount % 2 == 0)
                     {
-                        container.Row(row =>
-                        {
-                            row.RelativeItem().Column(column =>
-                            {
-                                column.Item().Text("LibraryPro").Bold().FontSize(20).FontColor(Colors.Blue.Darken2);
-                                column.Item().Text("Overdue Books Report").FontSize(14);
-                                column.Item().Text($"Generated: {data.GeneratedAt:dd MMM yyyy HH:mm}").FontSize(10).FontColor(Colors.Grey.Darken1);
-                            });
-                        });
-                    });
+                        graphics.DrawRectangle(colorTableAlt, margin, y, tableWidth, rowHeight);
+                    }
+                    
+                    // Draw row border
+                    graphics.DrawRectangle(colorBorder, margin, y, tableWidth, rowHeight);
+                    
+                    // Row text
+                    graphics.DrawString(overdue.BookTitle, fontNormal, XBrushes.Black, headerX, y + 8);
+                    graphics.DrawString(overdue.MemberName, fontNormal, XBrushes.Black, headerX + col1Width, y + 8);
+                    graphics.DrawString(overdue.DaysOverdue.ToString(), fontNormal, XBrushes.Red, headerX + col1Width + col2Width, y + 8);
+                    graphics.DrawString($"₹{overdue.LateFee:F2}", fontNormal, XBrushes.Red, headerX + col1Width + col2Width + col3Width, y + 8);
+                    
+                    y += rowHeight;
+                    rowCount++;
+                }
 
-                    page.Content().Element(container =>
-                    {
-                        container.PaddingVertical(1, Unit.Centimetre);
+                // Footer
+                var footerY = pageHeight - 30;
+                graphics.DrawLine(colorBorder, margin, footerY, pageWidth - margin, footerY);
+                graphics.DrawString($"LibraryPro - Confidential Document | Page 1 of 1", fontSmall, colorSecondary, margin, footerY + 10);
 
-                        container.Column(column =>
-                        {
-                            column.Item().Element(element =>
-                            {
-                                element.Border(1).Padding(10).Background(Colors.Red.Lighten3);
-                                element.Row(row =>
-                                {
-                                    row.ConstantItem(150).Text("Total Overdue:").Bold();
-                                    row.ConstantItem(100).Text(data.TotalOverdueBooks.ToString()).FontColor(Colors.Red.Darken2);
-                                });
-                            });
-
-                            column.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
-
-                            column.Item().Text("Overdue Books").Bold().FontSize(12);
-                            column.Item().PaddingTop(10);
-
-                            column.Item().Table(table =>
-                            {
-                                table.ColumnsDefinition(columns =>
-                                {
-                                    columns.RelativeColumn();
-                                    columns.RelativeColumn();
-                                    columns.ConstantColumn(60);
-                                    columns.ConstantColumn(60);
-                                });
-
-                                table.Header(header =>
-                                {
-                                    header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Book").Bold();
-                                    header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Member").Bold();
-                                    header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Days").Bold();
-                                    header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Fee").Bold();
-                                });
-
-                                foreach (var overdue in data.OverdueBooks.Take(50))
-                                {
-                                    table.Cell().Element(cell => cell.Padding(5)).Text(overdue.BookTitle);
-                                    table.Cell().Element(cell => cell.Padding(5)).Text(overdue.MemberName);
-                                    table.Cell().Element(cell => cell.Padding(5)).Text(overdue.DaysOverdue.ToString());
-                                    table.Cell().Element(cell => cell.Padding(5)).Text($"₹{overdue.LateFee:F2}");
-                                }
-                            });
-                        });
-                    });
-
-                    page.Footer().AlignCenter().Text(x =>
-                    {
-                        x.Span("Page ");
-                        x.CurrentPageNumber();
-                    });
-                });
-            });
-
-            return document.GeneratePdf();
+                _logger.LogInformation("PDF generation completed successfully");
+                
+                using var stream = new MemoryStream();
+                document.Save(stream, false);
+                return stream.ToArray();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating overdue books PDF report");
+                throw new InvalidOperationException($"Failed to generate PDF: {ex.Message}", ex);
+            }
         }
 
         public async Task<byte[]> GenerateOverdueBooksReportExcelAsync()
@@ -940,130 +1172,151 @@ namespace LibraryPro.Web.Services
                     _logger.LogWarning("No inventory items found, generating empty report");
                 }
 
-                var document = Document.Create(container =>
+                var document = new PdfDocument();
+                document.Info.Title = "LibraryPro - Inventory Status Report";
+                document.Info.Author = "LibraryPro";
+                
+                var page = document.AddPage();
+                page.Size = PdfSharpCore.PageSize.A4;
+                page.Orientation = PdfSharpCore.PageOrientation.Portrait;
+                
+                var graphics = XGraphics.FromPdfPage(page);
+                var margin = 50;
+                var pageWidth = page.Width.Point;
+                var pageHeight = page.Height.Point;
+
+                // Fonts
+                var fontTitle = new XFont("Arial", 24, XFontStyle.Bold);
+                var fontSubtitle = new XFont("Arial", 14, XFontStyle.Bold);
+                var fontHeader = new XFont("Arial", 11, XFontStyle.Bold);
+                var fontNormal = new XFont("Arial", 10, XFontStyle.Regular);
+                var fontSmall = new XFont("Arial", 9, XFontStyle.Regular);
+
+                // Colors
+                var colorPrimary = XBrushes.DarkBlue;
+                var colorSecondary = XBrushes.Gray;
+                var colorTableHeader = XBrushes.LightGray;
+                var colorTableAlt = XBrushes.WhiteSmoke;
+                var colorBorder = XPens.LightGray;
+                var colorBorderDark = XPens.DarkGray;
+
+                // String formats for alignment
+                var formatLeft = new XStringFormat();
+                formatLeft.Alignment = XStringAlignment.Near;
+                formatLeft.LineAlignment = XLineAlignment.Center;
+                
+                var formatRight = new XStringFormat();
+                formatRight.Alignment = XStringAlignment.Far;
+                formatRight.LineAlignment = XLineAlignment.Center;
+
+                // Draw header background
+                graphics.DrawRectangle(XBrushes.LightBlue, margin, margin, pageWidth - 2 * margin, 80);
+                
+                // Title
+                graphics.DrawString("LibraryPro", fontTitle, colorPrimary, margin + 10, margin + 15);
+                graphics.DrawString("Inventory Status Report", fontSubtitle, XBrushes.Black, margin + 10, margin + 50);
+                
+                // Report info
+                graphics.DrawString($"Generated: {data.GeneratedAt:dd MMM yyyy HH:mm}", fontSmall, colorSecondary, margin + 10, margin + 70);
+
+                // Summary section
+                int y = margin + 100;
+                var summaryBoxHeight = 100;
+                
+                // Draw summary box
+                graphics.DrawRectangle(XBrushes.White, margin, y, pageWidth - 2 * margin, summaryBoxHeight);
+                graphics.DrawRectangle(colorBorderDark, margin, y, pageWidth - 2 * margin, summaryBoxHeight);
+                
+                // Summary title
+                graphics.DrawString("Summary", fontSubtitle, colorPrimary, margin + 10, y + 10);
+                
+                // Summary data in grid
+                var summaryY = y + 40;
+                var colWidth = (pageWidth - 2 * margin - 20) / 4;
+                
+                graphics.DrawString($"Total Books:", fontHeader, colorSecondary, margin + 10, summaryY, formatLeft);
+                graphics.DrawString(data.TotalBooks.ToString(), fontHeader, XBrushes.Black, margin + 10 + colWidth - 10, summaryY, formatRight);
+                
+                graphics.DrawString($"Total Copies:", fontHeader, colorSecondary, margin + 10 + colWidth, summaryY, formatLeft);
+                graphics.DrawString(data.TotalCopies.ToString(), fontHeader, XBrushes.Black, margin + 10 + colWidth + colWidth - 10, summaryY, formatRight);
+                
+                graphics.DrawString($"Available:", fontHeader, colorSecondary, margin + 10 + colWidth * 2, summaryY, formatLeft);
+                graphics.DrawString(data.AvailableCopies.ToString(), fontHeader, XBrushes.Green, margin + 10 + colWidth * 2 + colWidth - 10, summaryY, formatRight);
+                
+                graphics.DrawString($"Borrowed:", fontHeader, colorSecondary, margin + 10 + colWidth * 3, summaryY, formatLeft);
+                graphics.DrawString(data.BorrowedCopies.ToString(), fontHeader, XBrushes.Red, margin + 10 + colWidth * 3 + colWidth - 10, summaryY, formatRight);
+
+                y += summaryBoxHeight + 20;
+                
+                // Table section
+                graphics.DrawString("Inventory Details", fontSubtitle, colorPrimary, margin, y);
+                y += 25;
+
+                // Table header
+                var tableY = y;
+                var rowHeight = 25;
+                var col1Width = 220;
+                var col2Width = 220;
+                var col3Width = 60;
+                var col4Width = 60;
+                var col5Width = 60;
+                var tableWidth = col1Width + col2Width + col3Width + col4Width + col5Width;
+
+                // Draw header background
+                graphics.DrawRectangle(colorTableHeader, margin, tableY, tableWidth, rowHeight);
+                graphics.DrawRectangle(colorBorderDark, margin, tableY, tableWidth, rowHeight);
+
+                // Header text with proper alignment
+                var headerX = margin + 5;
+                graphics.DrawString("Title", fontHeader, XBrushes.Black, headerX, tableY + 8, formatLeft);
+                graphics.DrawString("Author", fontHeader, XBrushes.Black, headerX + col1Width + 5, tableY + 8, formatLeft);
+                graphics.DrawString("Total", fontHeader, XBrushes.Black, headerX + col1Width + col2Width + 5, tableY + 8, formatLeft);
+                graphics.DrawString("Avail", fontHeader, XBrushes.Black, headerX + col1Width + col2Width + col3Width + 5, tableY + 8, formatLeft);
+                graphics.DrawString("Borrowed", fontHeader, XBrushes.Black, headerX + col1Width + col2Width + col3Width + col4Width + 5, tableY + 8, formatLeft);
+
+                // Table rows
+                y = tableY + rowHeight;
+                int rowCount = 0;
+                
+                if (data.InventoryItems != null && data.InventoryItems.Any())
                 {
-                    container.Page(page =>
+                    foreach (var item in data.InventoryItems)
                     {
-                        page.Size(PageSizes.A4);
-                        page.Margin(2, Unit.Centimetre);
-                        page.DefaultTextStyle(x => x.FontSize(10));
-
-                        page.Header().Element(container =>
+                        // Alternate row colors
+                        if (rowCount % 2 == 0)
                         {
-                            container.Row(row =>
-                            {
-                                row.RelativeItem().Column(column =>
-                                {
-                                    column.Item().Text("LibraryPro").Bold().FontSize(20).FontColor(Colors.Blue.Darken2);
-                                    column.Item().Text("Inventory Status Report").FontSize(14);
-                                    column.Item().Text($"Generated: {data.GeneratedAt:dd MMM yyyy HH:mm}").FontSize(10).FontColor(Colors.Grey.Darken1);
-                                });
-                            });
-                        });
+                            graphics.DrawRectangle(colorTableAlt, margin, y, tableWidth, rowHeight);
+                        }
+                        
+                        // Draw row border
+                        graphics.DrawRectangle(colorBorder, margin, y, tableWidth, rowHeight);
+                        
+                        // Row text with proper alignment
+                        graphics.DrawString(item.Title ?? "N/A", fontNormal, XBrushes.Black, headerX, y + 8, formatLeft);
+                        graphics.DrawString(item.Author ?? "N/A", fontNormal, XBrushes.Black, headerX + col1Width + 5, y + 8, formatLeft);
+                        graphics.DrawString(item.TotalCopies.ToString(), fontNormal, XBrushes.Black, headerX + col1Width + col2Width + 5, y + 8, formatLeft);
+                        graphics.DrawString(item.AvailableCopies.ToString(), fontNormal, XBrushes.Green, headerX + col1Width + col2Width + col3Width + 5, y + 8, formatLeft);
+                        graphics.DrawString(item.BorrowedCopies.ToString(), fontNormal, XBrushes.Red, headerX + col1Width + col2Width + col3Width + col4Width + 5, y + 8, formatLeft);
+                        
+                        y += rowHeight;
+                        rowCount++;
+                    }
+                }
+                else
+                {
+                    graphics.DrawString("No inventory items available", fontNormal, colorSecondary, margin, y + 8, formatLeft);
+                }
 
-                        page.Content().Element(container =>
-                        {
-                            container.PaddingVertical(1, Unit.Centimetre);
+                // Footer
+                var footerY = pageHeight - 30;
+                graphics.DrawLine(colorBorder, margin, footerY, pageWidth - margin, footerY);
+                graphics.DrawString($"LibraryPro - Confidential Document | Page 1 of 1", fontSmall, colorSecondary, margin, footerY + 10, formatLeft);
 
-                            container.Column(column =>
-                            {
-                                column.Item().Element(element =>
-                                {
-                                    element.Border(1).Padding(10).Background(Colors.Grey.Lighten3);
-                                });
-                                
-                                column.Item().Element(element =>
-                                {
-                                    element.Row(row =>
-                                    {
-                                        row.ConstantItem(150).Text("Total Books:").Bold();
-                                        row.ConstantItem(100).Text(data.TotalBooks.ToString());
-                                    });
-                                });
-                                
-                                column.Item().Element(element =>
-                                {
-                                    element.Row(row =>
-                                    {
-                                        row.ConstantItem(150).Text("Total Copies:").Bold();
-                                        row.ConstantItem(100).Text(data.TotalCopies.ToString());
-                                    });
-                                });
-                                
-                                column.Item().Element(element =>
-                                {
-                                    element.Row(row =>
-                                    {
-                                        row.ConstantItem(150).Text("Available:").Bold();
-                                        row.ConstantItem(100).Text(data.AvailableCopies.ToString());
-                                    });
-                                });
-                                
-                                column.Item().Element(element =>
-                                {
-                                    element.Row(row =>
-                                    {
-                                        row.ConstantItem(150).Text("Borrowed:").Bold();
-                                        row.ConstantItem(100).Text(data.BorrowedCopies.ToString());
-                                    });
-                                });
-
-                                column.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
-
-                                column.Item().Text("Inventory Details").Bold().FontSize(12);
-                                column.Item().PaddingTop(10);
-
-                                if (data.InventoryItems != null && data.InventoryItems.Any())
-                                {
-                                    column.Item().Table(table =>
-                                    {
-                                        table.ColumnsDefinition(columns =>
-                                        {
-                                            columns.RelativeColumn();
-                                            columns.RelativeColumn();
-                                            columns.ConstantColumn(60);
-                                            columns.ConstantColumn(60);
-                                            columns.ConstantColumn(60);
-                                        });
-
-                                        table.Header(header =>
-                                        {
-                                            header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Title").Bold();
-                                            header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Author").Bold();
-                                            header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Total").Bold();
-                                            header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Avail").Bold();
-                                            header.Cell().Element(cell => cell.Background(Colors.Blue.Lighten4).Padding(5)).Text("Borrowed").Bold();
-                                        });
-
-                                        foreach (var item in data.InventoryItems)
-                                        {
-                                            table.Cell().Element(cell => cell.Padding(5)).Text(item.Title ?? "N/A");
-                                            table.Cell().Element(cell => cell.Padding(5)).Text(item.Author ?? "N/A");
-                                            table.Cell().Element(cell => cell.Padding(5)).Text(item.TotalCopies.ToString());
-                                            table.Cell().Element(cell => cell.Padding(5)).Text(item.AvailableCopies.ToString());
-                                            table.Cell().Element(cell => cell.Padding(5)).Text(item.BorrowedCopies.ToString());
-                                        }
-                                    });
-                                }
-                                else
-                                {
-                                    column.Item().Text("No inventory items available").FontColor(Colors.Grey.Darken1);
-                                }
-                            });
-                        });
-
-                        page.Footer().AlignCenter().Text(x =>
-                        {
-                            x.Span("Page ");
-                            x.CurrentPageNumber();
-                        });
-                    });
-                });
-
-                _logger.LogInformation("PDF document created successfully, generating PDF bytes");
-                var pdfBytes = document.GeneratePdf();
-                _logger.LogInformation("PDF generation completed successfully, size: {Size} bytes", pdfBytes.Length);
-                return pdfBytes;
+                _logger.LogInformation("PDF generation completed successfully");
+                
+                using var stream = new MemoryStream();
+                document.Save(stream, false);
+                return stream.ToArray();
             }
             catch (Exception ex)
             {

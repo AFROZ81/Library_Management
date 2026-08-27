@@ -18,6 +18,7 @@ namespace LibraryPro.Web.Data
         public DbSet<BookReservation> BookReservations { get; set; }
         public DbSet<EmailLog> EmailLogs { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<ApiKey> ApiKeys { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

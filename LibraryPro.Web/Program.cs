@@ -62,6 +62,7 @@ builder.Services.AddScoped<ILoanRepository, LoanRepository>();
 builder.Services.AddScoped<ILibrarySettingsRepository, LibrarySettingsRepository>();
 builder.Services.AddScoped<IBookReservationRepository, BookReservationRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+builder.Services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
 
 // Register Email Services
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
@@ -83,8 +84,50 @@ builder.Services.AddScoped<IReportService, ReportService>();
 // Register Recommendation Service
 builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 
+// Register Barcode and QR Code Services
+builder.Services.AddScoped<IBarcodeService, BarcodeService>();
+builder.Services.AddScoped<IQRCodeService, QRCodeService>();
+
+// Register External Book Services
+builder.Services.AddHttpClient<GoogleBooksService>();
+builder.Services.AddScoped<IExternalBookService, GoogleBooksService>();
+builder.Services.AddHttpClient<OpenLibraryService>();
+builder.Services.AddScoped<OpenLibraryService>();
+
 // Register DatabaseSeeder
 builder.Services.AddScoped<DatabaseSeeder>();
+
+// Add Swagger/OpenAPI services
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Add API Versioning
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+});
+
+// Add Rate Limiting (simplified)
+builder.Services.AddRateLimiter();
+
+// Add JWT Authentication (for API endpoints only)
+builder.Services.AddAuthentication()
+.AddJwtBearer("Bearer", options =>
+{
+    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "YourSecretKeyHere12345678901234567890"))
+    };
+});
 
 var app = builder.Build();
 
@@ -102,14 +145,31 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Enable Swagger in development
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "LibraryPro API v1");
+        c.RoutePrefix = "swagger";
+    });
+}
+
 app.UseHttpsRedirection();
 app.UseRouting();
+
+// Apply rate limiting to API endpoints
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 // Add audit logging middleware
 app.UseAuditLogging();
+
+// Add API key authentication middleware
+app.UseMiddleware<LibraryPro.Web.Middleware.ApiKeyAuthenticationMiddleware>();
 
 app.MapStaticAssets();
 

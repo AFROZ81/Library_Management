@@ -26,5 +26,7 @@ namespace LibraryPro.Web.Models.Entities
         public int AvailableCopies { get; set; }
 
         public string? ImageUrl { get; set; } // For the "Eye-catching" UI
+
+        public string? Barcode { get; set; } // Barcode for scanning
     }
 }

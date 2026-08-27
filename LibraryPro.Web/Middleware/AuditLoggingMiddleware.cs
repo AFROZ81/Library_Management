@@ -57,6 +57,21 @@ namespace LibraryPro.Web.Middleware
                 return;
             }
 
+            // Skip logging for GET requests (read-only operations) to reduce noise
+            // Only log POST, PUT, DELETE, PATCH operations
+            if (context.Request.Method == "GET")
+            {
+                await _next(context);
+                return;
+            }
+
+            // Skip logging if user is not authenticated (e.g., during seeding)
+            if (context.User?.Identity?.IsAuthenticated != true)
+            {
+                await _next(context);
+                return;
+            }
+
             var auditLog = CreateAuditLog(context);
 
             try

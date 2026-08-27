@@ -43,7 +43,10 @@
                                 <label asp-for="ISBN" class="form-label fw-semibold text-secondary small text-uppercase">ISBN</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0"><i class="bi bi-upc-scan text-primary"></i></span>
-                                    <input asp-for="ISBN" class="form-control border-start-0" placeholder="ISBN-13" />
+                                    <input asp-for="ISBN" id="isbnInput" class="form-control border-start-0" placeholder="ISBN-13" />
+                                    <button type="button" id="lookupBtn" class="btn btn-outline-primary" title="Lookup book details">
+                                        <i class="bi bi-search"></i>
+                                    </button>
                                 </div>
                                 <span asp-validation-for="ISBN" class="text-danger small"></span>
                             </div>
@@ -221,6 +224,47 @@
                 placeholder: "  Select Genres", /* Added spaces for alignment */
                 allowClear: true,
                 width: '100%'
+            });
+
+            // ISBN Lookup functionality
+            $('#lookupBtn').click(function() {
+                const isbn = $('#isbnInput').val().trim();
+                if (!isbn) {
+                    alert('Please enter an ISBN');
+                    return;
+                }
+
+                $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+                $.get('@Url.Action("LookupByISBN", "Books")', { isbn: isbn })
+                    .done(function(response) {
+                        if (response.success) {
+                            const data = response.data;
+                            if (data.title) $('input[name="Title"]').val(data.title);
+                            if (data.author) $('input[name="Author"]').val(data.author);
+                            if (data.isbn) $('input[name="ISBN"]').val(data.isbn);
+                            if (data.publicationYear) $('select[name="PublicationYear"]').val(data.publicationYear);
+                            
+                            // Handle genres
+                            if (data.genres && data.genres.length > 0) {
+                                $('#genreSelect').val(data.genres).trigger('change');
+                            }
+
+                            // Optional: Auto-fill image URL if available
+                            if (data.imageUrl) {
+                                // You could display a preview or auto-fill if desired
+                                console.log('Image URL available:', data.imageUrl);
+                            }
+                        } else {
+                            alert(response.message || 'Book not found');
+                        }
+                    })
+                    .fail(function() {
+                        alert('Error looking up book. Please try again.');
+                    })
+                    .always(function() {
+                        $('#lookupBtn').prop('disabled', false).html('<i class="bi bi-search"></i>');
+                    });
             });
         });
     </script>
