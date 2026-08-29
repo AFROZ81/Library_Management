@@ -26,6 +26,15 @@ namespace LibraryPro.Web.Controllers
         {
             const int pageSize = 50;
             
+            // Reset filters if all are empty (default to "All")
+            if (string.IsNullOrEmpty(operationType) && string.IsNullOrEmpty(entityType) && !startDate.HasValue && !endDate.HasValue)
+            {
+                operationType = null;
+                entityType = null;
+                startDate = null;
+                endDate = null;
+            }
+            
             IEnumerable<AuditLog> logs;
 
             // Apply filters
@@ -95,9 +104,18 @@ namespace LibraryPro.Web.Controllers
             try
             {
                 var cutoffDate = DateTime.UtcNow.AddDays(-retentionDays);
-                await _auditLogRepository.DeleteOldLogsAsync(cutoffDate);
-                TempData["Success"] = $"Audit logs older than {retentionDays} days have been deleted.";
-                _logger.LogInformation("Admin cleared audit logs older than {RetentionDays} days", retentionDays);
+                var deletedCount = await _auditLogRepository.DeleteOldLogsAsync(cutoffDate);
+                
+                if (deletedCount > 0)
+                {
+                    TempData["Success"] = $"Deleted {deletedCount} audit logs older than {retentionDays} days.";
+                    _logger.LogInformation("Admin cleared {Count} audit logs older than {RetentionDays} days", deletedCount, retentionDays);
+                }
+                else
+                {
+                    TempData["Error"] = $"No audit logs found older than {retentionDays} days. The oldest log is newer than the cutoff date.";
+                    _logger.LogWarning("No audit logs deleted. Cutoff date: {CutoffDate}, Retention days: {RetentionDays}", cutoffDate, retentionDays);
+                }
             }
             catch (Exception ex)
             {

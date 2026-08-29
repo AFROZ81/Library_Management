@@ -31,21 +31,49 @@
                     <div class="card mb-4">
                         <div class="card-body">
                             <form asp-action="Index" method="get" class="row g-3">
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <select name="operationType" class="form-select form-select-sm">
-                                        <option value="">All Operations</option>
+                                        @if (string.IsNullOrEmpty(Model.OperationType))
+                                        {
+                                            <option value="" selected>All Operations</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="">All Operations</option>
+                                        }
                                         @foreach (var op in ViewData["OperationTypes"] as List<string> ?? new List<string>())
                                         {
-                                            <option value="@op" selected="@op == Model.OperationType">@op</option>
+                                            @if (op == Model.OperationType)
+                                            {
+                                                <option value="@op" selected>@op</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@op">@op</option>
+                                            }
                                         }
                                     </select>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <select name="entityType" class="form-select form-select-sm">
-                                        <option value="">All Entities</option>
+                                        @if (string.IsNullOrEmpty(Model.EntityType))
+                                        {
+                                            <option value="" selected>All Entities</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="">All Entities</option>
+                                        }
                                         @foreach (var entity in ViewData["EntityTypes"] as List<string> ?? new List<string>())
                                         {
-                                            <option value="@entity" selected="@entity == Model.EntityType">@entity</option>
+                                            @if (entity == Model.EntityType)
+                                            {
+                                                <option value="@entity" selected>@entity</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@entity">@entity</option>
+                                            }
                                         }
                                     </select>
                                 </div>
@@ -59,6 +87,11 @@
                                     <button type="submit" class="btn btn-primary btn-sm w-100">
                                         <i class="bi bi-filter me-1"></i> Filter
                                     </button>
+                                </div>
+                                <div class="col-md-2">
+                                    <a asp-action="Index" class="btn btn-secondary btn-sm w-100">
+                                        <i class="bi bi-x-circle me-1"></i> Reset
+                                    </a>
                                 </div>
                             </form>
                         </div>

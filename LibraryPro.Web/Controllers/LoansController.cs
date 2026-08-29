@@ -45,7 +45,16 @@ namespace LibraryPro.Web.Controllers
             var settings = await _settingsRepo.GetSettingsAsync();
 
             ViewBag.Books = new SelectList(books.Where(b => b.AvailableCopies > 0), "Id", "Title");
-            ViewBag.Members = new SelectList(members, "Id", "Name");
+            
+            // Create SelectList with both Name and Email for better identification
+            ViewBag.Members = new SelectList(
+                members.Select(m => new 
+                { 
+                    Id = m.Id, 
+                    DisplayName = $"{m.Name} ({m.Email})" 
+                }), 
+                "Id", 
+                "DisplayName");
             
             var loan = new BookLoan
             {

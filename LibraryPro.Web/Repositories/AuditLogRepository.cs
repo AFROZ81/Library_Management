@@ -74,7 +74,7 @@ namespace LibraryPro.Web.Repositories
             _logger.LogInformation("Bulk audit log entries created: {Count} entries", auditLogs.Count());
         }
 
-        public async Task DeleteOldLogsAsync(DateTime cutoffDate)
+        public async Task<int> DeleteOldLogsAsync(DateTime cutoffDate)
         {
             var oldLogs = await _context.AuditLogs
                 .Where(a => a.Timestamp < cutoffDate)
@@ -86,6 +86,13 @@ namespace LibraryPro.Web.Repositories
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("Deleted {Count} old audit logs older than {CutoffDate}", 
                     oldLogs.Count, cutoffDate);
+                return oldLogs.Count;
+            }
+            else
+            {
+                _logger.LogWarning("No audit logs found older than {CutoffDate}. Current log count: {TotalLogs}", 
+                    cutoffDate, await _context.AuditLogs.CountAsync());
+                return 0;
             }
         }
     }

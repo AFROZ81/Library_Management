@@ -1,3 +1,6 @@
 <Solution>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/LibraryPro.Tests.csproj" />
+  </Folder>
   <Project Path="LibraryPro.Web/LibraryPro.Web.csproj" />
 </Solution>

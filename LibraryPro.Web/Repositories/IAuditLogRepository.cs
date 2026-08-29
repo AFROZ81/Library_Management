@@ -12,6 +12,6 @@ namespace LibraryPro.Web.Repositories
         Task<AuditLog?> GetByIdAsync(int id);
         Task AddAsync(AuditLog auditLog);
         Task AddRangeAsync(IEnumerable<AuditLog> auditLogs);
-        Task DeleteOldLogsAsync(DateTime cutoffDate);
+        Task<int> DeleteOldLogsAsync(DateTime cutoffDate);
     }
 }

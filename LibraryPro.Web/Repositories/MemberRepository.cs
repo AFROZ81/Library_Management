@@ -10,7 +10,10 @@ namespace LibraryPro.Web.Repositories
         public MemberRepository(ApplicationDbContext context) => _context = context;
 
         public async Task<IEnumerable<Member>> GetAllAsync() =>
-            await _context.Members.ToListAsync();
+            await _context.Members
+                .Include(m => m.Loans)
+                .ThenInclude(l => l.Book)
+                .ToListAsync();
 
         public async Task<Member?> GetByIdAsync(int id) =>
             await _context.Members.FindAsync(id);

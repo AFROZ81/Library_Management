@@ -8,6 +8,17 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure logging for production
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+builder.Logging.AddEventSourceLogger();
+
+if (builder.Environment.IsProduction())
+{
+    builder.Logging.AddEventLog();
+}
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -97,6 +108,13 @@ builder.Services.AddScoped<OpenLibraryService>();
 // Register DatabaseSeeder
 builder.Services.AddScoped<DatabaseSeeder>();
 
+// Add Health Checks
+builder.Services.AddHealthChecks()
+    .AddCheck("database", () =>
+    {
+        return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("Database connection check pending");
+    });
+
 // Add Swagger/OpenAPI services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -144,6 +162,10 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+else
+{
+    app.UseDeveloperExceptionPage();
+}
 
 // Enable Swagger in development
 if (app.Environment.IsDevelopment())
@@ -164,6 +186,23 @@ app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Add security headers for production
+if (app.Environment.IsProduction())
+{
+    app.Use(async (context, next) =>
+    {
+        context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+        context.Response.Headers["X-Frame-Options"] = "DENY";
+        context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
+        context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+        context.Response.Headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://code.jquery.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com; img-src 'self' data: https:; connect-src 'self' https://books.google.com https://openlibrary.org;";
+        await next();
+    });
+}
+
+// Add health check endpoint
+app.MapHealthChecks("/health");
 
 // Add audit logging middleware
 app.UseAuditLogging();
