@@ -4,60 +4,99 @@
     ViewData["Title"] = "Edit Member";
 }
 
-<div class="container mt-5 animate-slide-up">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg border-0 rounded-3">
-                <div class="card-header text-white text-center py-4" style="background-color: #1a237e;">
-                    <div class="display-6 mb-2"><i class="bi bi-person-gear"></i></div>
-                    <h4 class="mb-0 fw-bold">Update Member Profile</h4>
-                    <p class="small opacity-75 mb-0">Modifying: <span class="fw-bold">@Model.Name</span></p>
+<div class="member-edit-page">
+    <div class="container-fluid px-4 py-4 animate-fade-in">
+        <div class="page-header mb-4">
+            <div class="page-header__title-block">
+                <p class="page-header__eyebrow">Members</p>
+                <h1 class="page-header__title">Edit Member</h1>
+            </div>
+
+            <div class="page-header__actions">
+                <a asp-action="Index" class="btn page-header__cta">
+                    <span class="page-header__cta-icon"><i class="bi bi-arrow-left"></i></span>
+                    <span class="page-header__cta-text">Back to<br>Directory</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="member-edit-shell">
+            <div class="member-edit-card">
+                <div class="member-edit-card-header">
+                    <div class="member-edit-header-badge">
+                        <i class="bi bi-person-gear"></i>
+                    </div>
+                    <div>
+                        <h2>Member Details</h2>
+                        <p>Update the profile information for this member.</p>
+                    </div>
                 </div>
 
-                <div class="card-body p-4 p-lg-5">
-                    <form asp-action="Edit">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4"></div>
-                        <input type="hidden" asp-for="Id" />
-                        <input type="hidden" asp-for="MembershipDate" />
+                <div class="member-edit-body">
+                    <aside class="member-edit-summary">
+                        <div class="summary-chip">Profile</div>
+                        <h3>@Model.Name</h3>
 
-                        <div class="row g-4">
-                            <div class="col-12">
-                                <label asp-for="Name" class="form-label fw-semibold text-secondary small text-uppercase">Full Name</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-primary"></i></span>
-                                    <input asp-for="Name" class="form-control border-start-0" placeholder="John Doe" />
-                                </div>
-                                <span asp-validation-for="Name" class="text-danger small"></span>
+                        <div class="summary-list">
+                            <div class="summary-item">
+                                <span class="summary-label">Email</span>
+                                <strong>@(!string.IsNullOrWhiteSpace(Model.Email) ? Model.Email : "Not provided")</strong>
                             </div>
-
-                            <div class="col-12">
-                                <label asp-for="Email" class="form-label fw-semibold text-secondary small text-uppercase">Email Address</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope-at text-primary"></i></span>
-                                    <input asp-for="Email" class="form-control border-start-0" placeholder="name@example.com" />
-                                </div>
-                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            <div class="summary-item">
+                                <span class="summary-label">Phone</span>
+                                <strong>@(!string.IsNullOrWhiteSpace(Model.PhoneNumber) ? Model.PhoneNumber : "Not provided")</strong>
                             </div>
-
-                            <div class="col-12">
-                                <label asp-for="PhoneNumber" class="form-label fw-semibold text-secondary small text-uppercase">Phone Number</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-telephone text-primary"></i></span>
-                                    <input asp-for="PhoneNumber" class="form-control border-start-0" placeholder="+1 (555) 000-0000" />
-                                </div>
-                                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                            <div class="summary-item">
+                                <span class="summary-label">Membership Date</span>
+                                <strong>@Model.MembershipDate.ToString("dd MMM yyyy")</strong>
                             </div>
                         </div>
+                    </aside>
 
-                        <div class="d-grid gap-3 mt-5">
-                            <button type="submit" class="btn btn-warning btn-lg fw-bold shadow-sm py-3 transition-lift">
-                                <i class="bi bi-check-circle-fill me-2"></i>SAVE CHANGES
-                            </button>
-                            <a asp-action="Index" class="btn btn-link text-decoration-none text-muted small text-center">
-                                <i class="bi bi-arrow-left me-1"></i> Return to Directory
-                            </a>
-                        </div>
-                    </form>
+                    <div class="member-edit-form-panel">
+                        <form asp-action="Edit" class="member-edit-form">
+                            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+                            <input type="hidden" asp-for="Id" />
+                            <input type="hidden" asp-for="MembershipDate" />
+
+                            <div class="field-group">
+                                <label asp-for="Name" class="form-label">Full Name</label>
+                                <div class="input-group modern-input-group">
+                                    <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                                    <input asp-for="Name" class="form-control" placeholder="John Doe" />
+                                </div>
+                                <span asp-validation-for="Name" class="field-validation-error"></span>
+                            </div>
+
+                            <div class="field-group">
+                                <label asp-for="Email" class="form-label">Email Address</label>
+                                <div class="input-group modern-input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
+                                    <input asp-for="Email" class="form-control" placeholder="name@example.com" />
+                                </div>
+                                <span asp-validation-for="Email" class="field-validation-error"></span>
+                            </div>
+
+                            <div class="field-group">
+                                <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                                <div class="input-group modern-input-group">
+                                    <span class="input-group-text"><i class="bi bi-telephone-fill"></i></span>
+                                    <input asp-for="PhoneNumber" class="form-control" placeholder="+1 (555) 000-0000" />
+                                </div>
+                                <span asp-validation-for="PhoneNumber" class="field-validation-error"></span>
+                            </div>
+
+                            <div class="member-form-actions">
+                                <button type="submit" class="btn member-submit-btn">
+                                    <i class="bi bi-check-circle-fill me-2"></i>Save Changes
+                                </button>
+
+                                <a asp-action="Index" class="btn member-cancel-btn">
+                                    <i class="bi bi-x-lg me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -65,32 +104,388 @@
 </div>
 
 <style>
-    .form-control:focus {
-        border-color: #1a237e;
+    :root {
+        --member-page-bg: #f8fafc;
+        --member-card-bg: #ffffff;
+        --member-border: #e5e7eb;
+        --member-primary: #1d4ed8;
+        --member-primary-soft: #eff6ff;
+        --member-text: #0f172a;
+        --member-muted: #64748b;
+        --member-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        --member-error: #dc2626;
+    }
+
+    .member-edit-page {
+        min-height: calc(100vh - 56px);
+        background: var(--member-page-bg);
+        padding: 0 0 2.5rem;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1.5rem;
+        padding: 0.25rem 0 0.5rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+        margin-bottom: 1.5rem;
+    }
+
+    .page-header__title-block {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        min-width: 0;
+    }
+
+    .page-header__eyebrow {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .page-header__title {
+        margin: 0;
+        font-size: clamp(2.2rem, 3.4vw, 4rem);
+        line-height: 0.95;
+        font-weight: 600;
+        letter-spacing: -0.06em;
+        color: #0f172a;
+    }
+
+    .page-header__actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 1rem;
+        width: min(100%, 720px);
+        flex: 1;
+    }
+
+    .page-header__cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.7rem;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid #dfe7f1;
+        color: #0f172a;
+        border-radius: 12px;
+        min-width: 140px;
+        height: 48px;
+        padding: 0.7rem 1rem;
         box-shadow: none;
+        transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
     }
 
-    .transition-lift {
-        transition: all 0.2s ease-in-out;
+    .page-header__cta:hover {
+        color: #0f172a;
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        transform: translateY(-1px);
     }
 
-        .transition-lift:hover {
-            transform: translateY(-3px);
+    .page-header__cta-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: transparent;
+        color: #475569;
+        font-size: 0.9rem;
+    }
+
+    .page-header__cta-text {
+        line-height: 1.1;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-align: left;
+    }
+
+    .member-edit-shell {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .member-edit-card {
+        background: var(--member-card-bg);
+        border: 1px solid var(--member-border);
+        border-radius: 22px;
+        box-shadow: var(--member-shadow);
+        overflow: hidden;
+    }
+
+    .member-edit-card-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+        color: #fff;
+        padding: 1.5rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .member-edit-header-badge {
+        width: 52px;
+        height: 52px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        font-size: 1.4rem;
+    }
+
+    .member-edit-card-header h2 {
+        margin: 0;
+        font-size: clamp(1.4rem, 2vw, 1.85rem);
+        font-weight: 700;
+    }
+
+    .member-edit-card-header p {
+        margin: 0.25rem 0 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.94rem;
+    }
+
+    .member-edit-body {
+        display: grid;
+        grid-template-columns: 320px minmax(0, 1fr);
+    }
+
+    .member-edit-summary {
+        background: linear-gradient(180deg, #f8faff 0%, #f3f6ff 100%);
+        border-right: 1px solid var(--member-border);
+        padding: 2rem;
+    }
+
+    .summary-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.45rem 0.8rem;
+        border-radius: 999px;
+        background: var(--member-primary-soft);
+        color: var(--member-primary);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .member-edit-summary h3 {
+        margin: 1rem 0 0.8rem;
+        font-size: clamp(1.5rem, 2vw, 2rem);
+        font-weight: 700;
+        color: var(--member-text);
+        word-break: break-word;
+    }
+
+    .summary-list {
+        margin-top: 1.5rem;
+        display: grid;
+        gap: 0.9rem;
+    }
+
+    .summary-item {
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 14px;
+        padding: 0.9rem 1rem;
+    }
+
+    .summary-label {
+        display: block;
+        color: var(--member-muted);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+    }
+
+    .summary-item strong {
+        color: var(--member-text);
+        font-size: 0.98rem;
+        word-break: break-word;
+    }
+
+    .member-edit-form-panel {
+        padding: 2rem;
+        background: #fff;
+    }
+
+    .member-edit-form {
+        max-width: 680px;
+    }
+
+    .validation-summary {
+        margin-bottom: 1.25rem;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 12px;
+        color: var(--member-error);
+        padding: 0.85rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .validation-summary ul {
+        margin: 0;
+        padding-left: 1.1rem;
+    }
+
+    .field-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.55rem;
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: var(--member-muted);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .modern-input-group .input-group-text {
+        width: 48px;
+        justify-content: center;
+        background: #f8fafc;
+        border: 1px solid #dfe7f1;
+        border-right: none;
+        border-radius: 12px 0 0 12px;
+        color: var(--member-primary);
+        font-size: 1rem;
+    }
+
+    .modern-input-group .form-control {
+        border: 1px solid #dfe7f1;
+        border-left: none;
+        border-radius: 0 12px 12px 0;
+        padding: 0.9rem 1rem;
+        font-size: 0.98rem;
+        color: var(--member-text);
+        background: #fff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .modern-input-group .form-control:focus {
+        border-color: rgba(26, 35, 126, 0.7);
+        box-shadow: 0 0 0 4px rgba(26, 35, 126, 0.08);
+        outline: none;
+    }
+
+    .field-validation-error {
+        display: block;
+        margin-top: 0.4rem;
+        color: var(--member-error);
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .member-form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.9rem;
+        padding-top: 1.2rem;
+        margin-top: 1.5rem;
+        border-top: 1px solid var(--member-border);
+    }
+
+    .member-submit-btn,
+    .member-cancel-btn {
+        min-height: 48px;
+        padding: 0.8rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 700;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .member-submit-btn {
+        background: linear-gradient(135deg, #2f6ef5 0%, #1d4ed8 100%);
+        border: none;
+        color: #fff;
+        box-shadow: 0 10px 18px rgba(37, 99, 235, 0.2);
+    }
+
+    .member-submit-btn:hover {
+        transform: translateY(-1px);
+        color: #fff;
+    }
+
+    .member-cancel-btn {
+        border: 1px solid #dfe7f1;
+        color: var(--member-text);
+        background: #fff;
+    }
+
+    .member-cancel-btn:hover {
+        background: #f8fafc;
+        color: var(--member-text);
+        transform: translateY(-1px);
+    }
+
+    @@media (max-width: 991.98px) {
+        .page-header {
+            flex-direction: column;
+            align-items: stretch;
         }
 
-    .animate-slide-up {
-        animation: slideUp 0.6s ease-out;
-    }
-
-    @@keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
+        .page-header__actions {
+            width: 100%;
         }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
+        .member-edit-body {
+            grid-template-columns: 1fr;
+        }
+
+        .member-edit-summary {
+            border-right: none;
+            border-bottom: 1px solid var(--member-border);
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .page-header {
+            gap: 1rem;
+        }
+
+        .page-header__actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .page-header__cta {
+            width: 100%;
+            min-width: 0;
+            justify-content: center;
+        }
+
+        .member-edit-card-header,
+        .member-edit-summary,
+        .member-edit-form-panel {
+            padding: 1.25rem;
+        }
+
+        .member-form-actions {
+            flex-direction: column;
+        }
+
+        .member-submit-btn,
+        .member-cancel-btn {
+            width: 100%;
         }
     }
 </style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

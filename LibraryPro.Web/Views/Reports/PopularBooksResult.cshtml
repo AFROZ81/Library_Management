@@ -4,37 +4,55 @@
     ViewData["Title"] = "Popular Books Report Results";
 }
 
-<div class="container mt-5 animate-slide-up">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-lg border-0 rounded-3">
-                <div class="card-header text-white py-4 d-flex justify-content-between align-items-center" style="background-color: #ffc107;">
+<div class="report-page">
+    <div class="container-fluid px-3 px-md-4 py-4 py-lg-5">
+        <div class="report-shell">
+            <div class="page-header">
+                <div class="page-header__title-block">
+                    <p class="page-header__eyebrow">Analytics</p>
+                    <h1 class="page-header__title">Popular Books</h1>
+                </div>
+                <div class="page-header__actions">
+                    <a asp-action="Index" class="page-header__back-link">
+                        <i class="bi bi-arrow-left me-1"></i>Back
+                    </a>
+                </div>
+            </div>
+
+            <div class="report-card">
+                <div class="report-card__header report-card__header--warning">
+                    <div class="report-card__header-icon"><i class="bi bi-star-fill"></i></div>
                     <div>
-                        <h4 class="mb-0 fw-bold">Popular Books Report Results</h4>
-                        <p class="small opacity-75 mb-0">@Model.StartDate.ToString("dd MMM yyyy") - @Model.EndDate.ToString("dd MMM yyyy")</p>
+                        <h2>Results</h2>
+                        <p>@Model.StartDate.ToString("dd MMM yyyy") - @Model.EndDate.ToString("dd MMM yyyy")</p>
                     </div>
-                    <div>
-                        <a asp-action="PopularBooksPdf" asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")" asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")" asp-route-topN="@Model.PopularBooks.Count" class="btn btn-light btn-sm me-2">
-                            <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+                    <div class="report-header-actions">
+                        <a asp-action="PopularBooksPdf" asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")"
+                           asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")"
+                           asp-route-topN="@Model.PopularBooks.Count" class="btn btn-light btn-sm report-export-btn">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>PDF
                         </a>
-                        <a asp-action="PopularBooksExcel" asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")" asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")" asp-route-topN="@Model.PopularBooks.Count" class="btn btn-success btn-sm">
-                            <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                        <a asp-action="PopularBooksExcel" asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")"
+                           asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")"
+                           asp-route-topN="@Model.PopularBooks.Count" class="btn btn-success btn-sm report-export-btn">
+                            <i class="bi bi-file-earmark-excel me-1"></i>Excel
                         </a>
                     </div>
                 </div>
 
-                <div class="card-body p-4 p-lg-5">
-                    <!-- Summary -->
-                    <div class="alert alert-info mb-4">
+                <div class="report-card__body report-card__body--wide">
+                    <div class="summary-banner">
                         <i class="bi bi-info-circle me-2"></i>
                         Showing top <strong>@Model.PopularBooks.Count</strong> most borrowed books
                     </div>
 
-                    <!-- Popular Books Table -->
-                    <h5 class="fw-bold mb-3">Most Borrowed Books</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover table-bordered">
-                            <thead class="table-light">
+                    <div class="section-heading">
+                        <h3>Most Borrowed Books</h3>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table class="report-table">
+                            <thead>
                                 <tr>
                                     <th>Rank</th>
                                     <th>Title</th>
@@ -50,11 +68,11 @@
                                 @foreach (var book in Model.PopularBooks)
                                 {
                                     <tr>
-                                        <td><span class="badge bg-primary">@rank</span></td>
-                                        <td>@book.Title</td>
-                                        <td>@book.Author</td>
-                                        <td>@string.Join(", ", book.Genre)</td>
-                                        <td><strong>@book.TimesBorrowed</strong></td>
+                                        <td data-label="Rank"><span class="rank-badge">@rank</span></td>
+                                        <td data-label="Title">@book.Title</td>
+                                        <td data-label="Author">@book.Author</td>
+                                        <td data-label="Genre">@string.Join(", ", book.Genre)</td>
+                                        <td data-label="Times Borrowed"><strong>@book.TimesBorrowed</strong></td>
                                     </tr>
                                     rank++;
                                 }
@@ -62,11 +80,6 @@
                         </table>
                     </div>
 
-                    <div class="mt-4">
-                        <a asp-action="Index" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -74,19 +87,293 @@
 </div>
 
 <style>
-    .animate-slide-up {
-        animation: slideUp 0.6s ease-out;
+    :root {
+        --report-bg: #f8fafc;
+        --report-card: #ffffff;
+        --report-border: #e5e7eb;
+        --report-text: #0f172a;
+        --report-muted: #64748b;
+        --report-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
     }
 
-    @@keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(40px);
+    .report-page {
+        min-height: calc(100vh - 56px);
+        background: var(--report-bg);
+        padding: 0 0 2.5rem;
+    }
+
+    .report-shell {
+        max-width: none;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1.5rem;
+        padding: 0.25rem 0 0.5rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+        margin-bottom: 1.5rem;
+    }
+
+    .page-header__title-block {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-header__actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+    }
+
+    .page-header__back-link {
+        display: inline-flex;
+        align-items: center;
+        color: var(--report-muted);
+        text-decoration: none;
+        font-size: 0.88rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        transition: color 0.2s ease;
+    }
+
+    .page-header__back-link:hover {
+        color: var(--report-text);
+        text-decoration: none;
+    }
+
+    .page-header__eyebrow {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--report-muted);
+    }
+
+    .page-header__title {
+        margin: 0;
+        font-size: clamp(2rem, 3vw, 3.5rem);
+        letter-spacing: -0.06em;
+        line-height: 0.95;
+        font-weight: 700;
+        color: var(--report-text);
+    }
+
+    .report-card {
+        background: var(--report-card);
+        border: 1px solid var(--report-border);
+        border-radius: 22px;
+        box-shadow: var(--report-shadow);
+        overflow: hidden;
+    }
+
+    .report-card__header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.4rem 1.5rem;
+        border-bottom: 1px solid rgba(229, 231, 235, 0.9);
+    }
+
+    .report-card__header--warning {
+        background: linear-gradient(135deg, #b45309 0%, #f59e0b 100%);
+        color: #fff;
+    }
+
+    .report-card__header-icon {
+        width: 52px;
+        height: 52px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        font-size: 1.4rem;
+    }
+
+    .report-card__header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+    }
+
+    .report-card__header p {
+        margin: 0.25rem 0 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.92rem;
+    }
+
+    .report-header-actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+    }
+
+    .report-export-btn {
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    .report-card__body {
+        padding: 1.5rem;
+    }
+
+    .report-card__body--wide {
+        padding: 1.5rem 1.5rem 1.75rem;
+    }
+
+    .summary-banner {
+        display: flex;
+        align-items: center;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1d4ed8;
+        border-radius: 12px;
+        padding: 0.9rem 1rem;
+        margin-bottom: 1.2rem;
+        font-weight: 600;
+    }
+
+    .section-heading {
+        margin: 0 0 0.9rem;
+    }
+
+    .section-heading h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--report-text);
+    }
+
+    .table-wrap {
+        overflow: hidden;
+        border: 1px solid var(--report-border);
+        border-radius: 14px;
+        background: #fff;
+    }
+
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 700px;
+    }
+
+    .report-table th,
+    .report-table td {
+        padding: 0.9rem 1rem;
+        border-bottom: 1px solid #edf2f7;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .report-table thead th {
+        background: #f8fafc;
+        color: var(--report-text);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .rank-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 28px;
+        padding: 0.25rem 0.5rem;
+        border-radius: 999px;
+        background: #2563eb;
+        color: #fff;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .report-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .report-table tbody tr:hover {
+        background: rgba(241, 245, 249, 0.7);
+    }
+
+    @@media (max-width: 767.98px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
         }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
+        .report-card__header {
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .report-header-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .report-card__body {
+            padding: 1rem;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .report-table {
+            min-width: 100%;
+        }
+
+        .report-table thead {
+            display: none;
+        }
+
+        .report-table,
+        .report-table tbody,
+        .report-table tr,
+        .report-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .report-table tbody {
+            padding: 0.5rem;
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .report-table tr {
+            background: #fff;
+            border: 1px solid var(--report-border);
+            border-radius: 14px;
+            padding: 0.8rem 0.9rem;
+        }
+
+        .report-table td {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            border: none;
+            padding: 0.45rem 0;
+        }
+
+        .report-table td::before {
+            content: attr(data-label);
+            color: var(--report-muted);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
     }
 </style>

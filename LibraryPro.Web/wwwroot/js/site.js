@@ -1,4 +1,28 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿(function () {
+	'use strict';
 
-// Write your JavaScript code.
+	function dismissToast(toast) {
+		if (!toast) {
+			return;
+		}
+
+		toast.classList.add('app-toast--leaving');
+		window.setTimeout(function () {
+			toast.remove();
+		}, 220);
+	}
+
+	document.querySelectorAll('[data-app-toast]').forEach(function (toast) {
+		var dismissButton = toast.querySelector('[data-toast-dismiss]');
+
+		if (dismissButton) {
+			dismissButton.addEventListener('click', function () {
+				dismissToast(toast);
+			});
+		}
+
+		window.setTimeout(function () {
+			dismissToast(toast);
+		}, 4500);
+	});
+})();

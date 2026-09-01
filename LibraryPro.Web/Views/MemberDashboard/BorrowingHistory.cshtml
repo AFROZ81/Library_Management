@@ -1,0 +1,153 @@
+@model IEnumerable<LibraryPro.Web.Models.Entities.BookLoan>
+
+@{
+    ViewData["Title"] = "Borrowing History";
+}
+
+<div class="container-fluid px-4 py-4 animate-fade-in">
+    <div class="page-header mb-4">
+        <div class="page-header__title-block">
+            <p class="page-header__eyebrow">Library Activity</p>
+            <h1 class="page-header__title">Borrowing History</h1>
+        </div>
+        <div class="page-header__actions">
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-clock-history me-2 text-primary"></i>All Loans
+                </h5>
+                <span class="badge bg-secondary">@Model.Count() Total Loans</span>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <!-- Desktop Table View -->
+                <div class="table-responsive d-none d-md-block">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Book</th>
+                                <th>Author</th>
+                                <th>Loan Date</th>
+                                <th>Due Date</th>
+                                <th>Return Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var loan in Model)
+                            {
+                                var isReturned = loan.IsReturned;
+                                var isOverdue = !isReturned && loan.DueDate.Date < DateTime.Now.Date;
+                                
+                                <tr class="@(isOverdue ? "table-danger" : "")">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="@(string.IsNullOrEmpty(loan.Book?.ImageUrl) ? "/images/default-book-cover.svg" : loan.Book.ImageUrl)" class="rounded me-2" style="width: 40px; height: 60px; object-fit: cover;" alt="Book cover">
+                                            <div>
+                                                <strong>@loan.Book?.Title</strong>
+                                                <small class="text-muted d-block">@loan.Book?.ISBN</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@loan.Book?.Author</td>
+                                    <td>@loan.LoanDate.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        @if (isOverdue)
+                                        {
+                                            <span class="text-danger fw-bold">@loan.DueDate.ToString("MMM dd, yyyy")</span>
+                                        }
+                                        else
+                                        {
+                                            @loan.DueDate.ToString("MMM dd, yyyy")
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (isReturned && loan.ReturnDate.HasValue)
+                                        {
+                                            @loan.ReturnDate.Value.ToString("MMM dd, yyyy")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Not returned</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (isReturned)
+                                        {
+                                            <span class="badge bg-success">Returned</span>
+                                        }
+                                        else if (isOverdue)
+                                        {
+                                            <span class="badge bg-danger">Overdue</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">Active</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="d-md-none">
+                    @foreach (var loan in Model)
+                    {
+                        var isReturned = loan.IsReturned;
+                        var isOverdue = !isReturned && loan.DueDate.Date < DateTime.Now.Date;
+                        
+                        <div class="card mb-3 @(isOverdue ? "border-danger" : "")">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start mb-3">
+                                    <img src="@(string.IsNullOrEmpty(loan.Book?.ImageUrl) ? "/images/default-book-cover.svg" : loan.Book.ImageUrl)" class="rounded me-3" style="width: 60px; height: 90px; object-fit: cover;" alt="Book cover">
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold mb-1">@loan.Book?.Title</h6>
+                                        <p class="text-muted small mb-2">@loan.Book?.Author</p>
+                                        <span class="badge @(isReturned ? "bg-success" : isOverdue ? "bg-danger" : "bg-warning")">
+                                            @(isReturned ? "Returned" : isOverdue ? "Overdue" : "Active")
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="row g-2 text-sm">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Loan Date</small>
+                                        <span class="fw-medium">@loan.LoanDate.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Due Date</small>
+                                        <span class="fw-medium @(isOverdue ? "text-danger" : "")">@loan.DueDate.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Return Date</small>
+                                        <span class="fw-medium">
+                                            @(isReturned && loan.ReturnDate.HasValue ? loan.ReturnDate.Value.ToString("MMM dd, yyyy") : "Not returned")
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-journal-x fs-1 text-muted mb-3"></i>
+                    <p class="text-muted">No borrowing history found</p>
+                    <a asp-controller="Books" asp-action="Index" class="btn btn-primary">Start Borrowing</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

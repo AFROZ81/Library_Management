@@ -4,142 +4,284 @@
     ViewData["Title"] = "Audit Log Details";
 }
 
-<div class="container mt-5 animate-slide-up">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-lg border-0 rounded-3">
-                <div class="card-header text-white py-4" style="background-color: #1a237e;">
-                    <div class="d-flex align-items-center">
-                        <div class="display-6 me-3"><i class="bi bi-file-earmark-text"></i></div>
-                        <div>
-                            <h4 class="mb-0 fw-bold">Audit Log Details</h4>
-                            <p class="small opacity-75 mb-0">Detailed information about this audit event</p>
-                        </div>
-                    </div>
-                </div>
+<div class="container-fluid px-4 py-4 animate-fade-in">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-4">
+        <div class="flex-grow-1">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Audit Logs</a></li>
+                    <li class="breadcrumb-item active">Details</li>
+                </ol>
+            </nav>
+            <h1 class="fw-bold text-dark mb-0">Audit Log Details</h1>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-3 shadow-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back to Logs
+            </a>
+        </div>
+    </div>
 
-                <div class="card-body p-4 p-lg-5">
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary small text-uppercase">Timestamp</label>
-                            <p class="form-control-plaintext">@Model.FormattedTimestamp</p>
+    <div class="row g-4">
+        <div class="col-12 col-lg-4 col-xl-3">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3 mx-auto shadow-sm"
+                             style="width: 80px; height: 80px; font-size: 2rem; background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);">
+                            <i class="bi bi-file-earmark-text"></i>
                         </div>
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary small text-uppercase">Status</label>
-                            <p>
-                                @if (Model.IsSuccess)
-                                {
-                                    <span class="badge bg-success">Success</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-danger">Failed</span>
-                                }
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary small text-uppercase">User ID</label>
-                            <p class="form-control-plaintext">@Model.UserId</p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary small text-uppercase">User Name</label>
-                            <p class="form-control-plaintext">@Model.UserName</p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary small text-uppercase">Action</label>
-                            <p class="form-control-plaintext">@Model.Action</p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary small text-uppercase">Operation Type</label>
-                            <p>
-                                <span class="badge @(Model.OperationType switch
-                                {
-                                    "Create" => "bg-success",
-                                    "Read" => "bg-info",
-                                    "Update" => "bg-warning",
-                                    "Delete" => "bg-danger",
-                                    "Login" => "bg-primary",
-                                    "Logout" => "bg-secondary",
-                                    _ => "bg-secondary"
-                                })">@Model.OperationType</span>
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary small text-uppercase">Controller</label>
-                            <p class="form-control-plaintext">@Model.Controller</p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary small text-uppercase">Action Name</label>
-                            <p class="form-control-plaintext">@Model.ActionName</p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary small text-uppercase">IP Address</label>
-                            <p class="form-control-plaintext">@Model.IpAddress</p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary small text-uppercase">Entity Type</label>
-                            <p class="form-control-plaintext">@Model.EntityType</p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="fw-semibold text-secondary small text-uppercase">Entity ID</label>
-                            <p class="form-control-plaintext">@Model.EntityId</p>
-                        </div>
-                        <div class="col-12">
-                            <label class="fw-semibold text-secondary small text-uppercase">Description</label>
-                            <p class="form-control-plaintext">@Model.Description</p>
-                        </div>
-                        <div class="col-12">
-                            <label class="fw-semibold text-secondary small text-uppercase">User Agent</label>
-                            <p class="form-control-plaintext small">@Model.UserAgent</p>
-                        </div>
-                        @if (!string.IsNullOrEmpty(Model.OldValues))
+                        <h4 class="fw-bold mb-1">Status</h4>
+                        @if (Model.IsSuccess)
                         {
-                            <div class="col-12">
-                                <label class="fw-semibold text-secondary small text-uppercase">Old Values</label>
-                                <pre class="bg-light p-3 rounded small">@Model.OldValues</pre>
-                            </div>
+                            <span class="badge bg-success-soft text-success rounded-pill px-3 mb-3">Success</span>
                         }
-                        @if (!string.IsNullOrEmpty(Model.NewValues))
+                        else
                         {
-                            <div class="col-12">
-                                <label class="fw-semibold text-secondary small text-uppercase">New Values</label>
-                                <pre class="bg-light p-3 rounded small">@Model.NewValues</pre>
-                            </div>
-                        }
-                        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-                        {
-                            <div class="col-12">
-                                <label class="fw-semibold text-secondary small text-uppercase">Error Message</label>
-                                <div class="alert alert-danger small">@Model.ErrorMessage</div>
-                            </div>
+                            <span class="badge bg-danger-soft text-danger rounded-pill px-3 mb-3">Failed</span>
                         }
                     </div>
 
-                    <div class="mt-4">
-                        <a asp-action="Index" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i> Back to Logs
-                        </a>
+                    <div class="text-start">
+                        <div class="mb-4">
+                            <small class="text-muted text-uppercase fw-bold d-block mb-2">Event</small>
+                            <div class="fw-semibold text-dark fs-6">@Model.FriendlyDescription</div>
+                        </div>
+
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-clock text-muted me-3 fs-5 flex-shrink-0"></i>
+                            <div class="min-w-0">
+                                <small class="text-muted d-block">Timestamp</small>
+                                <span class="fw-medium text-truncate d-block">@Model.FormattedTimestamp</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-person text-muted me-3 fs-5 flex-shrink-0"></i>
+                            <div class="min-w-0">
+                                <small class="text-muted d-block">User</small>
+                                <span class="fw-medium text-truncate d-block">@Model.UserName</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-hdd-network text-muted me-3 fs-5 flex-shrink-0"></i>
+                            <div class="min-w-0">
+                                <small class="text-muted d-block">IP Address</small>
+                                <span class="fw-medium text-truncate d-block">@Model.IpAddress</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-white fw-bold py-3">
+                    <i class="bi bi-cpu me-2"></i>Operation Details
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <small class="text-muted text-uppercase fw-bold d-block mb-1">Operation Type</small>
+                        <span class="badge @(Model.OperationType switch
+                              {
+                                  "Create" => "bg-success-soft text-success",
+                                  "Read" => "bg-info-soft text-info",
+                                  "Update" => "bg-warning-soft text-warning",
+                                  "Delete" => "bg-danger-soft text-danger",
+                                  "Login" => "bg-primary-soft text-primary",
+                                  "Logout" => "bg-secondary-soft text-secondary",
+                                  _ => "bg-secondary-soft text-secondary"
+                              }) rounded-pill">@Model.OperationType</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted text-uppercase fw-bold d-block mb-1">Controller</small>
+                        <span class="fw-medium">@Model.Controller</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted text-uppercase fw-bold d-block mb-1">Action</small>
+                        <span class="fw-medium">@Model.Action</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted text-uppercase fw-bold d-block mb-1">Action Name</small>
+                        <span class="fw-medium">@Model.ActionName</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-8 col-xl-9">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-info-circle me-2 text-primary"></i>General Information</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-12 col-md-6">
+                            <label class="fw-semibold text-secondary small text-uppercase">User ID</label>
+                            <p class="form-control-plaintext text-truncate">@Model.UserId</p>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="fw-semibold text-secondary small text-uppercase">User Name</label>
+                            <p class="form-control-plaintext text-truncate">@Model.UserName</p>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="fw-semibold text-secondary small text-uppercase">Entity Type</label>
+                            <p class="form-control-plaintext text-truncate">@Model.EntityType</p>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="fw-semibold text-secondary small text-uppercase">Entity ID</label>
+                            <p class="form-control-plaintext text-truncate">@Model.EntityId</p>
+                        </div>
+                        <div class="col-12">
+                            <label class="fw-semibold text-secondary small text-uppercase">Description</label>
+                            <p class="form-control-plaintext mb-0">@Model.FriendlyDescription</p>
+                        </div>
+                        <div class="col-12">
+                            <label class="fw-semibold text-secondary small text-uppercase">User Agent</label>
+                            <p class="form-control-plaintext small text-truncate">@Model.UserAgent</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.OldValues))
+            {
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-arrow-counterclockwise me-2 text-warning"></i>Old Values
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <pre class="bg-light p-3 rounded small mb-0"
+                             style="max-height: 300px; overflow-y: auto;">@Model.OldValues</pre>
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.NewValues))
+            {
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-arrow-clockwise me-2 text-success"></i>New Values</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <pre class="bg-light p-3 rounded small mb-0"
+                             style="max-height: 300px; overflow-y: auto;">@Model.NewValues</pre>
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-exclamation-triangle me-2 text-danger"></i>Error Message
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="alert alert-danger small mb-0">@Model.ErrorMessage</div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>
 
 <style>
-    .animate-slide-up {
-        animation: slideUp 0.6s ease-out;
+    /* Soft Colors */
+    .bg-success-soft {
+        background-color: #ecfdf5;
+        color: #059669;
     }
 
-    @@keyframes slideUp {
+    .bg-danger-soft {
+        background-color: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fee2e2;
+    }
+
+    .bg-warning-soft {
+        background-color: #fffbeb;
+        color: #d97706;
+    }
+
+    .bg-info-soft {
+        background-color: #eff6ff;
+        color: #3b82f6;
+    }
+
+    .bg-primary-soft {
+        background-color: #e0e7ff;
+        color: #4f46e5;
+    }
+
+    .bg-secondary-soft {
+        background-color: #f3f4f6;
+        color: #6b7280;
+    }
+
+    /* Animation */
+    .animate-fade-in {
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    @@keyframes fadeIn {
         from {
             opacity: 0;
-            transform: translateY(40px);
+            transform: translateY(8px);
         }
 
         to {
             opacity: 1;
             transform: translateY(0);
         }
+    }
+
+    /* Mobile Responsive Enhancements */
+    @@media (max-width: 768px) {
+        .rounded-circle {
+            width: 70px !important;
+            height: 70px !important;
+            font-size: 1.75rem !important;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .btn-sm {
+            font-size: 0.8rem;
+        }
+
+        pre {
+            font-size: 0.8rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .card {
+            border-radius: 8px;
+        }
+
+        .card-header {
+            padding: 0.75rem 1rem;
+        }
+
+        .card-body {
+            padding: 0.875rem;
+        }
+
+        .badge {
+            font-size: 0.7rem;
+        }
+    }
+
+    /* Utility for text truncation */
+    .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .min-w-0 {
+        min-width: 0;
     }
 </style>

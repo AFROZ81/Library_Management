@@ -4,58 +4,65 @@
     ViewData["Title"] = "Popular Books Report";
 }
 
-<div class="container mt-5 animate-slide-up">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg border-0 rounded-3">
-                <div class="card-header text-white py-4" style="background-color: #ffc107;">
-                    <div class="d-flex align-items-center">
-                        <div class="display-6 me-3"><i class="bi bi-star-fill"></i></div>
-                        <div>
-                            <h4 class="mb-0 fw-bold">Popular Books Report</h4>
-                            <p class="small opacity-75 mb-0">Generate most borrowed books analysis</p>
-                        </div>
+<div class="report-page">
+    <div class="container-fluid px-3 px-md-4 py-4 py-lg-5">
+        <div class="report-shell report-shell--narrow">
+            <div class="page-header">
+                <div class="page-header__title-block">
+                    <p class="page-header__eyebrow">Operations</p>
+                    <h1 class="page-header__title">Popular Books Report</h1>
+                </div>
+                <div class="page-header__actions">
+                    <a asp-action="Index" class="page-header__back-link">
+                        <i class="bi bi-arrow-left me-1"></i>Back
+                    </a>
+                </div>
+            </div>
+
+            <div class="report-card report-card--form">
+                <div class="report-card__header report-card__header--warning">
+                    <div class="report-card__header-icon"><i class="bi bi-star-fill"></i></div>
+                    <div>
+                        <h2>Generate report</h2>
+                        <p>Identify the titles with the highest circulation demand.</p>
                     </div>
                 </div>
 
-                <div class="card-body p-4 p-lg-5">
-                    <form asp-action="PopularBooks" method="post">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4"></div>
+                <div class="report-card__body">
+                    <form asp-action="PopularBooks" method="post" class="report-form">
+                        <div asp-validation-summary="ModelOnly" class="form-alert form-alert--error"></div>
 
-                        <div class="mb-4">
-                            <label asp-for="StartDate" class="form-label fw-semibold text-secondary small text-uppercase">Start Date</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-calendar text-warning"></i></span>
-                                <input asp-for="StartDate" class="form-control border-start-0" type="date" />
+                        <div class="field-group">
+                            <label asp-for="StartDate" class="field-label">Start Date</label>
+                            <div class="input-wrap input-wrap--warning">
+                                <span class="input-icon"><i class="bi bi-calendar"></i></span>
+                                <input asp-for="StartDate" type="date" class="field-input" />
                             </div>
-                            <span asp-validation-for="StartDate" class="text-danger small"></span>
+                            <span asp-validation-for="StartDate" class="field-validation-error"></span>
                         </div>
 
-                        <div class="mb-4">
-                            <label asp-for="EndDate" class="form-label fw-semibold text-secondary small text-uppercase">End Date</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-calendar-check text-warning"></i></span>
-                                <input asp-for="EndDate" class="form-control border-start-0" type="date" />
+                        <div class="field-group">
+                            <label asp-for="EndDate" class="field-label">End Date</label>
+                            <div class="input-wrap input-wrap--warning">
+                                <span class="input-icon"><i class="bi bi-calendar-check"></i></span>
+                                <input asp-for="EndDate" type="date" class="field-input" />
                             </div>
-                            <span asp-validation-for="EndDate" class="text-danger small"></span>
+                            <span asp-validation-for="EndDate" class="field-validation-error"></span>
                         </div>
 
-                        <div class="mb-4">
-                            <label asp-for="TopN" class="form-label fw-semibold text-secondary small text-uppercase">Top N Books</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-list-ol text-warning"></i></span>
-                                <input asp-for="TopN" class="form-control border-start-0" type="number" min="1" max="100" value="20" />
+                        <div class="field-group">
+                            <label asp-for="TopN" class="field-label">Top N Books</label>
+                            <div class="input-wrap input-wrap--warning">
+                                <span class="input-icon"><i class="bi bi-list-ol"></i></span>
+                                <input asp-for="TopN" type="number" min="1" max="100" value="20" class="field-input" />
                             </div>
-                            <span asp-validation-for="TopN" class="text-danger small"></span>
+                            <span asp-validation-for="TopN" class="field-validation-error"></span>
                         </div>
 
-                        <div class="d-grid gap-3 mt-5">
-                            <button type="submit" class="btn btn-warning btn-lg fw-bold shadow-sm py-3 transition-lift text-dark">
+                        <div class="report-form__actions">
+                            <button type="submit" class="btn btn-warning report-submit text-dark">
                                 <i class="bi bi-bar-chart-fill me-2"></i>Generate Report
                             </button>
-                            <a asp-action="Index" class="btn btn-link text-decoration-none text-muted">
-                                <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
-                            </a>
                         </div>
                     </form>
                 </div>
@@ -65,27 +72,240 @@
 </div>
 
 <style>
-    .transition-lift {
-        transition: transform 0.2s;
+    :root {
+        --report-bg: #f8fafc;
+        --report-card: #ffffff;
+        --report-border: #e5e7eb;
+        --report-text: #0f172a;
+        --report-muted: #64748b;
+        --report-warning: #d97706;
+        --report-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
     }
 
-    .transition-lift:hover {
-        transform: translateY(-3px);
+    .report-page {
+        min-height: calc(100vh - 56px);
+        background: var(--report-bg);
+        padding: 0 0 2.5rem;
     }
 
-    .animate-slide-up {
-        animation: slideUp 0.6s ease-out;
+    .report-shell {
+        max-width: 1500px;
+        width: min(100%, 1500px);
+        margin: 0 auto;
+        padding: 0 0.5rem;
     }
 
-    @@keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(40px);
+    .report-shell--narrow {
+        max-width: 1280px;
+        width: min(100%, 1280px);
+    }
+
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1.5rem;
+        padding: 0.25rem 0 0.5rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+        margin-bottom: 1.5rem;
+    }
+
+    .page-header__title-block {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-header__actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+    }
+
+    .page-header__back-link {
+        display: inline-flex;
+        align-items: center;
+        color: var(--report-muted);
+        text-decoration: none;
+        font-size: 0.88rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        transition: color 0.2s ease;
+    }
+
+    .page-header__back-link:hover {
+        color: var(--report-text);
+        text-decoration: none;
+    }
+
+    .page-header__eyebrow {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--report-muted);
+    }
+
+    .page-header__title {
+        margin: 0;
+        font-size: clamp(2rem, 3vw, 3.5rem);
+        letter-spacing: -0.06em;
+        line-height: 0.95;
+        font-weight: 700;
+        color: var(--report-text);
+    }
+
+    .report-card {
+        background: var(--report-card);
+        border: 1px solid var(--report-border);
+        border-radius: 22px;
+        box-shadow: var(--report-shadow);
+        overflow: hidden;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .report-card__header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.4rem 1.5rem;
+        border-bottom: 1px solid rgba(229, 231, 235, 0.9);
+    }
+
+    .report-card__header--warning {
+        background: linear-gradient(135deg, #b45309 0%, #f59e0b 100%);
+        color: #fff;
+    }
+
+    .report-card__header-icon {
+        width: 52px;
+        height: 52px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        font-size: 1.4rem;
+    }
+
+    .report-card__header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+    }
+
+    .report-card__header p {
+        margin: 0.25rem 0 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.92rem;
+    }
+
+    .report-card__body {
+        padding: clamp(1.25rem, 2vw, 2rem);
+    }
+
+    .report-form {
+        max-width: 820px;
+        margin: 0 auto;
+        padding-inline: clamp(0.25rem, 1vw, 1rem);
+    }
+
+    .form-alert {
+        padding: 0.9rem 1rem;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .form-alert--error {
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+    }
+
+    .field-group {
+        margin-bottom: 1.4rem;
+    }
+
+    .field-label {
+        display: block;
+        margin-bottom: 0.55rem;
+        color: var(--report-muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .input-wrap {
+        display: flex;
+        align-items: center;
+        background: #fff;
+        border: 1px solid #dfe7f1;
+        border-radius: 12px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .input-wrap:focus-within {
+        border-color: rgba(217, 119, 6, 0.7);
+        box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.08);
+    }
+
+    .input-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 52px;
+        color: var(--report-warning);
+        background: #f8fafc;
+        border-right: 1px solid #e2e8f0;
+        border-radius: 12px 0 0 12px;
+    }
+
+    .field-input {
+        border: none;
+        width: 100%;
+        height: 52px;
+        background: transparent;
+        padding: 0.8rem 1rem;
+        color: var(--report-text);
+        outline: none;
+    }
+
+    .field-validation-error {
+        display: block;
+        margin-top: 0.4rem;
+        color: #dc2626;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .report-form__actions {
+        display: grid;
+        gap: 0.75rem;
+        margin: 1.75rem auto 0;
+        max-width: 820px;
+    }
+
+    .report-submit {
+        width: 100%;
+        min-height: 52px;
+        border-radius: 12px;
+        font-weight: 700;
+    }
+
+    @@media (max-width: 767.98px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
         }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
+        .report-card__body {
+            padding: 1rem;
         }
     }
 </style>

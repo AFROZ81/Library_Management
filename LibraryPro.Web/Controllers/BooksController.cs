@@ -165,7 +165,7 @@ namespace LibraryPro.Web.Controllers
                 book.AvailableCopies = book.TotalCopies;
 
                 await _bookRepo.AddAsync(book);
-                TempData["Success"] = "New volume has been added.";
+                TempData["Success"] = "New volume has been added to Libris.";
                 return RedirectToAction(nameof(Index));
             }
             return View(book);

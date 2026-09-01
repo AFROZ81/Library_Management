@@ -1,0 +1,332 @@
+@model LibraryPro.Web.Models.ViewModels.MemberDashboardViewModel
+
+@{
+    ViewData["Title"] = "My Dashboard";
+}
+
+<div class="container-fluid px-4 py-4 animate-fade-in">
+    <div class="page-header mb-4">
+        <div class="page-header__title-block">
+            <p class="page-header__eyebrow">Welcome back</p>
+            <h1 class="page-header__title">@Model.Member?.Name</h1>
+        </div>
+        <div class="page-header__actions">
+            <span class="badge bg-primary rounded-pill px-3 py-2">
+                <i class="bi bi-book me-2"></i>@Model.TotalBorrowedBooks Total Books Borrowed
+            </span>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body bg-light-blue">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary text-white rounded-circle p-3">
+                                <i class="bi bi-journal-arrow-up fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Current Loans</h6>
+                            <h3 class="mb-0 fw-bold">@Model.CurrentLoans.Count</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body bg-light-warning">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning text-white rounded-circle p-3">
+                                <i class="bi bi-exclamation-triangle fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Overdue</h6>
+                            <h3 class="mb-0 fw-bold">@Model.OverdueLoans.Count</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body bg-light-success">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success text-white rounded-circle p-3">
+                                <i class="bi bi-calendar-check fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Reservations</h6>
+                            <h3 class="mb-0 fw-bold">@Model.ActiveReservations.Count</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body bg-light-danger">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-danger text-white rounded-circle p-3">
+                                <i class="bi bi-currency-rupee fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Outstanding Fines</h6>
+                            <h3 class="mb-0 fw-bold">₹@Model.TotalFines.ToString("N0")</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Loans Section -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-journal-arrow-up me-2 text-primary"></i>Current Loans
+                </h5>
+                @if (Model.OverdueLoans.Any())
+                {
+                    <span class="badge bg-danger">@(Model.OverdueLoans.Count) Overdue</span>
+                }
+            </div>
+        </div>
+        <div class="card-body">
+            @if (Model.CurrentLoans.Any())
+            {
+                <!-- Desktop Table View -->
+                <div class="table-responsive d-none d-md-block">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Book</th>
+                                <th>Author</th>
+                                <th>Loan Date</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var loan in Model.CurrentLoans)
+                            {
+                                var isOverdue = loan.DueDate.Date < DateTime.Now.Date;
+                                <tr class="@(isOverdue ? "table-danger" : "")">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="@(string.IsNullOrEmpty(loan.Book?.ImageUrl) ? "/images/default-book-cover.svg" : loan.Book.ImageUrl)" class="rounded me-2" style="width: 40px; height: 60px; object-fit: cover;" alt="Book cover">
+                                            <div>
+                                                <strong>@loan.Book?.Title</strong>
+                                                <small class="text-muted d-block">@loan.Book?.ISBN</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@loan.Book?.Author</td>
+                                    <td>@loan.LoanDate.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        @if (isOverdue)
+                                        {
+                                            <span class="text-danger fw-bold">@loan.DueDate.ToString("MMM dd, yyyy")</span>
+                                        }
+                                        else
+                                        {
+                                            @loan.DueDate.ToString("MMM dd, yyyy")
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (isOverdue)
+                                        {
+                                            <span class="badge bg-danger">Overdue</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="d-md-none">
+                    @foreach (var loan in Model.CurrentLoans)
+                    {
+                        var isOverdue = loan.DueDate.Date < DateTime.Now.Date;
+                        <div class="card mb-3 @(isOverdue ? "border-danger" : "")">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start mb-3">
+                                    <img src="@(string.IsNullOrEmpty(loan.Book?.ImageUrl) ? "/images/default-book-cover.svg" : loan.Book.ImageUrl)" class="rounded me-3" style="width: 60px; height: 90px; object-fit: cover;" alt="Book cover">
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold mb-1">@loan.Book?.Title</h6>
+                                        <p class="text-muted small mb-2">@loan.Book?.Author</p>
+                                        <span class="badge @(isOverdue ? "bg-danger" : "bg-success")">
+                                            @(isOverdue ? "Overdue" : "Active")
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="row g-2 text-sm">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Loan Date</small>
+                                        <span class="fw-medium">@loan.LoanDate.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Due Date</small>
+                                        <span class="fw-medium @(isOverdue ? "text-danger" : "")">@loan.DueDate.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-journal-x fs-1 text-muted mb-3"></i>
+                    <p class="text-muted">No current loans</p>
+                    <a asp-controller="Books" asp-action="Index" class="btn btn-primary">Browse Catalog</a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Active Reservations Section -->
+    @if (Model.ActiveReservations.Any())
+    {
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-calendar-check me-2 text-success"></i>Active Reservations
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Desktop Table View -->
+                <div class="table-responsive d-none d-md-block">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Book</th>
+                                <th>Reservation Date</th>
+                                <th>Queue Position</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var reservation in Model.ActiveReservations)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="@(string.IsNullOrEmpty(reservation.Book?.ImageUrl) ? "/images/default-book-cover.svg" : reservation.Book.ImageUrl)" class="rounded me-2" style="width: 40px; height: 60px; object-fit: cover;" alt="Book cover">
+                                            <div>
+                                                <strong>@reservation.Book?.Title</strong>
+                                                <small class="text-muted d-block">@reservation.Book?.Author</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@reservation.ReservationDate.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        <span class="badge bg-info">#@reservation.QueuePosition</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning">Pending</span>
+                                    </td>
+                                    <td>
+                                        <form asp-controller="Reservations" asp-action="Cancel" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@reservation.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="d-md-none">
+                    @foreach (var reservation in Model.ActiveReservations)
+                    {
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start mb-3">
+                                    <img src="@(string.IsNullOrEmpty(reservation.Book?.ImageUrl) ? "/images/default-book-cover.svg" : reservation.Book.ImageUrl)" class="rounded me-3" style="width: 60px; height: 90px; object-fit: cover;" alt="Book cover">
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold mb-1">@reservation.Book?.Title</h6>
+                                        <p class="text-muted small mb-2">@reservation.Book?.Author</p>
+                                        <div class="d-flex gap-2 mb-2">
+                                            <span class="badge bg-info">#@reservation.QueuePosition in queue</span>
+                                            <span class="badge bg-warning">Pending</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-2 text-sm mb-3">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Reserved On</small>
+                                        <span class="fw-medium">@reservation.ReservationDate.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                </div>
+                                <form asp-controller="Reservations" asp-action="Cancel" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@reservation.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100">Cancel Reservation</button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Quick Actions -->
+    <div class="row g-3">
+        <div class="col-12 col-md-4">
+            <a asp-controller="Books" asp-action="Index" class="card text-decoration-none h-100 border-0 shadow-sm">
+                <div class="card-body text-center py-4">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-collection fs-4"></i>
+                    </div>
+                    <h6 class="fw-bold mb-2">Browse Catalog</h6>
+                    <p class="text-muted small mb-0">Search and discover new books</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-4">
+            <a asp-action="BorrowingHistory" class="card text-decoration-none h-100 border-0 shadow-sm">
+                <div class="card-body text-center py-4">
+                    <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-clock-history fs-4"></i>
+                    </div>
+                    <h6 class="fw-bold mb-2">Borrowing History</h6>
+                    <p class="text-muted small mb-0">View your past loans</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-4">
+            <a asp-action="Profile" class="card text-decoration-none h-100 border-0 shadow-sm">
+                <div class="card-body text-center py-4">
+                    <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-person-gear fs-4"></i>
+                    </div>
+                    <h6 class="fw-bold mb-2">Manage Profile</h6>
+                    <p class="text-muted small mb-0">Update your information</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>

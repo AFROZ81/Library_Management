@@ -25,4 +25,15 @@ namespace LibraryPro.Web.Models.ViewModels
         public string? MemberEmail { get; set; }
         public int LoanCount { get; set; }
     }
+
+    public class MemberDashboardViewModel
+    {
+        public Member? Member { get; set; }
+        public List<BookLoan> CurrentLoans { get; set; } = new();
+        public List<BookLoan> OverdueLoans { get; set; } = new();
+        public List<BookLoan> LoanHistory { get; set; } = new();
+        public List<BookReservation> ActiveReservations { get; set; } = new();
+        public decimal TotalFines { get; set; }
+        public int TotalBorrowedBooks { get; set; }
+    }
 }

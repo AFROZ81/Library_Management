@@ -24,6 +24,12 @@ namespace LibraryPro.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
+            // Redirect members to their personal dashboard
+            if (User.IsInRole("Member"))
+            {
+                return RedirectToAction("Index", "MemberDashboard");
+            }
+
             // 1. Fetch data from repositories
             var books = (await _bookRepo.GetAllAsync()).ToList();
             var members = (await _memberRepo.GetAllAsync()).ToList();

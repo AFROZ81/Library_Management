@@ -48,7 +48,7 @@ namespace LibraryPro.Web.Middleware
             }
 
             // Skip logging for static files
-            if (context.Request.Path.StartsWithSegments("/wwwroot") || 
+            if (context.Request.Path.StartsWithSegments("/wwwroot") ||
                 context.Request.Path.StartsWithSegments("/images") ||
                 context.Request.Path.StartsWithSegments("/css") ||
                 context.Request.Path.StartsWithSegments("/js"))
@@ -116,19 +116,142 @@ namespace LibraryPro.Web.Middleware
             var user = context.User;
             var userId = user?.Identity?.IsAuthenticated == true ? user.Identity.Name : null;
             var userName = user?.Identity?.Name;
+            var operationType = GetOperationType(context.Request.Method, context.Request.Path);
+            var controller = GetControllerName(context) ?? "Unknown";
+            var action = GetActionName(context) ?? "Unknown";
+            var description = BuildHumanReadableDescription(context, operationType, controller, action);
 
             return new AuditLog
             {
                 UserId = userId,
                 UserName = userName,
                 Action = context.Request.Method,
-                Controller = GetControllerName(context),
-                ActionName = GetActionName(context),
+                Controller = controller,
+                ActionName = action,
                 Timestamp = DateTime.UtcNow,
                 IpAddress = context.Connection.RemoteIpAddress?.ToString(),
                 UserAgent = context.Request.Headers["User-Agent"].ToString(),
-                Description = $"{context.Request.Method} {context.Request.Path}",
-                OperationType = GetOperationType(context.Request.Method, context.Request.Path)
+                Description = description,
+                OperationType = operationType,
+                EntityType = GetEntityType(context.Request.Path)
+            };
+        }
+
+        private string BuildHumanReadableDescription(HttpContext context, string operationType, string controller, string action)
+        {
+            var path = context.Request.Path.Value ?? string.Empty;
+            var lowerPath = path.Trim();
+
+            if (lowerPath.Contains("/Account/Login", StringComparison.OrdinalIgnoreCase))
+                return "A user signed in to the library system.";
+
+            if (lowerPath.Contains("/Account/Logout", StringComparison.OrdinalIgnoreCase))
+                return "A user signed out of the library system.";
+
+            if (lowerPath.Contains("/Account/Register", StringComparison.OrdinalIgnoreCase))
+                return "A new member account was registered in the system.";
+
+            if (controller.Equals("Books", StringComparison.OrdinalIgnoreCase))
+            {
+                if (action.Contains("Create", StringComparison.OrdinalIgnoreCase) || action.Contains("Add", StringComparison.OrdinalIgnoreCase))
+                    return "A new book was added to the catalog.";
+
+                if (action.Contains("Edit", StringComparison.OrdinalIgnoreCase) || action.Contains("Update", StringComparison.OrdinalIgnoreCase))
+                    return "A book record was updated in the catalog.";
+
+                if (action.Contains("Delete", StringComparison.OrdinalIgnoreCase))
+                    return "A book record was removed from the catalog.";
+
+                if (action.Contains("Details", StringComparison.OrdinalIgnoreCase))
+                    return "A book record was viewed in the catalog.";
+
+                return "A book operation was performed in the catalog.";
+            }
+
+            if (controller.Equals("Members", StringComparison.OrdinalIgnoreCase))
+            {
+                if (action.Contains("Register", StringComparison.OrdinalIgnoreCase))
+                    return "A new member record was registered.";
+
+                if (action.Contains("Edit", StringComparison.OrdinalIgnoreCase) || action.Contains("Update", StringComparison.OrdinalIgnoreCase))
+                    return "A member profile was updated.";
+
+                if (action.Contains("Delete", StringComparison.OrdinalIgnoreCase))
+                    return "A member record was deleted from the system.";
+
+                if (action.Contains("PayFine", StringComparison.OrdinalIgnoreCase))
+                    return "A member fine was cleared in the system.";
+
+                if (action.Contains("Details", StringComparison.OrdinalIgnoreCase))
+                    return "A member profile was opened for review.";
+
+                return "A member-related action was performed.";
+            }
+
+            if (controller.Equals("Loans", StringComparison.OrdinalIgnoreCase))
+            {
+                if (action.Contains("Issue", StringComparison.OrdinalIgnoreCase))
+                    return "A book was issued to a member.";
+
+                if (action.Contains("Return", StringComparison.OrdinalIgnoreCase))
+                    return "A borrowed book was returned to the library.";
+
+                if (action.Contains("Renew", StringComparison.OrdinalIgnoreCase))
+                    return "A loan was renewed for a member.";
+
+                return "A lending action was processed.";
+            }
+
+            if (controller.Equals("Reservations", StringComparison.OrdinalIgnoreCase))
+            {
+                if (action.Contains("Create", StringComparison.OrdinalIgnoreCase))
+                    return "A book reservation was created for a member.";
+
+                if (action.Contains("Cancel", StringComparison.OrdinalIgnoreCase))
+                    return "A book reservation was cancelled.";
+
+                return "A reservation was updated in the queue.";
+            }
+
+            if (controller.Equals("Settings", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Library settings were updated.";
+            }
+
+            if (controller.Equals("Reports", StringComparison.OrdinalIgnoreCase))
+            {
+                return "A report was generated or accessed in the system.";
+            }
+
+            if (operationType == "Login")
+                return "A user signed in to the library system.";
+
+            if (operationType == "Logout")
+                return "A user signed out of the library system.";
+
+            return $"{operationType} activity was recorded in {controller}.";
+        }
+
+        private string? GetEntityType(string path)
+        {
+            var normalized = path.Trim('/');
+            if (string.IsNullOrWhiteSpace(normalized))
+                return "System";
+
+            var segments = normalized.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (segments.Length == 0)
+                return "System";
+
+            var controller = segments[0];
+            return controller switch
+            {
+                "Books" => "Book",
+                "Members" => "Member",
+                "Loans" => "BookLoan",
+                "Reservations" => "BookReservation",
+                "Settings" => "LibrarySettings",
+                "Account" => "UserAccount",
+                _ => controller
             };
         }
 

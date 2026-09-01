@@ -5,47 +5,371 @@
 }
 
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+      rel="stylesheet" />
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-navy text-white py-3">
-                    <h5 class="mb-0"><i class="bi bi-journal-plus me-2"></i>New Loan Transaction</h5>
+<style>
+    :root {
+        --issue-bg: #f8fafc;
+        --issue-card-bg: #ffffff;
+        --issue-border: #e5e7eb;
+        --issue-text: #0f172a;
+        --issue-muted: #64748b;
+        --issue-primary: #1d4ed8;
+        --issue-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        --issue-error: #dc2626;
+    }
+
+    .issue-page {
+        min-height: calc(100vh - 56px);
+        background: var(--issue-bg);
+        padding: 0 0 2.5rem;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1.5rem;
+        padding: 0.25rem 0 0.5rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+        margin-bottom: 1.5rem;
+    }
+
+    .page-header__title-block {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        min-width: 0;
+    }
+
+    .page-header__eyebrow {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .page-header__title {
+        margin: 0;
+        font-size: clamp(2.2rem, 3.4vw, 4rem);
+        line-height: 0.95;
+        font-weight: 600;
+        letter-spacing: -0.06em;
+        color: #0f172a;
+    }
+
+    .page-header__actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 1rem;
+        width: min(100%, 720px);
+        flex: 1;
+    }
+
+    .page-header__cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.7rem;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid #dfe7f1;
+        color: #0f172a;
+        border-radius: 12px;
+        min-width: 140px;
+        height: 48px;
+        padding: 0.7rem 1rem;
+        box-shadow: none;
+        transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .page-header__cta:hover {
+        color: #0f172a;
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        transform: translateY(-1px);
+    }
+
+    .page-header__cta-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: transparent;
+        color: #475569;
+        font-size: 0.9rem;
+    }
+
+    .page-header__cta-text {
+        line-height: 1.1;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-align: left;
+    }
+
+    .issue-shell {
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .issue-card {
+        background: var(--issue-card-bg);
+        border: 1px solid var(--issue-border);
+        border-radius: 22px;
+        box-shadow: var(--issue-shadow);
+        overflow: hidden;
+    }
+
+    .issue-card__header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+        color: #fff;
+        padding: 1.5rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .issue-card__icon {
+        width: 52px;
+        height: 52px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        font-size: 1.4rem;
+    }
+
+    .issue-card__header h2 {
+        margin: 0;
+        font-size: clamp(1.4rem, 2vw, 1.85rem);
+        font-weight: 700;
+    }
+
+    .issue-card__header p {
+        margin: 0.25rem 0 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.94rem;
+    }
+
+    .issue-card__body {
+        padding: 2rem;
+        background: #fff;
+    }
+
+    .issue-form {
+        max-width: 620px;
+        margin: 0 auto;
+    }
+
+    .validation-summary {
+        margin-bottom: 1.25rem;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 12px;
+        color: var(--issue-error);
+        padding: 0.85rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .validation-summary ul {
+        margin: 0;
+        padding-left: 1.1rem;
+    }
+
+    .field-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .field-label {
+        display: block;
+        margin-bottom: 0.55rem;
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: var(--issue-muted);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .select-search,
+    .issue-control {
+        width: 100%;
+        border: 1px solid #dfe7f1;
+        border-radius: 12px;
+        padding: 0.9rem 1rem;
+        font-size: 0.98rem;
+        color: var(--issue-text);
+        background: #fff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .select-search:focus,
+    .issue-control:focus {
+        border-color: rgba(26, 35, 126, 0.7);
+        box-shadow: 0 0 0 4px rgba(26, 35, 126, 0.08);
+        outline: none;
+    }
+
+    .field-validation-error {
+        display: block;
+        margin-top: 0.4rem;
+        color: var(--issue-error);
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .row-inline {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .issue-submit-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 48px;
+        padding: 0.8rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 700;
+        border: none;
+        color: #fff;
+        background: linear-gradient(135deg, #2f6ef5 0%, #1d4ed8 100%);
+        box-shadow: 0 10px 18px rgba(37, 99, 235, 0.2);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .issue-submit-btn:hover {
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .select2-container--bootstrap-5 .select2-selection {
+        border: 1px solid #dfe7f1;
+        border-radius: 12px;
+        min-height: 52px;
+        padding: 0.45rem 0.8rem;
+    }
+
+    .select2-container--bootstrap-5 .select2-selection--single {
+        height: 52px;
+    }
+
+    .select2-container--bootstrap-5 .select2-selection__rendered {
+        line-height: 2.2;
+        padding-left: 0.15rem;
+    }
+
+    @@media (max-width: 991.98px) {
+        .page-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .page-header__actions {
+            width: 100%;
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .page-header {
+            gap: 1rem;
+        }
+
+        .page-header__actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .page-header__cta {
+            width: 100%;
+            min-width: 0;
+            justify-content: center;
+        }
+
+        .issue-card__header,
+        .issue-card__body {
+            padding: 1.25rem;
+        }
+
+        .row-inline {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="issue-page">
+    <div class="container-fluid px-4 py-4 animate-fade-in">
+        <div class="page-header mb-4">
+            <div class="page-header__title-block">
+                <p class="page-header__eyebrow">Operations</p>
+                <h1 class="page-header__title">Issue Book</h1>
+            </div>
+
+            <div class="page-header__actions">
+                <a asp-action="Index" class="btn page-header__cta">
+                    <span class="page-header__cta-icon"><i class="bi bi-arrow-left"></i></span>
+                    <span class="page-header__cta-text">Back to<br>Loans</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="issue-shell">
+            <div class="issue-card">
+                <div class="issue-card__header">
+                    <div class="issue-card__icon">
+                        <i class="bi bi-journal-check"></i>
+                    </div>
+                    <div>
+                        <h2>Book Loan</h2>
+                        <p>Create a new circulation record.</p>
+                    </div>
                 </div>
-                <div class="card-body p-4">
-                    <form asp-action="Issue">
-                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Select Member</label>
-                            <select asp-for="MemberId" class="form-select select-search" asp-items="ViewBag.Members">
-                                <option value="">-- Search by Name or Email --</option>
+                <div class="issue-card__body">
+                    <form asp-action="Issue" class="issue-form">
+                        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+                        <div class="field-group">
+                            <label class="field-label">Select Member</label>
+                            <select asp-for="MemberId" class="select-search" asp-items="ViewBag.Members">
+                                <option value="">-- Search by name or email --</option>
                             </select>
+                            <span asp-validation-for="MemberId" class="field-validation-error"></span>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Select Book</label>
-                            <select asp-for="BookId" class="form-select select-search" asp-items="ViewBag.Books">
-                                <option value="">-- Search by Title or ISBN --</option>
+                        <div class="field-group">
+                            <label class="field-label">Select Book</label>
+                            <select asp-for="BookId" class="select-search" asp-items="ViewBag.Books">
+                                <option value="">-- Search by title or ISBN --</option>
                             </select>
+                            <span asp-validation-for="BookId" class="field-validation-error"></span>
                         </div>
 
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label asp-for="LoanDate" class="form-label fw-bold">Issue Date</label>
-                                <input asp-for="LoanDate" type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                        <div class="row-inline">
+                            <div class="field-group">
+                                <label asp-for="LoanDate" class="field-label">Issue Date</label>
+                                <input asp-for="LoanDate" type="date" class="issue-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                                <span asp-validation-for="LoanDate" class="field-validation-error"></span>
                             </div>
-                            <div class="col-md-6">
-                                <label asp-for="DueDate" class="form-label fw-bold">Due Date</label>
-                                <input asp-for="DueDate" type="date" class="form-control" value="@DateTime.Now.AddDays(14).ToString("yyyy-MM-dd")" />
+
+                            <div class="field-group">
+                                <label asp-for="DueDate" class="field-label">Due Date</label>
+                                <input asp-for="DueDate" type="date" class="issue-control" value="@DateTime.Now.AddDays(14).ToString("yyyy-MM-dd")" />
+                                <span asp-validation-for="DueDate" class="field-validation-error"></span>
                             </div>
                         </div>
 
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-warning btn-lg fw-bold">
-                                <i class="bi bi-check2-circle me-1"></i>CONFIRM ISSUE
+                        <div class="field-group" style="margin-bottom: 0;">
+                            <button type="submit" class="btn issue-submit-btn">
+                                <i class="bi bi-check2-circle me-2"></i>Confirm Issue
                             </button>
                         </div>
                     </form>
@@ -58,17 +382,12 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('.select-search').select2({
                 theme: 'bootstrap-5',
-                width: '100%'
+                width: '100%',
+                dropdownParent: $('.issue-card')
             });
         });
     </script>
 }
-
-<style>
-    .bg-navy {
-        background-color: #1a237e;
-    }
-</style>

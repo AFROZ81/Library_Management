@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryPro.Web.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "LibrarianOrAdmin")]
     public class MembersController : Controller
     {
         private readonly IMemberRepository _memberRepo;
@@ -44,7 +44,7 @@ namespace LibraryPro.Web.Controllers
             if (ModelState.IsValid)
             {
                 await _memberRepo.AddAsync(member);
-                TempData["Success"] = $"Member '{member.Name}' registered successfully!"; 
+                TempData["Success"] = $"Member '{member.Name}' registered successfully!";
                 return RedirectToAction(nameof(Index));
             }
             return View(member);
@@ -109,28 +109,6 @@ namespace LibraryPro.Web.Controllers
                 TempData["Success"] = "Member record removed permanently."; // ADD THIS
             }
             return RedirectToAction(nameof(Index));
-        }
-
-        // 3. This will now work because _loanRepo is defined!
-        public async Task<IActionResult> Profile(int id)
-        {
-            var member = await _memberRepo.GetByIdAsync(id);
-            if (member == null) return NotFound();
-
-            var allLoans = await _loanRepo.GetAllLoansAsync();
-            var memberLoans = allLoans.Where(l => l.MemberId == id);
-
-            var viewModel = new MemberProfileViewModel
-            {
-                MemberId = member.Id,
-                Name = member.Name,
-                Email = member.Email,
-                TotalUnpaidFine = memberLoans.Where(l => !l.IsReturned).Sum(l => l.CalculateLateFee),
-                ActiveLoans = memberLoans.Where(l => !l.IsReturned).ToList(),
-                PastHistory = memberLoans.Where(l => l.IsReturned).OrderByDescending(l => l.ReturnDate).ToList()
-            };
-
-            return View(viewModel);
         }
 
         [HttpPost]

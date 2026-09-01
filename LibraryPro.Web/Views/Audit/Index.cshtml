@@ -4,219 +4,500 @@
     ViewData["Title"] = "Audit Logs";
 }
 
-<div class="container mt-5 animate-slide-up">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-lg border-0 rounded-3">
-                <div class="card-header text-white py-4" style="background-color: #1a237e;">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center">
-                            <div class="display-6 me-3"><i class="bi bi-shield-lock-fill"></i></div>
-                            <div>
-                                <h4 class="mb-0 fw-bold">Audit Logs</h4>
-                                <p class="small opacity-75 mb-0">System activity and security audit trail</p>
-                            </div>
-                        </div>
-                        <form asp-action="ClearOldLogs" method="post" class="d-flex align-items-center">
-                            <input type="number" name="retentionDays" class="form-control form-control-sm me-2" placeholder="Days" min="30" value="90" style="width: 100px;" />
-                            <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Are you sure you want to delete logs older than the specified days?');">
-                                <i class="bi bi-trash me-1"></i> Clear Old Logs
-                            </button>
-                        </form>
+<div class="container-fluid px-4 py-4 animate-fade-in">
+    <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-center mb-4 gap-3">
+        <div class="flex-grow-1">
+            <h1 class="fw-bold text-dark mb-0"><i class="bi bi-shield-lock-fill text-primary me-2"></i> Audit Logs</h1>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <form asp-action="ClearOldLogs" method="post" class="d-flex align-items-center">
+                <input type="number" name="retentionDays" class="form-control form-control-sm me-2" placeholder="Days"
+                       min="30" value="90" style="width: 100px;" />
+                <button type="submit" class="btn btn-warning btn-sm"
+                        onclick="return confirm('Are you sure you want to delete logs older than the specified days?');">
+                    <i class="bi bi-trash me-1"></i> Clear Old Logs
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+            <div class="card border-0 shadow-sm p-4 bg-light-blue h-100">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                         style="width: 48px; height: 48px;">
+                        <i class="bi bi-journal-text fs-5"></i>
+                    </div>
+                    <div>
+                        <small class="text-uppercase fw-bold text-primary opacity-75 d-block">Total Logs</small>
+                        <h3 class="fw-bold mb-0">@Model.TotalLogs</h3>
                     </div>
                 </div>
-
-                <div class="card-body p-4 p-lg-5">
-                    <!-- Filters -->
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <form asp-action="Index" method="get" class="row g-3">
-                                <div class="col-md-2">
-                                    <select name="operationType" class="form-select form-select-sm">
-                                        @if (string.IsNullOrEmpty(Model.OperationType))
-                                        {
-                                            <option value="" selected>All Operations</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="">All Operations</option>
-                                        }
-                                        @foreach (var op in ViewData["OperationTypes"] as List<string> ?? new List<string>())
-                                        {
-                                            @if (op == Model.OperationType)
-                                            {
-                                                <option value="@op" selected>@op</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="@op">@op</option>
-                                            }
-                                        }
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <select name="entityType" class="form-select form-select-sm">
-                                        @if (string.IsNullOrEmpty(Model.EntityType))
-                                        {
-                                            <option value="" selected>All Entities</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="">All Entities</option>
-                                        }
-                                        @foreach (var entity in ViewData["EntityTypes"] as List<string> ?? new List<string>())
-                                        {
-                                            @if (entity == Model.EntityType)
-                                            {
-                                                <option value="@entity" selected>@entity</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="@entity">@entity</option>
-                                            }
-                                        }
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <input type="date" name="startDate" class="form-control form-control-sm" value="@(Model.StartDate?.ToString("yyyy-MM-dd"))" />
-                                </div>
-                                <div class="col-md-2">
-                                    <input type="date" name="endDate" class="form-control form-control-sm" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" />
-                                </div>
-                                <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary btn-sm w-100">
-                                        <i class="bi bi-filter me-1"></i> Filter
-                                    </button>
-                                </div>
-                                <div class="col-md-2">
-                                    <a asp-action="Index" class="btn btn-secondary btn-sm w-100">
-                                        <i class="bi bi-x-circle me-1"></i> Reset
-                                    </a>
-                                </div>
-                            </form>
-                        </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+            <div class="card border-0 shadow-sm p-4 bg-success-soft h-100">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center"
+                         style="width: 48px; height: 48px;">
+                        <i class="bi bi-check-circle fs-5"></i>
                     </div>
-
-                    <!-- Audit Logs Table -->
-                    <div class="table-responsive">
-                        <table class="table table-hover table-bordered">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Timestamp</th>
-                                    <th>User</th>
-                                    <th>Action</th>
-                                    <th>Controller</th>
-                                    <th>Operation</th>
-                                    <th>IP Address</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var log in Model.AuditLogs)
-                                {
-                                    <tr class="@(log.IsSuccess ? "" : "table-danger")">
-                                        <td>@log.FormattedTimestamp</td>
-                                        <td>
-                                            <div>@log.UserName</div>
-                                            <small class="text-muted">@log.UserId</small>
-                                        </td>
-                                        <td>@log.Action</td>
-                                        <td>@log.Controller</td>
-                                        <td>
-                                            <span class="badge @(log.OperationType switch
-                                            {
-                                                "Create" => "bg-success",
-                                                "Read" => "bg-info",
-                                                "Update" => "bg-warning",
-                                                "Delete" => "bg-danger",
-                                                "Login" => "bg-primary",
-                                                "Logout" => "bg-secondary",
-                                                _ => "bg-secondary"
-                                            })">@log.OperationType</span>
-                                        </td>
-                                        <td>@log.IpAddress</td>
-                                        <td>
-                                            @if (log.IsSuccess)
-                                            {
-                                                <span class="badge bg-success">Success</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-danger">Failed</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            <a asp-action="Details" asp-route-id="@log.Id" class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                    <div>
+                        <small class="text-uppercase fw-bold text-success opacity-75 d-block">Successful</small>
+                        <h3 class="fw-bold mb-0">@Model.AuditLogs.Count(l => l.IsSuccess)</h3>
                     </div>
-
-                    <!-- Pagination -->
-                    @if (Model.TotalPages > 1)
-                    {
-                        <nav aria-label="Page navigation" class="mt-4">
-                            <ul class="pagination justify-content-center">
-                                @if (Model.CurrentPage > 1)
-                                {
-                                    <li class="page-item">
-                                        <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.CurrentPage - 1)" 
-                                           asp-route-operationType="@Model.OperationType" 
-                                           asp-route-entityType="@Model.EntityType"
-                                           asp-route-startDate="@Model.StartDate"
-                                           asp-route-endDate="@Model.EndDate">Previous</a>
-                                    </li>
-                                }
-
-                                @for (int i = 1; i <= Model.TotalPages; i++)
-                                {
-                                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
-                                        <a class="page-link" asp-action="Index" asp-route-pageNumber="@i"
-                                           asp-route-operationType="@Model.OperationType"
-                                           asp-route-entityType="@Model.EntityType"
-                                           asp-route-startDate="@Model.StartDate"
-                                           asp-route-endDate="@Model.EndDate">@i</a>
-                                    </li>
-                                }
-
-                                @if (Model.CurrentPage < Model.TotalPages)
-                                {
-                                    <li class="page-item">
-                                        <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.CurrentPage + 1)"
-                                           asp-route-operationType="@Model.OperationType"
-                                           asp-route-entityType="@Model.EntityType"
-                                           asp-route-startDate="@Model.StartDate"
-                                           asp-route-endDate="@Model.EndDate">Next</a>
-                                    </li>
-                                }
-                            </ul>
-                        </nav>
-                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+            <div class="card border-0 shadow-sm p-4 bg-danger-soft h-100">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center"
+                         style="width: 48px; height: 48px;">
+                        <i class="bi bi-exclamation-triangle fs-5"></i>
+                    </div>
+                    <div>
+                        <small class="text-uppercase fw-bold text-danger opacity-75 d-block">Failed</small>
+                        <h3 class="fw-bold mb-0">@Model.AuditLogs.Count(l => !l.IsSuccess)</h3>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<style>
-    .animate-slide-up {
-        animation: slideUp 0.6s ease-out;
-    }
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+            <form asp-action="Index" method="get" class="row g-3">
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <label class="form-label fw-semibold text-secondary small text-uppercase">Operation Type</label>
+                    <select name="operationType" class="form-select">
+                        @if (string.IsNullOrEmpty(Model.OperationType))
+                        {
+                            <option value="" selected>All Operations</option>
+                        }
+                        else
+                        {
+                            <option value="">All Operations</option>
+                        }
+                        @foreach (var op in ViewData["OperationTypes"] as List<string> ?? new List<string>())
+                        {
+                            @if (op == Model.OperationType)
+                            {
+                                <option value="@op" selected>@op</option>
+                            }
+                            else
+                            {
+                                <option value="@op">@op</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <label class="form-label fw-semibold text-secondary small text-uppercase">Entity Type</label>
+                    <select name="entityType" class="form-select">
+                        @if (string.IsNullOrEmpty(Model.EntityType))
+                        {
+                            <option value="" selected>All Entities</option>
+                        }
+                        else
+                        {
+                            <option value="">All Entities</option>
+                        }
+                        @foreach (var entity in ViewData["EntityTypes"] as List<string> ?? new List<string>())
+                        {
+                            @if (entity == Model.EntityType)
+                            {
+                                <option value="@entity" selected>@entity</option>
+                            }
+                            else
+                            {
+                                <option value="@entity">@entity</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                    <label class="form-label fw-semibold text-secondary small text-uppercase">Start Date</label>
+                    <input type="date" name="startDate" class="form-control"
+                           value="@(Model.StartDate?.ToString("yyyy-MM-dd"))" />
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                    <label class="form-label fw-semibold text-secondary small text-uppercase">End Date</label>
+                    <input type="date" name="endDate" class="form-control"
+                           value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" />
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-2 d-flex align-items-end">
+                    <div class="d-flex gap-2 w-100">
+                        <button type="submit" class="btn btn-primary flex-grow-1">
+                            <i class="bi bi-filter me-1"></i> Filter
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    @@keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(40px);
-        }
+    <!-- Desktop Table View -->
+    <div class="card shadow-sm border-0 d-none d-md-block">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-dark text-white">
+                        <tr>
+                            <th class="ps-4 py-3 border-0">Timestamp</th>
+                            <th class="py-3 border-0">User</th>
+                            <th class="py-3 border-0">Activity</th>
+                            <th class="py-3 border-0">Module</th>
+                            <th class="py-3 border-0">Type</th>
+                            <th class="py-3 border-0">IP Address</th>
+                            <th class="py-3 border-0">Status</th>
+                            <th class="py-3 border-0 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in Model.AuditLogs)
+                        {
+                            <tr class="@(log.IsSuccess ? "" : "table-danger")">
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary-soft p-2 rounded-2 me-3 flex-shrink-0">
+                                            <i class="bi bi-clock text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <span class="fw-bold d-block">@log.FormattedTimestamp</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle-sm me-2 flex-shrink-0">
+                                            @(string.IsNullOrEmpty(log.UserName) ? "U" : log.UserName.Substring(0,
+                                            1).ToUpper())</div>
+                                            <div>
+                                                <span class="fw-medium d-block">@log.UserName</span>
+                                                <small class="text-muted">@log.UserId</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="fw-medium text-dark">@log.FriendlyDescription</td>
+                                    <td>@log.Controller</td>
+                                    <td>
+                                        <span class="badge @(log.OperationType switch
+                                              {
+                                                  "Create" => "bg-success-soft text-success",
+                                                  "Read" => "bg-info-soft text-info",
+                                                  "Update" => "bg-warning-soft text-warning",
+                                                  "Delete" => "bg-danger-soft text-danger",
+                                                  "Login" => "bg-primary-soft text-primary",
+                                                  "Logout" => "bg-secondary-soft text-secondary",
+                                                  _ => "bg-secondary-soft text-secondary"
+                                              }) rounded-pill">@log.OperationType</span>
+                                    </td>
+                                    <td class="text-muted">@log.IpAddress</td>
+                                    <td>
+                                        @if (log.IsSuccess)
+                                        {
+                                            <span class="badge bg-success-soft text-success rounded-pill">Success</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger-soft text-danger rounded-pill">Failed</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <a asp-action="Details" asp-route-id="@log.Id"
+                                           class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                            @if (!Model.AuditLogs.Any())
+                            {
+                                <tr>
+                                    <td colspan="8" class="text-center py-5 text-muted">
+                                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                        No audit logs found matching your criteria.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
+        <!-- Mobile Card View -->
+        <div class="d-md-none">
+            @if (!Model.AuditLogs.Any())
+            {
+                <div class="card border-0 shadow-sm p-5 text-center bg-white">
+                    <i class="bi bi-inbox fs-1 text-muted opacity-25"></i>
+                    <p class="text-muted mt-2 mb-0">No audit logs found matching your criteria.</p>
+                </div>
+            }
+            else
+            {
+                <div class="row g-3">
+                    @foreach (var log in Model.AuditLogs)
+                    {
+                        <div class="col-12">
+                            <div
+                                class="card border-0 shadow-sm @(log.IsSuccess ? "" : "border-start border-4 border-danger") transition-lift">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div class="d-flex align-items-center flex-grow-1 min-w-0">
+                                            <div class="bg-primary-soft p-3 rounded-3 me-3 flex-shrink-0">
+                                                <i class="bi bi-clock text-primary fs-5"></i>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <h6 class="fw-bold mb-0 text-truncate">@log.FormattedTimestamp</h6>
+                                                <small class="text-muted text-truncate d-block">@log.Controller</small>
+                                            </div>
+                                        </div>
+                                        <div class="ms-2 flex-shrink-0">
+                                            @if (log.IsSuccess)
+                                            {
+                                                <span class="badge bg-success-soft text-success rounded-pill">Success</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger-soft text-danger rounded-pill">Failed</span>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-6">
+                                            <div class="bg-light rounded-2 p-2">
+                                                <small class="text-muted text-uppercase fw-bold d-block mb-1">User</small>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-circle-sm me-2 flex-shrink-0">
+                                                        @(string.IsNullOrEmpty(log.UserName) ? "U" : log.UserName.Substring(0,
+                                                        1).ToUpper())</div>
+                                                        <span class="fw-medium text-truncate">@log.UserName</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="bg-light rounded-2 p-2">
+                                                    <small class="text-muted text-uppercase fw-bold d-block mb-1">Type</small>
+                                                    <span class="badge @(log.OperationType switch
+                                                          {
+                                                              "Create" => "bg-success-soft text-success",
+                                                              "Read" => "bg-info-soft text-info",
+                                                              "Update" => "bg-warning-soft text-warning",
+                                                              "Delete" => "bg-danger-soft text-danger",
+                                                              "Login" => "bg-primary-soft text-primary",
+                                                              "Logout" => "bg-secondary-soft text-secondary",
+                                                              _ => "bg-secondary-soft text-secondary"
+                                                          }) rounded-pill">@log.OperationType</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="bg-light rounded-2 p-3 mb-3">
+                                            <small class="text-muted text-uppercase fw-bold d-block mb-1">Activity</small>
+                                            <div class="fw-medium text-dark">@log.FriendlyDescription</div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                <i class="bi bi-hdd-network me-1"></i>@log.IpAddress
+                                            </small>
+                                            <a asp-action="Details" asp-route-id="@log.Id"
+                                               class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                <i class="bi bi-eye"></i> View Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        @if (Model.CurrentPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.CurrentPage - 1)"
+                                   asp-route-operationType="@Model.OperationType" asp-route-entityType="@Model.EntityType"
+                                   asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">Previous</a>
+                            </li>
+                        }
+
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-pageNumber="@i"
+                                   asp-route-operationType="@Model.OperationType" asp-route-entityType="@Model.EntityType"
+                                   asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">@i</a>
+                            </li>
+                        }
+
+                        @if (Model.CurrentPage < Model.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.CurrentPage + 1)"
+                                   asp-route-operationType="@Model.OperationType" asp-route-entityType="@Model.EntityType"
+                                   asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">Next</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        </div>
+
+        <style>
+            /* Gradient Avatar Small */
+            .avatar-circle-sm {
+                width: 32px;
+                height: 32px;
+                background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+                color: white;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 0.8rem;
+                flex-shrink: 0;
+            }
+
+            /* Soft Colors */
+            .bg-success-soft {
+                background-color: #ecfdf5;
+                color: #059669;
+            }
+
+            .bg-danger-soft {
+                background-color: #fef2f2;
+                color: #dc2626;
+                border: 1px solid #fee2e2;
+            }
+
+            .bg-warning-soft {
+                background-color: #fffbeb;
+                color: #d97706;
+            }
+
+            .bg-info-soft {
+                background-color: #eff6ff;
+                color: #3b82f6;
+            }
+
+            .bg-primary-soft {
+                background-color: #e0e7ff;
+                color: #4f46e5;
+            }
+
+            .bg-secondary-soft {
+                background-color: #f3f4f6;
+                color: #6b7280;
+            }
+
+            .bg-light-blue {
+                background-color: #f0f4ff;
+            }
+
+            /* Modern Table Header */
+            .table thead th {
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                font-weight: 700;
+            }
+
+            /* Row Hover Effect */
+            .table-hover tbody tr:hover {
+                background-color: #f8fafc;
+                cursor: pointer;
+            }
+
+            /* Animation */
+            .animate-fade-in {
+                animation: fadeIn 0.4s ease-out;
+            }
+
+            .transition-lift:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            }
+
+            @@keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(8px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Mobile Responsive Enhancements */
+            @@media (max-width: 768px) {
+                .avatar-circle-sm {
+                    width: 28px;
+                    height: 28px;
+                    font-size: 0.7rem;
+                }
+
+                .card-body {
+                    padding: 1rem;
+                }
+
+                .btn-sm {
+                    font-size: 0.8rem;
+                }
+
+                .pagination {
+                    flex-wrap: wrap;
+                }
+
+                .page-link {
+                    padding: 0.375rem 0.75rem;
+                    font-size: 0.875rem;
+                }
+            }
+
+            @@media (max-width: 576px) {
+                .card {
+                    border-radius: 8px;
+                }
+
+                .card-body {
+                    padding: 0.875rem;
+                }
+
+                .badge {
+                    font-size: 0.7rem;
+                }
+
+                .pagination {
+                    gap: 0.25rem;
+                }
+            }
+
+            /* Utility for text truncation */
+            .text-truncate {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .min-w-0 {
+                min-width: 0;
+            }
+        </style>

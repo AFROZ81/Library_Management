@@ -7,6 +7,7 @@ namespace LibraryPro.Web.Repositories
         Task<IEnumerable<Member>> GetAllAsync();
         Task AddAsync(Member member);
         Task<Member?> GetByIdAsync(int id);
+        Task<Member?> GetByEmailAsync(string email);
         Task UpdateAsync(Member member); // Added for Edit functionality
         Task DeleteAsync(int id);       // Already in your interface
     }

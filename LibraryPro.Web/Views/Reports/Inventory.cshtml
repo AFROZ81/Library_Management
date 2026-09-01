@@ -4,67 +4,65 @@
     ViewData["Title"] = "Inventory Status Report";
 }
 
-<div class="container mt-5 animate-slide-up">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-lg border-0 rounded-3">
-                <div class="card-header text-white py-4 d-flex justify-content-between align-items-center" style="background-color: #6c757d;">
+<div class="report-page">
+    <div class="container-fluid px-3 px-md-4 py-4 py-lg-5">
+        <div class="report-shell">
+            <div class="page-header">
+                <div class="page-header__title-block">
+                    <p class="page-header__eyebrow">Operations</p>
+                    <h1 class="page-header__title">Inventory Status</h1>
+                </div>
+                <div class="page-header__actions">
+                    <a asp-action="Index" class="page-header__back-link">
+                        <i class="bi bi-arrow-left me-1"></i>Back
+                    </a>
+                </div>
+            </div>
+
+            <div class="report-card">
+                <div class="report-card__header report-card__header--secondary">
+                    <div class="report-card__header-icon"><i class="bi bi-box-seam"></i></div>
                     <div>
-                        <h4 class="mb-0 fw-bold">Inventory Status Report</h4>
-                        <p class="small opacity-75 mb-0">Generated: @Model.GeneratedAt.ToString("dd MMM yyyy HH:mm")</p>
+                        <h2>Inventory report</h2>
+                        <p>Generated: @Model.GeneratedAt.ToString("dd MMM yyyy HH:mm")</p>
                     </div>
-                    <div>
-                        <a asp-action="InventoryPdf" class="btn btn-light btn-sm me-2">
-                            <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+                    <div class="report-header-actions">
+                        <a asp-action="InventoryPdf" class="btn btn-light btn-sm report-export-btn">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>PDF
                         </a>
-                        <a asp-action="InventoryExcel" class="btn btn-success btn-sm">
-                            <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                        <a asp-action="InventoryExcel" class="btn btn-success btn-sm report-export-btn">
+                            <i class="bi bi-file-earmark-excel me-1"></i>Excel
                         </a>
                     </div>
                 </div>
 
-                <div class="card-body p-4 p-lg-5">
-                    <!-- Summary Cards -->
-                    <div class="row g-4 mb-5">
-                        <div class="col-md-3">
-                            <div class="card border-0 shadow-sm bg-secondary text-white">
-                                <div class="card-body text-center">
-                                    <h6 class="card-subtitle mb-2 opacity-75">Total Books</h6>
-                                    <h3 class="card-title fw-bold mb-0">@Model.TotalBooks</h3>
-                                </div>
-                            </div>
+                <div class="report-card__body report-card__body--wide">
+                    <div class="stat-grid">
+                        <div class="stat-card stat-card--secondary">
+                            <span class="stat-card__label">Total Books</span>
+                            <strong>@Model.TotalBooks</strong>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card border-0 shadow-sm bg-primary text-white">
-                                <div class="card-body text-center">
-                                    <h6 class="card-subtitle mb-2 opacity-75">Total Copies</h6>
-                                    <h3 class="card-title fw-bold mb-0">@Model.TotalCopies</h3>
-                                </div>
-                            </div>
+                        <div class="stat-card stat-card--primary">
+                            <span class="stat-card__label">Total Copies</span>
+                            <strong>@Model.TotalCopies</strong>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card border-0 shadow-sm bg-success text-white">
-                                <div class="card-body text-center">
-                                    <h6 class="card-subtitle mb-2 opacity-75">Available</h6>
-                                    <h3 class="card-title fw-bold mb-0">@Model.AvailableCopies</h3>
-                                </div>
-                            </div>
+                        <div class="stat-card stat-card--success">
+                            <span class="stat-card__label">Available</span>
+                            <strong>@Model.AvailableCopies</strong>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card border-0 shadow-sm bg-warning text-dark">
-                                <div class="card-body text-center">
-                                    <h6 class="card-subtitle mb-2 opacity-75">Borrowed</h6>
-                                    <h3 class="card-title fw-bold mb-0">@Model.BorrowedCopies</h3>
-                                </div>
-                            </div>
+                        <div class="stat-card stat-card--warning">
+                            <span class="stat-card__label">Borrowed</span>
+                            <strong>@Model.BorrowedCopies</strong>
                         </div>
                     </div>
 
-                    <!-- Inventory Table -->
-                    <h5 class="fw-bold mb-3">Inventory Details</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover table-bordered">
-                            <thead class="table-light">
+                    <div class="section-heading">
+                        <h3>Inventory Details</h3>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table class="report-table">
+                            <thead>
                                 <tr>
                                     <th>Title</th>
                                     <th>Author</th>
@@ -77,24 +75,20 @@
                             <tbody>
                                 @foreach (var item in Model.InventoryItems)
                                 {
-                                    <tr class="@(item.AvailableCopies == 0 ? "table-danger" : item.AvailableCopies < 3 ? "table-warning" : "")">
-                                        <td>@item.Title</td>
-                                        <td>@item.Author</td>
-                                        <td>@item.TotalCopies</td>
-                                        <td><strong>@item.AvailableCopies</strong></td>
-                                        <td>@item.BorrowedCopies</td>
-                                        <td>@string.Join(", ", item.Genre)</td>
+                                    <tr
+                                        class="@(item.AvailableCopies == 0 ? "report-row report-row--danger" : item.AvailableCopies < 3 ? "report-row report-row--warning" : "report-row")">
+                                        <td data-label="Title">@item.Title</td>
+                                        <td data-label="Author">@item.Author</td>
+                                        <td data-label="Total Copies">@item.TotalCopies</td>
+                                        <td data-label="Available"><strong>@item.AvailableCopies</strong></td>
+                                        <td data-label="Borrowed">@item.BorrowedCopies</td>
+                                        <td data-label="Genre">@string.Join(", ", item.Genre)</td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
                     </div>
 
-                    <div class="mt-4">
-                        <a asp-action="Index" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -102,19 +96,341 @@
 </div>
 
 <style>
-    .animate-slide-up {
-        animation: slideUp 0.6s ease-out;
+    :root {
+        --report-bg: #f8fafc;
+        --report-card: #ffffff;
+        --report-border: #e5e7eb;
+        --report-text: #0f172a;
+        --report-muted: #64748b;
+        --report-primary: #1d4ed8;
+        --report-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
     }
 
-    @@keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(40px);
+    .report-page {
+        min-height: calc(100vh - 56px);
+        background: var(--report-bg);
+        padding: 0 0 2.5rem;
+    }
+
+    .report-shell {
+        max-width: 1500px;
+        width: min(100%, 1500px);
+        margin: 0 auto;
+        padding: 0 0.5rem;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1.5rem;
+        padding: 0.25rem 0 0.5rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+        margin-bottom: 1.5rem;
+    }
+
+    .page-header__title-block {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-header__actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+    }
+
+    .page-header__back-link {
+        display: inline-flex;
+        align-items: center;
+        color: var(--report-muted);
+        text-decoration: none;
+        font-size: 0.88rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        transition: color 0.2s ease;
+    }
+
+    .page-header__back-link:hover {
+        color: var(--report-text);
+        text-decoration: none;
+    }
+
+    .page-header__eyebrow {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--report-muted);
+    }
+
+    .page-header__title {
+        margin: 0;
+        font-size: clamp(2rem, 3vw, 3.5rem);
+        letter-spacing: -0.06em;
+        line-height: 0.95;
+        font-weight: 700;
+        color: var(--report-text);
+    }
+
+    .report-card {
+        background: var(--report-card);
+        border: 1px solid var(--report-border);
+        border-radius: 22px;
+        box-shadow: var(--report-shadow);
+        overflow: hidden;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .report-card__header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.4rem 1.5rem;
+        border-bottom: 1px solid rgba(229, 231, 235, 0.9);
+    }
+
+    .report-card__header--secondary {
+        background: linear-gradient(135deg, #334155 0%, #64748b 100%);
+        color: #fff;
+    }
+
+    .report-card__header-icon {
+        width: 52px;
+        height: 52px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        font-size: 1.4rem;
+    }
+
+    .report-card__header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+    }
+
+    .report-card__header p {
+        margin: 0.25rem 0 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.92rem;
+    }
+
+    .report-header-actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+    }
+
+    .report-export-btn {
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    .report-card__body {
+        padding: clamp(1.25rem, 2vw, 2rem);
+    }
+
+    .report-card__body--wide {
+        padding: clamp(1.25rem, 2vw, 2rem);
+    }
+
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        border-radius: 18px;
+        padding: 1.1rem 1rem;
+        border: 1px solid var(--report-border);
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 120px;
+    }
+
+    .stat-card--secondary {
+        background: #f8fafc;
+    }
+
+    .stat-card--primary {
+        background: #eff6ff;
+    }
+
+    .stat-card--success {
+        background: #ecfdf5;
+    }
+
+    .stat-card--warning {
+        background: #fffbeb;
+    }
+
+    .stat-card__label {
+        display: block;
+        color: var(--report-muted);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 0.4rem;
+    }
+
+    .stat-card strong {
+        color: var(--report-text);
+        font-size: clamp(1.5rem, 2vw, 2rem);
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .section-heading {
+        margin: 0 0 0.9rem;
+    }
+
+    .section-heading h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--report-text);
+    }
+
+    .table-wrap {
+        overflow: hidden;
+        border: 1px solid var(--report-border);
+        border-radius: 14px;
+        background: #fff;
+    }
+
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 820px;
+    }
+
+    .report-table th,
+    .report-table td {
+        padding: 0.9rem 1rem;
+        border-bottom: 1px solid #edf2f7;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .report-table thead th {
+        background: #f8fafc;
+        color: var(--report-text);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .report-row--warning {
+        background: rgba(255, 251, 235, 0.8);
+    }
+
+    .report-row--danger {
+        background: rgba(254, 242, 242, 0.9);
+    }
+
+    .report-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .report-table tbody tr:hover {
+        background: rgba(241, 245, 249, 0.7);
+    }
+
+    @@media (max-width: 991.98px) {
+        .stat-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
         }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
+        .report-card__header {
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .report-header-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .stat-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .report-card__body {
+            padding: 1rem;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .report-table {
+            min-width: 100%;
+        }
+
+        .report-table thead {
+            display: none;
+        }
+
+        .report-table,
+        .report-table tbody,
+        .report-table tr,
+        .report-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .report-table tbody {
+            padding: 0.5rem;
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .report-table tr {
+            background: #fff;
+            border: 1px solid var(--report-border);
+            border-radius: 14px;
+            padding: 0.8rem 0.9rem;
+        }
+
+        .report-table td {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            border: none;
+            padding: 0.45rem 0;
+        }
+
+        .report-table td::before {
+            content: attr(data-label);
+            color: var(--report-muted);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
     }
 </style>

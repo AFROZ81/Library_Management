@@ -67,6 +67,7 @@ namespace LibraryPro.Web.Controllers
                 AuditLogs = paginatedLogs,
                 CurrentPage = pageNumber,
                 TotalPages = (int)Math.Ceiling(totalLogs / (double)pageSize),
+                TotalLogs = totalLogs,
                 OperationType = operationType,
                 EntityType = entityType,
                 StartDate = startDate,
@@ -132,6 +133,7 @@ namespace LibraryPro.Web.Controllers
         public List<AuditLog> AuditLogs { get; set; } = new();
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
+        public int TotalLogs { get; set; }
         public string? OperationType { get; set; }
         public string? EntityType { get; set; }
         public DateTime? StartDate { get; set; }

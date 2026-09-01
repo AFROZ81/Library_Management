@@ -22,7 +22,7 @@ if (builder.Environment.IsProduction())
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => 
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add Identity services
@@ -34,12 +34,12 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 8;
-    
+
     // Lockout settings
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
-    
+
     // User settings
     options.User.RequireUniqueEmail = true;
 })
@@ -50,9 +50,9 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole(Constants.Roles.Admin));
-    options.AddPolicy("LibrarianOrAdmin", policy => 
+    options.AddPolicy("LibrarianOrAdmin", policy =>
         policy.RequireRole(Constants.Roles.Librarian, Constants.Roles.Admin));
-    options.AddPolicy("MemberOrAbove", policy => 
+    options.AddPolicy("MemberOrAbove", policy =>
         policy.RequireRole(Constants.Roles.Member, Constants.Roles.Librarian, Constants.Roles.Admin));
 });
 
@@ -62,7 +62,6 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.HttpOnly = true;
     options.ExpireTimeSpan = TimeSpan.FromHours(1);
     options.LoginPath = "/Account/Login";
-    options.AccessDeniedPath = "/Account/AccessDenied";
     options.SlidingExpiration = true;
 });
 
@@ -173,7 +172,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "LibraryPro API v1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Libris API v1");
         c.RoutePrefix = "swagger";
     });
 }

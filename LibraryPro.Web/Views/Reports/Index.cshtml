@@ -2,147 +2,253 @@
     ViewData["Title"] = "Reports Dashboard";
 }
 
-<div class="container mt-5 animate-slide-up">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-lg border-0 rounded-3">
-                <div class="card-header text-white py-4" style="background-color: #1a237e;">
-                    <div class="d-flex align-items-center">
-                        <div class="display-6 me-3"><i class="bi bi-bar-chart-fill"></i></div>
-                        <div>
-                            <h4 class="mb-0 fw-bold">Reports Dashboard</h4>
-                            <p class="small opacity-75 mb-0">Generate and export comprehensive library reports</p>
-                        </div>
-                    </div>
+<div class="report-page">
+    <div class="container-fluid px-3 px-md-4 py-4 py-lg-5">
+        <div class="report-shell">
+            <div class="page-header">
+                <div class="page-header__title-block">
+                    <p class="page-header__eyebrow">Analytics</p>
+                    <h1 class="page-header__title">Reports</h1>
                 </div>
+            </div>
 
-                <div class="card-body p-4 p-lg-5">
-                    <div class="row g-4">
-                        <!-- Circulation Reports -->
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
-                                <div class="card-body text-center p-4">
-                                    <div class="mb-3">
-                                        <i class="bi bi-book-half text-primary" style="font-size: 3rem;"></i>
-                                    </div>
-                                    <h5 class="card-title fw-bold mb-2">Circulation Reports</h5>
-                                    <p class="card-text text-muted small mb-3">Track book loans, returns, and borrowing patterns</p>
-                                    <a asp-action="Circulation" class="btn btn-primary btn-sm">
-                                        <i class="bi bi-arrow-right me-1"></i> Generate
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Financial Reports -->
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
-                                <div class="card-body text-center p-4">
-                                    <div class="mb-3">
-                                        <i class="bi bi-currency-rupee text-success" style="font-size: 3rem;"></i>
-                                    </div>
-                                    <h5 class="card-title fw-bold mb-2">Financial Reports</h5>
-                                    <p class="card-text text-muted small mb-3">Fine collections and payment analytics</p>
-                                    <a asp-action="Financial" class="btn btn-success btn-sm">
-                                        <i class="bi bi-arrow-right me-1"></i> Generate
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Popular Books Reports -->
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
-                                <div class="card-body text-center p-4">
-                                    <div class="mb-3">
-                                        <i class="bi bi-star-fill text-warning" style="font-size: 3rem;"></i>
-                                    </div>
-                                    <h5 class="card-title fw-bold mb-2">Popular Books</h5>
-                                    <p class="card-text text-muted small mb-3">Most borrowed books analysis</p>
-                                    <a asp-action="PopularBooks" class="btn btn-warning btn-sm">
-                                        <i class="bi bi-arrow-right me-1"></i> Generate
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Member Activity Reports -->
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
-                                <div class="card-body text-center p-4">
-                                    <div class="mb-3">
-                                        <i class="bi bi-people-fill text-info" style="font-size: 3rem;"></i>
-                                    </div>
-                                    <h5 class="card-title fw-bold mb-2">Member Activity</h5>
-                                    <p class="card-text text-muted small mb-3">Member borrowing statistics and activity</p>
-                                    <a asp-action="MemberActivity" class="btn btn-info btn-sm">
-                                        <i class="bi bi-arrow-right me-1"></i> Generate
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Overdue Books Report -->
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
-                                <div class="card-body text-center p-4">
-                                    <div class="mb-3">
-                                        <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 3rem;"></i>
-                                    </div>
-                                    <h5 class="card-title fw-bold mb-2">Overdue Books</h5>
-                                    <p class="card-text text-muted small mb-3">Current overdue books and late fees</p>
-                                    <a asp-action="OverdueBooks" class="btn btn-danger btn-sm">
-                                        <i class="bi bi-arrow-right me-1"></i> Generate
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Inventory Status Report -->
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
-                                <div class="card-body text-center p-4">
-                                    <div class="mb-3">
-                                        <i class="bi bi-box-seam-fill text-secondary" style="font-size: 3rem;"></i>
-                                    </div>
-                                    <h5 class="card-title fw-bold mb-2">Inventory Status</h5>
-                                    <p class="card-text text-muted small mb-3">Complete library inventory overview</p>
-                                    <a asp-action="Inventory" class="btn btn-secondary btn-sm">
-                                        <i class="bi bi-arrow-right me-1"></i> Generate
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+            <div class="report-grid">
+                <a asp-action="Circulation" class="report-card report-card--primary">
+                    <div class="report-card__icon"><i class="bi bi-book-half"></i></div>
+                    <div class="report-card__content">
+                        <h3>Circulation</h3>
+                        <p>Track loans, returns, and borrowing patterns.</p>
                     </div>
-                </div>
+                    <span class="report-card__link">Open report <i class="bi bi-arrow-right"></i></span>
+                </a>
+
+                <a asp-action="Financial" class="report-card report-card--success">
+                    <div class="report-card__icon"><i class="bi bi-currency-rupee"></i></div>
+                    <div class="report-card__content">
+                        <h3>Financial</h3>
+                        <p>Fine collections and payment insights.</p>
+                    </div>
+                    <span class="report-card__link">Open report <i class="bi bi-arrow-right"></i></span>
+                </a>
+
+                <a asp-action="PopularBooks" class="report-card report-card--warning">
+                    <div class="report-card__icon"><i class="bi bi-star-fill"></i></div>
+                    <div class="report-card__content">
+                        <h3>Popular Books</h3>
+                        <p>Identify the most borrowed titles.</p>
+                    </div>
+                    <span class="report-card__link">Open report <i class="bi bi-arrow-right"></i></span>
+                </a>
+
+                <a asp-action="MemberActivity" class="report-card report-card--info">
+                    <div class="report-card__icon"><i class="bi bi-people-fill"></i></div>
+                    <div class="report-card__content">
+                        <h3>Member Activity</h3>
+                        <p>View borrowing behavior and engagement.</p>
+                    </div>
+                    <span class="report-card__link">Open report <i class="bi bi-arrow-right"></i></span>
+                </a>
+
+                <a asp-action="OverdueBooks" class="report-card report-card--danger">
+                    <div class="report-card__icon"><i class="bi bi-exclamation-triangle"></i></div>
+                    <div class="report-card__content">
+                        <h3>Overdue Books</h3>
+                        <p>Monitor late books and fee exposure.</p>
+                    </div>
+                    <span class="report-card__link">Open report <i class="bi bi-arrow-right"></i></span>
+                </a>
+
+                <a asp-action="Inventory" class="report-card report-card--secondary">
+                    <div class="report-card__icon"><i class="bi bi-box-seam"></i></div>
+                    <div class="report-card__content">
+                        <h3>Inventory</h3>
+                        <p>Audit stock availability and copies.</p>
+                    </div>
+                    <span class="report-card__link">Open report <i class="bi bi-arrow-right"></i></span>
+                </a>
             </div>
         </div>
     </div>
 </div>
 
 <style>
-    .hover-shadow:hover {
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    :root {
+        --report-bg: #f8fafc;
+        --report-card: #ffffff;
+        --report-border: #e5e7eb;
+        --report-text: #0f172a;
+        --report-muted: #64748b;
+        --report-primary: #1d4ed8;
+        --report-primary-soft: #eff6ff;
+        --report-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    .report-page {
+        min-height: calc(100vh - 56px);
+        background: var(--report-bg);
+        padding: 0 0 2.5rem;
+    }
+
+    .report-shell {
+        max-width: none;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1.5rem;
+        padding: 0.25rem 0 0.5rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+        margin-bottom: 1.5rem;
+    }
+
+    .page-header__title-block {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-header__eyebrow {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--report-muted);
+    }
+
+    .page-header__title {
+        margin: 0;
+        font-size: clamp(2rem, 3vw, 3.5rem);
+        letter-spacing: -0.06em;
+        line-height: 0.95;
+        font-weight: 700;
+        color: var(--report-text);
+    }
+
+    .report-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.25rem;
+        margin-top: 1.5rem;
+    }
+
+    .report-card {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        gap: 1rem;
+        background: var(--report-card);
+        border: 1px solid var(--report-border);
+        border-radius: 20px;
+        padding: 1.4rem 1.3rem;
+        box-shadow: var(--report-shadow);
+        color: var(--report-text);
+        text-decoration: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .report-card:hover {
+        text-decoration: none;
+        color: var(--report-text);
         transform: translateY(-2px);
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.09);
+        border-color: rgba(148, 163, 184, 0.45);
     }
 
-    .transition-all {
-        transition: all 0.3s ease;
+    .report-card__icon {
+        width: 60px;
+        height: 60px;
+        display: grid;
+        place-items: center;
+        border-radius: 16px;
+        font-size: 1.7rem;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.7);
     }
 
-    .animate-slide-up {
-        animation: slideUp 0.6s ease-out;
+    .report-card__content {
+        min-width: 0;
     }
 
-    @@keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(40px);
+    .report-card__content h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    .report-card__content p {
+        margin: 0.4rem 0 0;
+        color: var(--report-muted);
+        font-size: 0.86rem;
+        line-height: 1.5;
+    }
+
+    .report-card__link {
+        grid-column: 1 / -1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.45rem;
+        margin-top: 0.25rem;
+        color: var(--report-primary);
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .report-card--primary .report-card__icon {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .report-card--success .report-card__icon {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .report-card--warning .report-card__icon {
+        background: #fffbeb;
+        color: #d97706;
+    }
+
+    .report-card--info .report-card__icon {
+        background: #f0f9ff;
+        color: #0284c7;
+    }
+
+    .report-card--danger .report-card__icon {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .report-card--secondary .report-card__icon {
+        background: #f3f4f6;
+        color: #475569;
+    }
+
+    @@media (max-width: 991.98px) {
+        .report-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
         }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
+        .report-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .report-card {
+            padding: 1.1rem 1rem;
         }
     }
 </style>

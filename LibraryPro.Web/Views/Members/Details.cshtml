@@ -4,16 +4,20 @@
     ViewData["Title"] = "Member Info";
 }
 
-<div class="container py-5 animate-fade-in">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Patrons</a></li>
-                <li class="breadcrumb-item active">@Model.Name</li>
-            </ol>
-        </nav>
-        <div class="d-flex gap-2">
-            <a asp-action="Edit" asp-route-id="@Model.MemberId" class="btn btn-outline-primary rounded-pill px-3 shadow-sm">
+<div class="container-fluid px-4 py-4 animate-fade-in">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-4">
+        <div class="flex-grow-1">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Patrons</a></li>
+                    <li class="breadcrumb-item active">@Model.Name</li>
+                </ol>
+            </nav>
+            <h1 class="fw-bold text-dark mb-0">Member Information</h1>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.MemberId"
+               class="btn btn-outline-primary rounded-pill px-3 shadow-sm">
                 <i class="bi bi-pencil-square me-2"></i>Edit
             </a>
             <button class="btn btn-outline-dark rounded-pill px-3 shadow-sm" onclick="window.print()">
@@ -22,19 +26,8 @@
         </div>
     </div>
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show border-0 shadow-lg mb-4" role="alert">
-            <div class="d-flex align-items-center">
-                <i class="bi bi-check-circle-fill fs-4 me-3"></i>
-                <div>@TempData["SuccessMessage"]</div>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-
     <div class="row g-4">
-        <div class="col-lg-4">
+        <div class="col-12 col-lg-4 col-xl-3">
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body text-center p-4">
                     <div class="avatar-header mx-auto mb-3 shadow">
@@ -45,14 +38,14 @@
 
                     <div class="text-start mt-4">
                         <div class="d-flex align-items-center mb-3">
-                            <i class="bi bi-envelope text-muted me-3 fs-5"></i>
-                            <div>
+                            <i class="bi bi-envelope text-muted me-3 fs-5 flex-shrink-0"></i>
+                            <div class="min-w-0">
                                 <small class="text-muted d-block">Email Address</small>
-                                <span class="fw-medium">@Model.Email</span>
+                                <span class="fw-medium text-truncate d-block">@Model.Email</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-center mb-3">
-                            <i class="bi bi-hash text-muted me-3 fs-5"></i>
+                            <i class="bi bi-hash text-muted me-3 fs-5 flex-shrink-0"></i>
                             <div>
                                 <small class="text-muted d-block">Member ID</small>
                                 <span class="fw-medium">#@Model.MemberId.ToString("D5")</span>
@@ -95,140 +88,213 @@
             </div>
         </div>
 
-        <div class="col-lg-8">
+        <div class="col-12 col-lg-8 col-xl-9">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-white border-bottom-0 p-3">
                     <ul class="nav nav-pills nav-justified gap-2" id="memberTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active fw-bold py-2 shadow-sm" id="loans-tab" data-bs-toggle="pill" data-bs-target="#loans-content" type="button" role="tab">
-                                <span class="text-inherit"><i class="bi bi-book me-2"></i>Active Loans (@Model.ActiveLoans.Count)</span>
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link fw-bold py-2 shadow-sm border" id="history-tab" data-bs-toggle="pill" data-bs-target="#history-content" type="button" role="tab">
-                                <span class="text-inherit"><i class="bi bi-clock-history me-2"></i>Borrowing History</span>
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="card-body pt-0">
-                    <div class="tab-content mt-3" id="memberTabsContent">
-                        <div class="tab-pane fade show active" id="loans-content" role="tabpanel" aria-labelledby="loans-tab">
-                            @if (!Model.ActiveLoans.Any())
-                            {
-                                <div class="text-center py-5 opacity-50">
-                                    <i class="bi bi-journal-check display-4"></i>
-                                    <p class="mt-2">No books currently checked out.</p>
-                                </div>
-                            }
-                            else
-                            {
-                                @foreach (var loan in Model.ActiveLoans)
-                                {
-                                    <div class="d-flex align-items-center justify-content-between p-3 mb-3 border rounded-3 transition-lift">
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-primary text-white p-3 rounded-3 me-3">
-                                                <i class="bi bi-book"></i>
-                                            </div>
-                                            <div>
-                                                <h6 class="fw-bold mb-0">@loan.Book?.Title</h6>
-                                                <small class="@(loan.DueDate < DateTime.Now.Date ? "text-danger fw-bold" : "text-muted")">
-                                                    Due: @loan.DueDate.ToString("MMM dd, yyyy")
-                                                </small>
-                                            </div>
-                                        </div>
-                                        <form asp-controller="Loans" asp-action="Return" method="post">
-                                            <input type="hidden" name="loanId" value="@loan.Id" />
-                                            <button type="submit" class="btn btn-sm btn-outline-primary px-3 rounded-pill">Process Return</button>
-                                        </form>
-                                    </div>
-                                }
-                            }
+                        <li class="nav-item flex-grow-1" role="presentation">
+                            <button class="nav-link active fw-bold py-2 shadow-sm w-100" id="loans-tab"
+                                    data-bs-toggle="pill" data-bs-target="#loans-content" type="button" role="tab">
+                                <span class="text-inherit"><i class="bi bi-book me-2"></i>Active Loans
+                                    (@Model.ActiveLoans.Count)</span>
+                                </button>
+                            </li>
+                            <li class="nav-item flex-grow-1" role="presentation">
+                                <button class="nav-link fw-bold py-2 shadow-sm border w-100" id="history-tab"
+                                        data-bs-toggle="pill" data-bs-target="#history-content" type="button" role="tab">
+                                    <span class="text-inherit"><i class="bi bi-clock-history me-2"></i>Borrowing
+                                        History</span>
+                                    </button>
+                                </li>
+                            </ul>
                         </div>
 
-                        <div class="tab-pane fade" id="history-content" role="tabpanel" aria-labelledby="history-tab">
-                            <div class="table-responsive">
-                                <table class="table align-middle table-hover">
-                                    <thead class="bg-light small text-muted">
-                                        <tr>
-                                            <th>Title</th>
-                                            <th>Borrowed</th>
-                                            <th>Returned</th>
-                                            <th class="text-end">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var hist in Model.PastHistory.OrderByDescending(x => x.ReturnDate))
+                        <div class="card-body pt-0">
+                            <div class="tab-content mt-3" id="memberTabsContent">
+                                <div class="tab-pane fade show active" id="loans-content" role="tabpanel"
+                                     aria-labelledby="loans-tab">
+                                    @if (!Model.ActiveLoans.Any())
+                                    {
+                                        <div class="text-center py-5 opacity-50">
+                                            <i class="bi bi-journal-check display-4"></i>
+                                            <p class="mt-2">No books currently checked out.</p>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var loan in Model.ActiveLoans)
                                         {
-                                            <tr>
-                                                <td class="fw-bold">@hist.Book?.Title</td>
-                                                <td class="small">@hist.LoanDate.ToShortDateString()</td>
-                                                <td class="small">@hist.ReturnDate?.ToShortDateString()</td>
-                                                <td class="text-end">
-                                                    <span class="badge bg-success-soft text-success rounded-pill">Returned</span>
-                                                </td>
-                                            </tr>
+                                            <div
+                                                class="d-flex flex-column flex-sm-row align-items-center justify-content-between p-3 mb-3 border rounded-3 transition-lift gap-3">
+                                                <div class="d-flex align-items-center w-100">
+                                                    <div class="bg-primary text-white p-3 rounded-3 me-3 flex-shrink-0">
+                                                        <i class="bi bi-book"></i>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <h6 class="fw-bold mb-0 text-truncate">@loan.Book?.Title</h6>
+                                                        <small
+                                                            class="@(loan.DueDate < DateTime.Now.Date ? "text-danger fw-bold" : "text-muted")">
+                                                            Due: @loan.DueDate.ToString("MMM dd, yyyy")
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                                <form asp-controller="Loans" asp-action="Return" method="post" class="flex-shrink-0">
+                                                    <input type="hidden" name="loanId" value="@loan.Id" />
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-primary px-3 rounded-pill w-100">Process
+                                                        Return</button>
+                                                    </form>
+                                                </div>
+                                            }
                                         }
-                                    </tbody>
-                                </table>
+                                    </div>
+
+                                    <div class="tab-pane fade" id="history-content" role="tabpanel" aria-labelledby="history-tab">
+                                        <div class="table-responsive">
+                                            <table class="table align-middle table-hover">
+                                                <thead class="bg-light small text-muted">
+                                                    <tr>
+                                                        <th>Title</th>
+                                                        <th class="d-none d-md-table-cell">Borrowed</th>
+                                                        <th class="d-none d-md-table-cell">Returned</th>
+                                                        <th class="text-end">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var hist in Model.PastHistory.OrderByDescending(x => x.ReturnDate))
+                                                    {
+                                                        <tr>
+                                                            <td class="fw-bold">
+                                                                <div class="d-flex flex-column">
+                                                                    <span>@hist.Book?.Title</span>
+                                                                    <small
+                                                                        class="text-muted d-md-none">@hist.LoanDate.ToShortDateString()
+                                                                        - @hist.ReturnDate?.ToShortDateString()</small>
+                                                                    </div>
+                                                                </td>
+                                                                <td class="small d-none d-md-table-cell">@hist.LoanDate.ToShortDateString()
+                                                                </td>
+                                                                <td class="small d-none d-md-table-cell">
+                                                                    @hist.ReturnDate?.ToShortDateString()</td>
+                                                                    <td class="text-end">
+                                                                        <span
+                                                                        class="badge bg-success-soft text-success rounded-pill">Returned</span>
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<style>
-    .avatar-header {
-        width: 100px;
-        height: 100px;
-        background: linear-gradient(45deg, #1a237e, #3949ab);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 3rem;
-        font-weight: 800;
-        border-radius: 50%;
-        border: 4px solid #fff;
-    }
+                    <style>
+                        .avatar-header {
+                            width: 100px;
+                            height: 100px;
+                            background: linear-gradient(45deg, #1a237e, #3949ab);
+                            color: white;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 3rem;
+                            font-weight: 800;
+                            border-radius: 50%;
+                            border: 4px solid #fff;
+                        }
 
-    .bg-success-soft {
-        background-color: #e8f5e9;
-    }
+                        .bg-success-soft {
+                            background-color: #e8f5e9;
+                        }
 
-    /* Fixed Nav Styles */
-    .nav-pills .nav-link {
-        color: #444 !important; /* Dark grey for inactive tabs */
-        opacity: 1 !important;
-        background-color: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 50px !important;
-        margin: 0 2px;
-    }
+                        /* Fixed Nav Styles */
+                        .nav-pills .nav-link {
+                            color: #444 !important;
+                            /* Dark grey for inactive tabs */
+                            opacity: 1 !important;
+                            background-color: #f8f9fa;
+                            border: 1px solid #dee2e6;
+                            border-radius: 50px !important;
+                            margin: 0 2px;
+                        }
 
-        .nav-pills .nav-link.active {
-            background-color: #1a237e !important;
-            color: #ffffff !important;
-            border-color: #1a237e;
-        }
+                        .nav-pills .nav-link.active {
+                            background-color: #1a237e !important;
+                            color: #ffffff !important;
+                            border-color: #1a237e;
+                        }
 
-    .transition-lift:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
+                        .transition-lift:hover {
+                            transform: translateY(-3px);
+                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                        }
 
-    @@media print {
-        .btn, .nav, .breadcrumb, form {
-            display: none !important;
-        }
+                        /* Mobile Responsive Enhancements */
+                        @@media (max-width: 768px) {
+                            .avatar-header {
+                                width: 80px;
+                                height: 80px;
+                                font-size: 2.5rem;
+                            }
 
-        .card {
-            border: 1px solid #ddd !important;
-            box-shadow: none !important;
-        }
-    }
-</style>
+                            .card-body {
+                                padding: 1rem;
+                            }
+
+                            .nav-pills .nav-link {
+                                font-size: 0.9rem;
+                                padding: 0.5rem 1rem;
+                            }
+
+                            .btn-sm {
+                                font-size: 0.8rem;
+                            }
+                        }
+
+                        @@media (max-width: 576px) {
+                            .avatar-header {
+                                width: 70px;
+                                height: 70px;
+                                font-size: 2rem;
+                            }
+
+                            .card-header {
+                                padding: 0.75rem 1rem;
+                            }
+
+                            .display-6 {
+                                font-size: 1.5rem;
+                            }
+                        }
+
+                        /* Utility for text truncation */
+                        .text-truncate {
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                        }
+
+                        .min-w-0 {
+                            min-width: 0;
+                        }
+
+                        @@media print {
+
+                            .btn,
+                            .nav,
+                            .breadcrumb,
+                            form {
+                                display: none !important;
+                            }
+
+                            .card {
+                                border: 1px solid #ddd !important;
+                                box-shadow: none !important;
+                            }
+                        }
+                    </style>

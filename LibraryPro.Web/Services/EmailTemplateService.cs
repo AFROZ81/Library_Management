@@ -23,7 +23,7 @@ namespace LibraryPro.Web.Services
 <body>
     <div class='container'>
         <div class='header'>
-            <h1>📚 LibraryPro - Overdue Notice</h1>
+            <h1>📚 Libris - Overdue Notice</h1>
         </div>
         <div class='content'>
             <p>Dear {memberName},</p>
@@ -39,12 +39,12 @@ namespace LibraryPro.Web.Services
             <p>Please return the book as soon as possible to avoid additional fines. The fine increases by ₹10 per day.</p>
             <p>If you have already returned this book, please contact the library staff.</p>
             <p style='margin-top: 20px;'>
-                <a href='http://localhost:5002/Members/Profile' class='button'>View Your Account</a>
+                <a href='http://localhost:5002/Members/Details' class='button'>View Your Account</a>
             </p>
         </div>
         <div class='footer'>
-            <p>This is an automated message from LibraryPro. Please do not reply to this email.</p>
-            <p>© {DateTime.Now.Year} LibraryPro. All rights reserved.</p>
+            <p>This is an automated message from Libris. Please do not reply to this email.</p>
+            <p>© {DateTime.Now.Year} Libris. All rights reserved.</p>
         </div>
     </div>
 </body>
@@ -72,7 +72,7 @@ namespace LibraryPro.Web.Services
 <body>
     <div class='container'>
         <div class='header'>
-            <h1>📚 LibraryPro - Due Date Reminder</h1>
+            <h1>📚 Libris - Due Date Reminder</h1>
         </div>
         <div class='content'>
             <p>Dear {memberName},</p>
@@ -86,12 +86,12 @@ namespace LibraryPro.Web.Services
             </ul>
             <p>Please return or renew the book before the due date to avoid late fees.</p>
             <p style='margin-top: 20px;'>
-                <a href='http://localhost:5002/Members/Profile' class='button'>View Your Account</a>
+                <a href='http://localhost:5002/Members/Details' class='button'>View Your Account</a>
             </p>
         </div>
         <div class='footer'>
-            <p>This is an automated message from LibraryPro. Please do not reply to this email.</p>
-            <p>© {DateTime.Now.Year} LibraryPro. All rights reserved.</p>
+            <p>This is an automated message from Libris. Please do not reply to this email.</p>
+            <p>© {DateTime.Now.Year} Libris. All rights reserved.</p>
         </div>
     </div>
 </body>
@@ -105,7 +105,7 @@ namespace LibraryPro.Web.Services
 <html>
 <head>
     <meta charset='utf-8'>
-    <title>Welcome to LibraryPro</title>
+    <title>Welcome to Libris</title>
     <style>
         body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
         .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
@@ -119,13 +119,13 @@ namespace LibraryPro.Web.Services
 <body>
     <div class='container'>
         <div class='header'>
-            <h1>📚 Welcome to LibraryPro!</h1>
+            <h1>📚 Welcome to Libris!</h1>
         </div>
         <div class='content'>
             <div class='success'>
                 <strong>Welcome, {memberName}!</strong>
             </div>
-            <p>Thank you for joining LibraryPro. Your account has been successfully created.</p>
+            <p>Thank you for joining Libris. Your account has been successfully created.</p>
             <h3>Your Account Details:</h3>
             <ul>
                 <li><strong>Name:</strong> {memberName}</li>
@@ -137,8 +137,8 @@ namespace LibraryPro.Web.Services
             </p>
         </div>
         <div class='footer'>
-            <p>This is an automated message from LibraryPro. Please do not reply to this email.</p>
-            <p>© {DateTime.Now.Year} LibraryPro. All rights reserved.</p>
+            <p>This is an automated message from Libris. Please do not reply to this email.</p>
+            <p>© {DateTime.Now.Year} Libris. All rights reserved.</p>
         </div>
     </div>
 </body>
@@ -166,7 +166,7 @@ namespace LibraryPro.Web.Services
 <body>
     <div class='container'>
         <div class='header'>
-            <h1>📚 LibraryPro - Reservation Available</h1>
+            <h1>📚 Libris - Reservation Available</h1>
         </div>
         <div class='content'>
             <p>Dear {memberName},</p>
@@ -179,12 +179,12 @@ namespace LibraryPro.Web.Services
             </ul>
             <p>Please visit the library to collect your book within 3 days. After this period, the reservation will be cancelled.</p>
             <p style='margin-top: 20px;'>
-                <a href='http://localhost:5002/Members/Profile' class='button'>View Your Account</a>
+                <a href='http://localhost:5002/Members/Details' class='button'>View Your Account</a>
             </p>
         </div>
         <div class='footer'>
-            <p>This is an automated message from LibraryPro. Please do not reply to this email.</p>
-            <p>© {DateTime.Now.Year} LibraryPro. All rights reserved.</p>
+            <p>This is an automated message from Libris. Please do not reply to this email.</p>
+            <p>© {DateTime.Now.Year} Libris. All rights reserved.</p>
         </div>
     </div>
 </body>

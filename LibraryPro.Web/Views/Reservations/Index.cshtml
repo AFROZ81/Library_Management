@@ -4,70 +4,376 @@
     ViewData["Title"] = "Reservations";
 }
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-calendar-check text-primary me-2"></i> Book Reservations</h2>
-    </div>
-
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success">@TempData["Success"]</div>
-    }
-
-    <div class="card border-0 shadow-sm">
-        <div class="table-responsive">
-            <table class="table align-middle mb-0">
-                <thead class="bg-light">
-                    <tr>
-                        <th>Book</th>
-                        <th>Member</th>
-                        <th>Reserved On</th>
-                        <th>Queue Position</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>@item.Book?.Title</td>
-                            <td>@item.Member?.Name</td>
-                            <td>@item.ReservationDate.ToString("g")</td>
-                            <td><span class="badge bg-secondary">#@item.QueuePosition</span></td>
-                            <td>
-                                @if (item.Status == LibraryPro.Web.Models.Entities.ReservationStatus.Pending)
-                                {
-                                    <span class="badge bg-warning text-dark">Pending</span>
-                                }
-                                else if (item.Status == LibraryPro.Web.Models.Entities.ReservationStatus.Fulfilled)
-                                {
-                                    <span class="badge bg-success">Fulfilled</span>
-                                }
-                                else if (item.Status == LibraryPro.Web.Models.Entities.ReservationStatus.Cancelled)
-                                {
-                                    <span class="badge bg-danger">Cancelled</span>
-                                }
-                            </td>
-                            <td>
-                                @if (item.Status == LibraryPro.Web.Models.Entities.ReservationStatus.Pending)
-                                {
-                                    <form asp-action="Cancel" method="post" class="d-inline">
-                                        <input type="hidden" name="id" value="@item.Id" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
-                                    </form>
-                                }
-                            </td>
-                        </tr>
-                    }
-                    @if (!Model.Any())
-                    {
-                        <tr>
-                            <td colspan="6" class="text-center py-4 text-muted">No reservations found.</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+<div class="container-fluid px-4 py-4 animate-fade-in">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div class="flex-grow-1">
+            <h1 class="fw-bold text-dark mb-0"><i class="bi bi-calendar-check text-primary me-2"></i> Book Reservations
+            </h1>
+            <p class="text-muted mb-0">Manage book reservations and queue positions</p>
+        </div>
+        <div class="d-flex gap-2">
+            <div class="input-group shadow-sm" style="width: 250px;">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" id="reservationSearch" class="form-control border-start-0 ps-0"
+                       placeholder="Search reservations...">
+            </div>
         </div>
     </div>
-</div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+            <div class="card border-0 shadow-sm p-4 bg-light-blue h-100">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                         style="width: 48px; height: 48px;">
+                        <i class="bi bi-calendar-check fs-5"></i>
+                    </div>
+                    <div>
+                        <small class="text-uppercase fw-bold text-primary opacity-75 d-block">Total Reservations</small>
+                        <h3 class="fw-bold mb-0">@Model.Count()</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+            <div class="card border-0 shadow-sm p-4 bg-warning-soft h-100">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center"
+                         style="width: 48px; height: 48px;">
+                        <i class="bi bi-clock fs-5"></i>
+                    </div>
+                    <div>
+                        <small class="text-uppercase fw-bold text-warning opacity-75 d-block">Pending</small>
+                        <h3 class="fw-bold mb-0">@Model.Count(r => r.Status ==
+                                                        LibraryPro.Web.Models.Entities.ReservationStatus.Pending)</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+                <div class="card border-0 shadow-sm p-4 bg-success-soft h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center"
+                             style="width: 48px; height: 48px;">
+                            <i class="bi bi-check-circle fs-5"></i>
+                        </div>
+                        <div>
+                            <small class="text-uppercase fw-bold text-success opacity-75 d-block">Fulfilled</small>
+                            <h3 class="fw-bold mb-0">@Model.Count(r => r.Status ==
+                                                            LibraryPro.Web.Models.Entities.ReservationStatus.Fulfilled)</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desktop Table View -->
+            <div class="card border-0 shadow-sm d-none d-md-block">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-dark text-white">
+                                <tr>
+                                    <th class="ps-4 py-3 border-0">Book</th>
+                                    <th class="py-3 border-0">Member</th>
+                                    <th class="py-3 border-0">Reserved On</th>
+                                    <th class="py-3 border-0">Queue Position</th>
+                                    <th class="py-3 border-0">Status</th>
+                                    <th class="py-3 border-0 text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-primary-soft p-2 rounded-2 me-3 flex-shrink-0">
+                                                    <i class="bi bi-book text-primary"></i>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <span class="fw-bold d-block text-truncate">@item.Book?.Title</span>
+                                                    <small class="text-muted text-truncate d-block">@item.Book?.Author</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-circle-sm me-2 flex-shrink-0">
+                                                    @(string.IsNullOrEmpty(item.Member?.Name) ? "M" : item.Member.Name.Substring(0,
+                                                    1).ToUpper())</div>
+                                                    <span class="fw-medium">@item.Member?.Name</span>
+                                                </div>
+                                            </td>
+                                            <td class="text-muted">
+                                                <i class="bi bi-calendar3 me-2"></i>@item.ReservationDate.ToString("MMM dd, yyyy")
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary rounded-pill">#@item.QueuePosition</span>
+                                            </td>
+                                            <td>
+                                                @if (item.Status == LibraryPro.Web.Models.Entities.ReservationStatus.Pending)
+                                                {
+                                                    <span class="badge bg-warning text-dark rounded-pill">Pending</span>
+                                                }
+                                                else if (item.Status == LibraryPro.Web.Models.Entities.ReservationStatus.Fulfilled)
+                                                {
+                                                    <span class="badge bg-success-soft text-success rounded-pill">Fulfilled</span>
+                                                }
+                                                else if (item.Status == LibraryPro.Web.Models.Entities.ReservationStatus.Cancelled)
+                                                {
+                                                    <span class="badge bg-danger-soft text-danger rounded-pill">Cancelled</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                @if (item.Status == LibraryPro.Web.Models.Entities.ReservationStatus.Pending)
+                                                {
+                                                    <form asp-action="Cancel" method="post" class="d-inline">
+                                                        <input type="hidden" name="id" value="@item.Id" />
+                                                        <button type="submit"
+                                                                class="btn btn-sm btn-outline-danger rounded-pill px-3">Cancel</button>
+                                                    </form>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                    @if (!Model.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="6" class="text-center py-5 text-muted">
+                                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                                No reservations found.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="d-md-none">
+                    @if (!Model.Any())
+                    {
+                        <div class="card border-0 shadow-sm p-5 text-center bg-white">
+                            <i class="bi bi-inbox fs-1 text-muted opacity-25"></i>
+                            <p class="text-muted mt-2 mb-0">No reservations found.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row g-3">
+                            @foreach (var item in Model)
+                            {
+                                <div class="col-12">
+                                    <div class="card border-0 shadow-sm transition-lift">
+                                        <div class="card-body p-4">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <div class="d-flex align-items-center flex-grow-1 min-w-0">
+                                                    <div class="bg-primary-soft p-3 rounded-3 me-3 flex-shrink-0">
+                                                        <i class="bi bi-book text-primary fs-5"></i>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <h6 class="fw-bold mb-0 text-truncate">@item.Book?.Title</h6>
+                                                        <small class="text-muted text-truncate d-block">@item.Book?.Author</small>
+                                                    </div>
+                                                </div>
+                                                <div class="ms-2 flex-shrink-0">
+                                                    @if (item.Status == LibraryPro.Web.Models.Entities.ReservationStatus.Pending)
+                                                    {
+                                                        <span class="badge bg-warning text-dark rounded-pill">Pending</span>
+                                                    }
+                                                    else if (item.Status == LibraryPro.Web.Models.Entities.ReservationStatus.Fulfilled)
+                                                    {
+                                                        <span class="badge bg-success-soft text-success rounded-pill">Fulfilled</span>
+                                                    }
+                                                    else if (item.Status == LibraryPro.Web.Models.Entities.ReservationStatus.Cancelled)
+                                                    {
+                                                        <span class="badge bg-danger-soft text-danger rounded-pill">Cancelled</span>
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-6">
+                                                    <div class="bg-light rounded-2 p-2">
+                                                        <small class="text-muted text-uppercase fw-bold d-block mb-1">Member</small>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-circle-sm me-2 flex-shrink-0">
+                                                                @(string.IsNullOrEmpty(item.Member?.Name) ? "M" :
+                                                                item.Member.Name.Substring(0, 1).ToUpper())</div>
+                                                                <span class="fw-medium text-truncate">@item.Member?.Name</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="bg-light rounded-2 p-2">
+                                                            <small class="text-muted text-uppercase fw-bold d-block mb-1">Queue Position</small>
+                                                            <span class="badge bg-secondary rounded-pill">#@item.QueuePosition</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-calendar3 me-1"></i>@item.ReservationDate.ToString("MMM dd, yyyy")
+                                                    </small>
+                                                    @if (item.Status == LibraryPro.Web.Models.Entities.ReservationStatus.Pending)
+                                                    {
+                                                        <form asp-action="Cancel" method="post" class="mb-0">
+                                                            <input type="hidden" name="id" value="@item.Id" />
+                                                            <button type="submit"
+                                                                    class="btn btn-sm btn-outline-danger rounded-pill px-3">Cancel</button>
+                                                        </form>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <style>
+                    /* Gradient Avatar Small */
+                    .avatar-circle-sm {
+                        width: 32px;
+                        height: 32px;
+                        background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+                        color: white;
+                        border-radius: 8px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: bold;
+                        font-size: 0.8rem;
+                        flex-shrink: 0;
+                    }
+
+                    /* Soft Colors */
+                    .bg-success-soft {
+                        background-color: #ecfdf5;
+                        color: #059669;
+                    }
+
+                    .bg-danger-soft {
+                        background-color: #fef2f2;
+                        color: #dc2626;
+                        border: 1px solid #fee2e2;
+                    }
+
+                    .bg-warning-soft {
+                        background-color: #fffbeb;
+                        color: #d97706;
+                    }
+
+                    .bg-light-blue {
+                        background-color: #f0f4ff;
+                    }
+
+                    .bg-primary-soft {
+                        background-color: #e0e7ff;
+                    }
+
+                    /* Modern Table Header */
+                    .table thead th {
+                        font-size: 0.75rem;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                        font-weight: 700;
+                    }
+
+                    /* Row Hover Effect */
+                    .table-hover tbody tr:hover {
+                        background-color: #f8fafc;
+                        cursor: pointer;
+                    }
+
+                    /* Animation */
+                    .animate-fade-in {
+                        animation: fadeIn 0.4s ease-out;
+                    }
+
+                    .transition-lift:hover {
+                        transform: translateY(-3px);
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                    }
+
+                    @@keyframes fadeIn {
+                        from {
+                            opacity: 0;
+                            transform: translateY(8px);
+                        }
+
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+
+                    /* Mobile Responsive Enhancements */
+                    @@media (max-width: 768px) {
+                        .avatar-circle-sm {
+                            width: 28px;
+                            height: 28px;
+                            font-size: 0.7rem;
+                        }
+
+                        .card-body {
+                            padding: 1rem;
+                        }
+
+                        .btn-sm {
+                            font-size: 0.8rem;
+                        }
+                    }
+
+                    @@media (max-width: 576px) {
+                        .card {
+                            border-radius: 8px;
+                        }
+
+                        .card-body {
+                            padding: 0.875rem;
+                        }
+
+                        .badge {
+                            font-size: 0.7rem;
+                        }
+                    }
+
+                    /* Utility for text truncation */
+                    .text-truncate {
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+
+                    .min-w-0 {
+                        min-width: 0;
+                    }
+                </style>
+
+                @section Scripts {
+                    <script>
+                        // Real-time Search
+                        document.getElementById('reservationSearch').addEventListener('keyup', function () {
+                            let value = this.value.toLowerCase();
+
+                            // Search in table rows
+                            let tableRows = document.querySelectorAll('tbody tr');
+                            tableRows.forEach(row => {
+                                row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+                            });
+
+                            // Search in mobile cards
+                            let mobileCards = document.querySelectorAll('.d-md-none .col-12');
+                            mobileCards.forEach(card => {
+                                card.style.display = card.innerText.toLowerCase().includes(value) ? '' : 'none';
+                            });
+                        });
+                    </script>
+                }

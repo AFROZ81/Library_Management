@@ -4,125 +4,537 @@
     ViewData["Title"] = "System Policy Settings";
 }
 
-<div class="container py-4">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h2 class="fw-bold mb-1"><i class="bi bi-sliders text-primary me-2"></i>Library Policy Settings</h2>
-            <p class="text-muted mb-0">Configure operational rules, loan periods, fine rates, and member limits.</p>
-        </div>
-        <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill">
-            <i class="bi bi-clock-history me-1"></i> Last updated: @Model.UpdatedAt.ToString("g")
-        </span>
-    </div>
+<div class="settings-page">
+    <div class="container-fluid px-3 px-md-4 py-4 py-lg-5">
+        <div class="settings-shell">
+            <header class="page-header">
+                <div class="page-header__title-block">
+                    <p class="page-header__eyebrow">Administration</p>
+                    <h1 class="page-header__title">Library Policy Settings</h1>
+                </div>
+                <div class="page-header__actions">
+                    <span class="page-header__pill">
+                        <i class="bi bi-clock-history me-1"></i>Last updated: @Model.UpdatedAt.ToString("g")
+                    </span>
+                </div>
+            </header>
 
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+            <form asp-action="Index" method="post" class="settings-form">
+                <input type="hidden" asp-for="Id" />
 
-    <form asp-action="Index" method="post">
-        <input type="hidden" asp-for="Id" />
-        
-        <div class="row g-4">
-            <!-- Circulation & Loan Rules Card -->
-            <div class="col-lg-6">
-                <div class="card border-0 shadow-sm h-100 rounded-4">
-                    <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="p-2 bg-primary-subtle text-primary rounded-3">
-                                <i class="bi bi-book-half fs-5"></i>
+                <div class="settings-grid">
+                    <section class="settings-card settings-card--primary">
+                        <div class="settings-card__header">
+                            <div class="settings-card__icon">
+                                <i class="bi bi-book-half"></i>
                             </div>
                             <div>
-                                <h5 class="fw-bold mb-0">Circulation & Loan Rules</h5>
-                                <small class="text-muted">Manage loan durations and member limits</small>
+                                <h2>Circulation & Loan Rules</h2>
+                                <p>Manage loan durations and member limits</p>
+                            </div>
+                        </div>
+
+                        <div class="settings-card__body">
+                            <div class="field-group">
+                                <label asp-for="DefaultLoanPeriodDays" class="field-label">Default Loan Period</label>
+                                <div class="settings-input-group">
+                                    <input asp-for="DefaultLoanPeriodDays" class="settings-input" type="number" min="1"
+                                           max="365" />
+                                    <span class="settings-input-suffix">Days</span>
+                                </div>
+                                <span asp-validation-for="DefaultLoanPeriodDays" class="field-validation-error"></span>
+                                <small class="field-help">Standard initial loan period for books issued to
+                                    members.</small>
+                                </div>
+
+                                <div class="field-group">
+                                    <label asp-for="MaxBooksPerMember" class="field-label">Max Books Per Member</label>
+                                    <div class="settings-input-group">
+                                        <input asp-for="MaxBooksPerMember" class="settings-input" type="number" min="1"
+                                               max="50" />
+                                        <span class="settings-input-suffix">Books</span>
+                                    </div>
+                                    <span asp-validation-for="MaxBooksPerMember" class="field-validation-error"></span>
+                                    <small class="field-help">Maximum number of active book loans permitted per member
+                                        simultaneously.</small>
+                                    </div>
+
+                                    <div class="field-group">
+                                        <label asp-for="MaxRenewalAttempts" class="field-label">Max Renewal Attempts</label>
+                                        <div class="settings-input-group">
+                                            <input asp-for="MaxRenewalAttempts" class="settings-input" type="number" min="0"
+                                                   max="10" />
+                                            <span class="settings-input-suffix">Times</span>
+                                        </div>
+                                        <span asp-validation-for="MaxRenewalAttempts" class="field-validation-error"></span>
+                                        <small class="field-help">Maximum times a member can extend their book loan due
+                                            date.</small>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="settings-card settings-card--warning">
+                                    <div class="settings-card__header">
+                                        <div class="settings-card__icon settings-card__icon--warning">
+                                            <i class="bi bi-cash-stack"></i>
+                                        </div>
+                                        <div>
+                                            <h2>Fines & Penalties Policy</h2>
+                                            <p>Configure overdue penalty calculations</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="settings-card__body">
+                                        <div class="field-group">
+                                            <label asp-for="DailyFineRate" class="field-label">Daily Fine Rate</label>
+                                            <div class="settings-input-group">
+                                                <span class="settings-input-prefix">₹</span>
+                                                <input asp-for="DailyFineRate" class="settings-input" type="number" step="0.50"
+                                                       min="0" />
+                                                <span class="settings-input-suffix">/ Day</span>
+                                            </div>
+                                            <span asp-validation-for="DailyFineRate" class="field-validation-error"></span>
+                                            <small class="field-help">Daily fine amount charged for each day a book is returned
+                                                after its due date.</small>
+                                            </div>
+
+                                            <div class="field-group">
+                                                <label asp-for="GracePeriodDays" class="field-label">Grace Period</label>
+                                                <div class="settings-input-group">
+                                                    <input asp-for="GracePeriodDays" class="settings-input" type="number" min="0"
+                                                           max="30" />
+                                                    <span class="settings-input-suffix">Days</span>
+                                                </div>
+                                                <span asp-validation-for="GracePeriodDays" class="field-validation-error"></span>
+                                                <small class="field-help">Number of days after due date before fines start
+                                                    accumulating.</small>
+                                                </div>
+                                            </div>
+                                        </section>
+
+                                        <section class="settings-card settings-card--info">
+                                            <div class="settings-card__header">
+                                                <div class="settings-card__icon settings-card__icon--info">
+                                                    <i class="bi bi-info-circle"></i>
+                                                </div>
+                                                <div>
+                                                    <h2>System Information</h2>
+                                                    <p>Current policy status and details</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="settings-card__body">
+                                                <div class="settings-summary-list">
+                                                    <div class="settings-summary-item">
+                                                        <small>Current Loan Period</small>
+                                                        <div>
+                                                            <i class="bi bi-calendar-check"></i>
+                                                            <span>@Model.DefaultLoanPeriodDays days</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="settings-summary-item">
+                                                        <small>Max Books Per Member</small>
+                                                        <div>
+                                                            <i class="bi bi-stack"></i>
+                                                            <span>@Model.MaxBooksPerMember books</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="settings-summary-item">
+                                                        <small>Daily Fine Rate</small>
+                                                        <div>
+                                                            <i class="bi bi-cash"></i>
+                                                            <span>₹@Model.DailyFineRate / day</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="settings-summary-item">
+                                                        <small>Settings Updated</small>
+                                                        <div>
+                                                            <i class="bi bi-clock"></i>
+                                                            <span>@Model.UpdatedAt.ToString("g")</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="settings-actionbar">
+                                        <button type="submit" class="btn btn-primary settings-submit">
+                                            <i class="bi bi-save me-2"></i>Save Policy Settings
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
-                    <div class="card-body p-4">
-                        <div class="mb-3">
-                            <label asp-for="DefaultLoanPeriodDays" class="form-label fw-semibold"></label>
-                            <div class="input-group">
-                                <input asp-for="DefaultLoanPeriodDays" class="form-control" type="number" min="1" max="365" />
-                                <span class="input-group-text bg-light">Days</span>
-                            </div>
-                            <span asp-validation-for="DefaultLoanPeriodDays" class="text-danger small"></span>
-                            <div class="form-text">Standard initial loan period for books issued to members.</div>
-                        </div>
 
-                        <div class="mb-3">
-                            <label asp-for="MaxBooksPerMember" class="form-label fw-semibold"></label>
-                            <div class="input-group">
-                                <input asp-for="MaxBooksPerMember" class="form-control" type="number" min="1" max="50" />
-                                <span class="input-group-text bg-light">Books</span>
-                            </div>
-                            <span asp-validation-for="MaxBooksPerMember" class="text-danger small"></span>
-                            <div class="form-text">Maximum number of active book loans permitted per member simultaneously.</div>
-                        </div>
+                    <style>
+                        :root {
+                            --settings-bg: #f8fafc;
+                            --settings-card: #ffffff;
+                            --settings-border: #e5e7eb;
+                            --settings-text: #0f172a;
+                            --settings-muted: #64748b;
+                            --settings-primary: #1d4ed8;
+                            --settings-primary-soft: #eff6ff;
+                            --settings-warning: #d97706;
+                            --settings-warning-soft: #fff7ed;
+                            --settings-info: #0284c7;
+                            --settings-info-soft: #f0f9ff;
+                            --settings-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+                        }
 
-                        <div class="mb-3">
-                            <label asp-for="MaxRenewalAttempts" class="form-label fw-semibold"></label>
-                            <div class="input-group">
-                                <input asp-for="MaxRenewalAttempts" class="form-control" type="number" min="0" max="10" />
-                                <span class="input-group-text bg-light">Times</span>
-                            </div>
-                            <span asp-validation-for="MaxRenewalAttempts" class="text-danger small"></span>
-                            <div class="form-text">Maximum times a member can extend their book loan due date.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        .settings-page {
+                            min-height: calc(100vh - 56px);
+                            background: linear-gradient(180deg, #f8fafc 0%, #eef3f9 100%);
+                            padding: 0 0 2.5rem;
+                        }
 
-            <!-- Fines & Penalties Policy Card -->
-            <div class="col-lg-6">
-                <div class="card border-0 shadow-sm h-100 rounded-4">
-                    <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="p-2 bg-warning-subtle text-warning rounded-3">
-                                <i class="bi bi-cash-stack fs-5"></i>
-                            </div>
-                            <div>
-                                <h5 class="fw-bold mb-0">Fines & Penalties Policy</h5>
-                                <small class="text-muted">Configure overdue penalty calculations</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="mb-3">
-                            <label asp-for="DailyFineRate" class="form-label fw-semibold"></label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light">₹</span>
-                                <input asp-for="DailyFineRate" class="form-control" type="number" step="0.50" min="0" />
-                                <span class="input-group-text bg-light">/ Day</span>
-                            </div>
-                            <span asp-validation-for="DailyFineRate" class="text-danger small"></span>
-                            <div class="form-text">Daily fine amount charged for each day a book is returned after its due date.</div>
-                        </div>
+                        .settings-shell {
+                            max-width: 1500px;
+                            width: min(100%, 1500px);
+                            margin: 0 auto;
+                            padding: 0 0.5rem;
+                        }
 
-                        <div class="mb-3">
-                            <label asp-for="GracePeriodDays" class="form-label fw-semibold"></label>
-                            <div class="input-group">
-                                <input asp-for="GracePeriodDays" class="form-control" type="number" min="0" max="30" />
-                                <span class="input-group-text bg-light">Days</span>
-                            </div>
-                            <span asp-validation-for="GracePeriodDays" class="text-danger small"></span>
-                            <div class="form-text">Number of days after due date before fines start accumulating.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                        .page-header {
+                            display: flex;
+                            align-items: flex-end;
+                            justify-content: space-between;
+                            gap: 1.5rem;
+                            padding: 0.25rem 0 0.5rem;
+                            border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+                            margin-bottom: 1.5rem;
+                        }
 
-        <div class="d-flex justify-content-end mt-4">
-            <button type="submit" class="btn btn-primary px-4 py-2 rounded-3 shadow-sm fw-bold">
-                <i class="bi bi-save me-1"></i> Save Policy Settings
-            </button>
-        </div>
-    </form>
-</div>
+                        .page-header__title-block {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: flex-start;
+                        }
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+                        .page-header__eyebrow {
+                            margin: 0;
+                            font-size: 0.82rem;
+                            font-weight: 700;
+                            letter-spacing: 0.18em;
+                            text-transform: uppercase;
+                            color: var(--settings-muted);
+                        }
+
+                        .page-header__title {
+                            margin: 0;
+                            font-size: clamp(2rem, 3vw, 3.5rem);
+                            letter-spacing: -0.06em;
+                            line-height: 0.95;
+                            font-weight: 700;
+                            color: var(--settings-text);
+                        }
+
+                        .page-header__actions {
+                            margin-left: auto;
+                            display: flex;
+                            align-items: center;
+                        }
+
+                        .page-header__pill {
+                            display: inline-flex;
+                            align-items: center;
+                            border-radius: 999px;
+                            background: rgba(29, 78, 216, 0.08);
+                            border: 1px solid rgba(29, 78, 216, 0.12);
+                            color: var(--settings-primary);
+                            padding: 0.7rem 1rem;
+                            font-size: 0.8rem;
+                            font-weight: 700;
+                        }
+
+                        .settings-alert {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            gap: 1rem;
+                            padding: 1rem 1.1rem;
+                            border-radius: 16px;
+                            border: 1px solid transparent;
+                            margin-bottom: 1.5rem;
+                        }
+
+                        .settings-alert--success {
+                            background: #ecfdf5;
+                            border-color: #bbf7d0;
+                            color: #166534;
+                        }
+
+                        .settings-alert__content {
+                            display: flex;
+                            align-items: center;
+                            gap: 0.75rem;
+                            font-weight: 600;
+                        }
+
+                        .settings-alert__content i {
+                            font-size: 1.2rem;
+                        }
+
+                        .settings-form {
+                            display: grid;
+                            gap: 1.5rem;
+                        }
+
+                        .settings-grid {
+                            display: grid;
+                            grid-template-columns: repeat(3, minmax(0, 1fr));
+                            gap: 1.25rem;
+                        }
+
+                        .settings-card {
+                            background: var(--settings-card);
+                            border: 1px solid var(--settings-border);
+                            border-radius: 22px;
+                            box-shadow: var(--settings-shadow);
+                            overflow: hidden;
+                            min-height: 100%;
+                        }
+
+                        .settings-card__header {
+                            display: flex;
+                            align-items: center;
+                            gap: 1rem;
+                            padding: 1.4rem 1.35rem;
+                            border-bottom: 1px solid rgba(229, 231, 235, 0.95);
+                            background: #fff;
+                        }
+
+                        .settings-card__icon {
+                            width: 52px;
+                            height: 52px;
+                            display: grid;
+                            place-items: center;
+                            border-radius: 14px;
+                            background: rgba(29, 78, 216, 0.1);
+                            color: var(--settings-primary);
+                            font-size: 1.4rem;
+                            border: 1px solid rgba(29, 78, 216, 0.12);
+                        }
+
+                        .settings-card__icon--warning {
+                            background: rgba(217, 119, 6, 0.1);
+                            color: var(--settings-warning);
+                            border-color: rgba(217, 119, 6, 0.12);
+                        }
+
+                        .settings-card__icon--info {
+                            background: rgba(2, 132, 199, 0.1);
+                            color: var(--settings-info);
+                            border-color: rgba(2, 132, 199, 0.12);
+                        }
+
+                        .settings-card__header h2 {
+                            margin: 0;
+                            font-size: 1.3rem;
+                            font-weight: 700;
+                            letter-spacing: -0.03em;
+                            color: var(--settings-text);
+                        }
+
+                        .settings-card__header p {
+                            margin: 0.3rem 0 0;
+                            color: var(--settings-muted);
+                            font-size: 0.86rem;
+                        }
+
+                        .settings-card__body {
+                            padding: 1.35rem;
+                        }
+
+                        .field-group {
+                            margin-bottom: 1.3rem;
+                        }
+
+                        .field-group:last-child {
+                            margin-bottom: 0;
+                        }
+
+                        .field-label {
+                            display: block;
+                            margin-bottom: 0.55rem;
+                            color: var(--settings-muted);
+                            font-size: 0.75rem;
+                            font-weight: 700;
+                            letter-spacing: 0.08em;
+                            text-transform: uppercase;
+                        }
+
+                        .settings-input-group {
+                            display: flex;
+                            align-items: center;
+                            background: #fff;
+                            border: 1px solid #dfe7f1;
+                            border-radius: 12px;
+                            overflow: hidden;
+                            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+                        }
+
+                        .settings-input-group:focus-within {
+                            border-color: rgba(29, 78, 216, 0.7);
+                            box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.08);
+                        }
+
+                        .settings-input-prefix,
+                        .settings-input-suffix {
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            min-width: 52px;
+                            height: 52px;
+                            background: #f8fafc;
+                            color: var(--settings-muted);
+                            border-right: 1px solid #e2e8f0;
+                            font-weight: 700;
+                        }
+
+                        .settings-input-suffix {
+                            border-right: none;
+                            border-left: 1px solid #e2e8f0;
+                            min-width: 72px;
+                        }
+
+                        .settings-input {
+                            width: 100%;
+                            height: 52px;
+                            border: none;
+                            background: transparent;
+                            color: var(--settings-text);
+                            padding: 0.8rem 1rem;
+                            font-size: 1rem;
+                            outline: none;
+                        }
+
+                        .settings-input:focus {
+                            box-shadow: none;
+                            outline: none;
+                        }
+
+                        .field-validation-error {
+                            display: block;
+                            margin-top: 0.45rem;
+                            color: #dc2626;
+                            font-size: 0.8rem;
+                            font-weight: 600;
+                        }
+
+                        .field-help {
+                            display: block;
+                            margin-top: 0.5rem;
+                            color: var(--settings-muted);
+                            font-size: 0.8rem;
+                            line-height: 1.5;
+                        }
+
+                        .settings-summary-list {
+                            display: grid;
+                            gap: 0.9rem;
+                        }
+
+                        .settings-summary-item {
+                            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+                            border: 1px solid var(--settings-border);
+                            border-radius: 14px;
+                            padding: 0.9rem 1rem;
+                        }
+
+                        .settings-summary-item small {
+                            display: block;
+                            color: var(--settings-muted);
+                            font-size: 0.72rem;
+                            font-weight: 700;
+                            letter-spacing: 0.08em;
+                            text-transform: uppercase;
+                            margin-bottom: 0.5rem;
+                        }
+
+                        .settings-summary-item div {
+                            display: flex;
+                            align-items: center;
+                            gap: 0.65rem;
+                            font-weight: 700;
+                            color: var(--settings-text);
+                        }
+
+                        .settings-summary-item i {
+                            color: var(--settings-primary);
+                            font-size: 1rem;
+                        }
+
+                        .settings-actionbar {
+                            display: flex;
+                            justify-content: flex-end;
+                            margin-top: 0.5rem;
+                        }
+
+                        .settings-submit {
+                            min-width: 240px;
+                            min-height: 52px;
+                            border-radius: 12px;
+                            font-weight: 700;
+                            letter-spacing: 0.01em;
+                            box-shadow: 0 10px 18px rgba(29, 78, 216, 0.18);
+                        }
+
+                        .settings-submit:hover {
+                            transform: translateY(-1px);
+                        }
+
+                        @@media (max-width: 1199.98px) {
+                            .settings-grid {
+                                grid-template-columns: repeat(2, minmax(0, 1fr));
+                            }
+                        }
+
+                        @@media (max-width: 767.98px) {
+                            .page-header {
+                                flex-direction: column;
+                                align-items: flex-start;
+                            }
+
+                            .page-header__actions {
+                                width: 100%;
+                                margin-left: 0;
+                            }
+
+                            .page-header__pill {
+                                width: 100%;
+                                justify-content: center;
+                            }
+
+                            .settings-grid {
+                                grid-template-columns: 1fr;
+                            }
+
+                            .settings-card__body {
+                                padding: 1rem;
+                            }
+
+                            .settings-card__header {
+                                padding: 1.1rem 1rem;
+                            }
+
+                            .settings-actionbar {
+                                justify-content: stretch;
+                            }
+
+                            .settings-submit {
+                                width: 100%;
+                            }
+                        }
+                    </style>
+
+                    @section Scripts {
+                        @{
+                            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+                        }
+                    }

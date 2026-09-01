@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,7 +9,8 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet">
 
     <!-- Bootstrap 5 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
@@ -16,110 +18,254 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-</head>
-<body class="bg-light">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-3">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand d-flex align-items-center fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
-                <i class="bi bi-book-half text-primary fs-3 me-2"></i>
-                <span>Library<span class="text-primary">Pro</span></span>
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+</head>
+
+<body class="bg-light d-flex flex-column min-vh-100">
+
+    <nav class="topbar" aria-label="Main navigation">
+        <div class="topbar__inner container-fluid px-4 px-xl-5">
+            <a class="topbar__brand" asp-area="" asp-controller="Home" asp-action="Index">
+                <img src="~/logo/Libris.png" alt="Libris Logo" class="topbar__brand-logo" />
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+
+            <!-- Mobile Menu Toggle -->
+            <button class="navbar-toggler d-md-none" type="button" id="mobileMenuToggle" aria-label="Toggle navigation">
+                <i class="bi bi-list fs-1"></i>
             </button>
-            
-            <div class="collapse navbar-collapse" id="navbarMain">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0 fw-medium">
-                    <li class="nav-item">
-                        <a class="nav-link text-white px-3" asp-area="" asp-controller="Home" asp-action="Index"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white px-3" asp-area="" asp-controller="Books" asp-action="Index"><i class="bi bi-collection me-1"></i> Catalog</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white px-3" asp-area="" asp-controller="Members" asp-action="Index"><i class="bi bi-people me-1"></i> Members</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white px-3" asp-area="" asp-controller="Loans" asp-action="Index"><i class="bi bi-journal-arrow-up me-1"></i> Loans</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white px-3" asp-area="" asp-controller="Reservations" asp-action="Index"><i class="bi bi-calendar-check me-1"></i> Reservations</a>
-                    </li>
-                    @if (User.IsInRole("Admin") || User.IsInRole("Librarian"))
+
+            <div class="topbar__nav-wrap d-none d-md-flex flex-md-row" id="mobileNavbar">
+                <ul class="topbar__nav">
+                    @{
+                        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+                        var isAuthenticated = User.Identity?.IsAuthenticated == true;
+                        var isLibrarianOrAdmin = isAuthenticated && (User.IsInRole("Librarian") || User.IsInRole("Admin"));
+                        var isAdmin = isAuthenticated && User.IsInRole("Admin");
+                        var isMember = isAuthenticated && User.IsInRole("Member");
+                    }
+
+                    @if (isMember)
                     {
                         <li class="nav-item">
-                            <a class="nav-link text-white px-3" asp-area="" asp-controller="Reports" asp-action="Index"><i class="bi bi-file-earmark-bar-graph me-1"></i> Reports</a>
+                            <a class="topbar__nav-link @(currentController == "MemberDashboard" ? "active" : "")" asp-area=""
+                               asp-controller="MemberDashboard" asp-action="Index">
+                                <i class="bi bi-speedometer2"></i>
+                                <span>My Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="topbar__nav-link @(currentController == "Books" ? "active" : "")" asp-area=""
+                               asp-controller="Books" asp-action="Index">
+                                <i class="bi bi-collection"></i>
+                                <span>Catalog</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="topbar__nav-link @(currentController == "Reservations" ? "active" : "")" asp-area=""
+                               asp-controller="Reservations" asp-action="Index">
+                                <i class="bi bi-calendar-check"></i>
+                                <span>Reservations</span>
+                            </a>
                         </li>
                     }
-                    @if (User.IsInRole("Admin"))
+                    else
                     {
                         <li class="nav-item">
-                            <a class="nav-link text-white px-3" asp-area="" asp-controller="Audit" asp-action="Index"><i class="bi bi-shield-lock me-1"></i> Audit Logs</a>
+                            <a class="topbar__nav-link @(currentController == "Home" ? "active" : "")" asp-area=""
+                               asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-speedometer2"></i>
+                                <span>Dashboard</span>
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white px-3" asp-area="" asp-controller="Settings" asp-action="Index"><i class="bi bi-gear me-1"></i> Settings</a>
+                            <a class="topbar__nav-link @(currentController == "Books" ? "active" : "")" asp-area=""
+                               asp-controller="Books" asp-action="Index">
+                                <i class="bi bi-collection"></i>
+                                <span>Catalog</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="topbar__nav-link @(currentController == "Reservations" ? "active" : "")" asp-area=""
+                               asp-controller="Reservations" asp-action="Index">
+                                <i class="bi bi-calendar-check"></i>
+                                <span>Reservations</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="topbar__nav-link @(currentController == "Members" ? "active" : "")" asp-area=""
+                               asp-controller="Members" asp-action="Index">
+                                <i class="bi bi-people"></i>
+                                <span>Members</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="topbar__nav-link @(currentController == "Loans" ? "active" : "")" asp-area=""
+                               asp-controller="Loans" asp-action="Index">
+                                <i class="bi bi-journal-arrow-up"></i>
+                                <span>Loans</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="topbar__nav-link @(currentController == "Reports" ? "active" : "")" asp-area=""
+                               asp-controller="Reports" asp-action="Index">
+                                <i class="bi bi-file-earmark-bar-graph"></i>
+                                <span>Reports</span>
+                            </a>
+                        </li>
+                    }
+
+                    @if (isAdmin)
+                    {
+                        <li class="nav-item">
+                            <a class="topbar__nav-link @(currentController == "Audit" ? "active" : "")" asp-area=""
+                               asp-controller="Audit" asp-action="Index">
+                                <i class="bi bi-shield-lock"></i>
+                                <span>Audit Logs</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="topbar__nav-link @(currentController == "Settings" ? "active" : "")" asp-area=""
+                               asp-controller="Settings" asp-action="Index">
+                                <i class="bi bi-gear"></i>
+                                <span>Settings</span>
+                            </a>
                         </li>
                     }
                 </ul>
-                <ul class="navbar-nav ms-auto align-items-center">
+
+                <div class="topbar__actions">
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-white d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px;">
-                                    @(!string.IsNullOrEmpty(User.Identity?.Name) ? User.Identity.Name[0].ToString().ToUpper() : "U")
-                                </div>
-                                <span>@User.Identity?.Name</span>
+                        <div class="nav-item dropdown topbar__user-menu">
+                            <a class="topbar__user-trigger dropdown-toggle" href="#" id="userDropdown" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="topbar__user-avatar">
+                                    @(!string.IsNullOrEmpty(User.Identity?.Name) ?
+                                User.Identity.Name[0].ToString().ToUpper() : "U")
+                                </span>
+                                <span class="topbar__user-meta d-none d-md-block">
+                                    <small>Signed in</small>
+                                    <strong>@User.Identity?.Name</strong>
+                                </span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="userDropdown">
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-4 p-2"
+                                aria-labelledby="userDropdown">
                                 <li>
-                                    <form class="form-inline" asp-area="" asp-controller="Account" asp-action="Logout" method="post">
-                                        <button type="submit" class="dropdown-item text-danger fw-medium">
+                                    <form class="form-inline" asp-area="" asp-controller="Account" asp-action="Logout"
+                                          method="post">
+                                        <button type="submit"
+                                                class="dropdown-item rounded-3 text-danger fw-medium px-3 py-2">
                                             <i class="bi bi-box-arrow-right me-2"></i>Logout
                                         </button>
                                     </form>
                                 </li>
                             </ul>
-                        </li>
+                        </div>
                     }
-                </ul>
+                </div>
             </div>
         </div>
     </nav>
 
-    <main role="main" class="container-fluid px-4 py-4 mb-5">
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
-
+    <main role="main" class="container-fluid px-4 py-4 flex-grow-1">
         @RenderBody()
     </main>
 
-    <footer class="footer mt-auto py-3 bg-white border-top shadow-sm fixed-bottom">
+    @{
+        var successToast = TempData["Success"] ?? TempData["SuccessMessage"];
+        var errorToast = TempData["Error"] ?? TempData["ErrorMessage"];
+    }
+    @if (successToast is string successMessage && !string.IsNullOrWhiteSpace(successMessage))
+    {
+        <div class="app-toast-host" aria-live="polite" aria-atomic="true">
+            <div class="app-toast app-toast--success" role="status" data-app-toast>
+                <span class="app-toast__icon" aria-hidden="true"><i class="bi bi-check-lg"></i></span>
+                <span class="app-toast__message">@successMessage</span>
+                <button type="button" class="app-toast__close" data-toast-dismiss aria-label="Dismiss notification">
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    }
+    else if (errorToast is string errorMessage && !string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <div class="app-toast-host" aria-live="assertive" aria-atomic="true">
+            <div class="app-toast app-toast--error" role="alert" data-app-toast>
+                <span class="app-toast__icon" aria-hidden="true"><i class="bi bi-exclamation-lg"></i></span>
+                <span class="app-toast__message">@errorMessage</span>
+                <button type="button" class="app-toast__close" data-toast-dismiss aria-label="Dismiss notification">
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    }
+
+    <!-- Simple Footer -->
+    <footer class="simple-footer">
         <div class="container-fluid px-4 text-center">
-            <span class="text-muted fw-medium small">&copy; @DateTime.Now.Year - LibraryPro Enterprise</span>
+            <span>&copy; @DateTime.Now.Year Libris Enterprise. All rights reserved.</span>
         </div>
     </footer>
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- jQuery (Needed for Select2 and some legacy components) -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        // Mobile menu toggle - execute immediately
+        (function() {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mobileNavbar = document.getElementById('mobileNavbar');
+            
+            if (mobileMenuToggle && mobileNavbar) {
+                mobileMenuToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Mobile menu toggle clicked');
+                    
+                    // Toggle Bootstrap classes instead of just 'show'
+                    if (mobileNavbar.classList.contains('d-none')) {
+                        mobileNavbar.classList.remove('d-none');
+                        mobileNavbar.classList.add('d-flex');
+                        mobileNavbar.classList.add('show');
+                    } else {
+                        mobileNavbar.classList.remove('d-flex');
+                        mobileNavbar.classList.remove('show');
+                        mobileNavbar.classList.add('d-none');
+                    }
+                    
+                    console.log('Mobile navbar classes:', mobileNavbar.className);
+                });
+
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!mobileNavbar.contains(event.target) && !mobileMenuToggle.contains(event.target)) {
+                        mobileNavbar.classList.remove('d-flex');
+                        mobileNavbar.classList.remove('show');
+                        mobileNavbar.classList.add('d-none');
+                    }
+                });
+
+                // Close mobile menu on window resize to desktop
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth >= 992) {
+                        mobileNavbar.classList.remove('d-flex');
+                        mobileNavbar.classList.remove('show');
+                        mobileNavbar.classList.add('d-none');
+                    }
+                });
+            } else {
+                console.error('Mobile menu elements not found:', { mobileMenuToggle, mobileNavbar });
+            }
+        })();
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
+
 </html>

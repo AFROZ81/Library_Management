@@ -58,7 +58,7 @@ public class OpenLibraryService : IExternalBookService
                     Description = doc.Description,
                     ImageUrl = doc.CoverI != null ? $"https://covers.openlibrary.org/b/id/{doc.CoverI}-M.jpg" : null,
                     PublicationYear = doc.FirstPublishYear ?? 0,
-                    Genres = doc.Subject ?? new List<string>(),
+                    Genres = doc.Subject?.Where(s => s != null).ToList() ?? new List<string?>(),
                     Publisher = doc.Publisher?.FirstOrDefault(),
                     PageCount = doc.NumberOfPages ?? 0,
                     Source = "Open Library"
@@ -85,7 +85,7 @@ public class OpenLibraryService : IExternalBookService
             ImageUrl = book.Cover != null ? $"https://covers.openlibrary.org/b/id/{book.Cover}-M.jpg" : null,
             PublicationYear = book.PublishDate != null ? 
                 int.TryParse(book.PublishDate.Substring(0, 4), out var year) ? year : 0 : 0,
-            Genres = book.Subjects?.Select(s => s.Name).ToList() ?? new List<string>(),
+            Genres = book.Subjects?.Select(s => s.Name).Where(name => name != null).ToList() ?? new List<string?>(),
             Publisher = book.Publishers?.FirstOrDefault(),
             PageCount = book.NumberOfPages ?? 0,
             Source = source

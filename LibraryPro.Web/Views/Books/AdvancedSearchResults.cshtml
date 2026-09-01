@@ -4,60 +4,78 @@
     ViewData["Title"] = "Search Results";
 }
 
-<div class="container mt-5 animate-slide-up">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-lg border-0 rounded-3">
-                <div class="card-header text-white py-4 d-flex justify-content-between align-items-center" style="background-color: #1a237e;">
-                    <div>
-                        <h4 class="mb-0 fw-bold">Search Results</h4>
-                        <p class="small opacity-75 mb-0">Found @Model.TotalResults books</p>
-                    </div>
-                    <a asp-action="AdvancedSearch" class="btn btn-light btn-sm">
-                        <i class="bi bi-search me-1"></i> New Search
+<div class="books-page books-page--results">
+    <div class="container-fluid px-3 px-md-4 py-4 py-lg-5">
+        <div class="books-shell books-shell--narrow">
+            <header class="page-header page-header--compact">
+                <div class="page-header__title-block">
+                    <p class="page-header__eyebrow">Catalog</p>
+                    <h1 class="page-header__title">Search Results</h1>
+                </div>
+                <div class="page-header__actions">
+                    <a asp-action="AdvancedSearch" class="btn btn-outline-secondary books-header-action books-header-action--ghost">
+                        <i class="bi bi-search me-2"></i>New Search
                     </a>
                 </div>
+            </header>
 
-                <div class="card-body p-4 p-lg-5">
+            <div class="books-results-card">
+                <div class="books-results-card__header">
+                    <div>
+                        <h2>Search Results</h2>
+                        <p>Found @Model.TotalResults books</p>
+                    </div>
+                </div>
+
+                <div class="books-results-card__body">
                     @if (Model.TotalResults > 0)
                     {
-                        <div class="row g-4">
+                        <div class="books-results-grid">
                             @foreach (var book in Model.Recommendations)
                             {
-                                <div class="col-md-6 col-lg-4">
-                                    <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
-                                        <div class="card-body">
-                                            <h5 class="card-title fw-bold">@book.Title</h5>
-                                            <p class="card-text text-muted small mb-2">@book.Author</p>
-                                            <div class="mb-2">
-                                                @foreach (var genre in book.Genre)
+                                <article class="books-result-item">
+                                    <div class="books-result-item__content">
+                                        <div class="books-result-item__topline">
+                                            @if (book.Genre != null && book.Genre.Any())
+                                            {
+                                                @foreach (var genre in book.Genre.Take(2))
                                                 {
-                                                    <span class="badge bg-secondary me-1">@genre</span>
+                                                    <span class="books-tag">@genre</span>
                                                 }
-                                            </div>
-                                            <p class="card-text small text-muted">@book.RecommendationReason</p>
+                                            }
+                                            else
+                                            {
+                                                <span class="books-tag books-tag--neutral">General</span>
+                                            }
                                         </div>
-                                        <div class="card-footer bg-white border-0">
-                                            <a asp-action="Details" asp-route-id="@book.BookId" class="btn btn-primary btn-sm w-100">
-                                                View Details
-                                            </a>
-                                        </div>
+
+                                        <h3>@book.Title</h3>
+                                        <p class="books-result-item__author">@book.Author</p>
+
+                                        <p class="books-result-item__reason">@book.RecommendationReason</p>
                                     </div>
-                                </div>
+
+                                    <div class="books-result-item__footer">
+                                        <a asp-action="Details" asp-route-id="@book.BookId" class="btn btn-primary books-result-item__button">
+                                            View Details
+                                        </a>
+                                    </div>
+                                </article>
                             }
                         </div>
                     }
                     else
                     {
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle me-2"></i>
-                            No books found matching your search criteria. Try adjusting your filters.
+                        <div class="books-empty-state">
+                            <i class="bi bi-info-circle"></i>
+                            <h4>No books found</h4>
+                            <p>No books found matching your search criteria. Try adjusting your filters.</p>
                         </div>
                     }
 
-                    <div class="mt-4">
-                        <a asp-action="Index" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i> Back to Books
+                    <div class="books-results-actions">
+                        <a asp-action="Index" class="btn btn-outline-secondary books-results-back">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Books
                         </a>
                     </div>
                 </div>
@@ -67,28 +85,256 @@
 </div>
 
 <style>
-    .hover-shadow:hover {
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    .books-page--results {
+        min-height: calc(100vh - 56px);
+        background: #f8fafc;
+        padding: 0 0 2rem;
+    }
+
+    .books-shell {
+        width: min(100%, 1280px);
+        margin: 0 auto;
+    }
+
+    .books-shell--narrow {
+        width: min(100%, 1100px);
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1.25rem;
+        padding: 0.25rem 0 0.75rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+        margin: 0 auto 1.5rem;
+        width: 100%;
+    }
+
+    .page-header__title-block {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-header__eyebrow {
+        margin: 0;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .page-header__title {
+        margin: 0;
+        font-size: clamp(2rem, 3vw, 3.2rem);
+        letter-spacing: -0.06em;
+        line-height: 0.95;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .page-header__actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+    }
+
+    .page-header--compact {
+        margin-bottom: 1.25rem;
+    }
+
+    .books-header-action--ghost {
+        background: #fff;
+        border: 1px solid #dfe7f1;
+        color: #0f172a;
+        min-height: 42px;
+        border-radius: 12px;
+        font-weight: 600;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+    }
+
+    .books-results-card {
+        background: rgba(255, 255, 255, 0.82);
+        border: 1px solid #dfe7f1;
+        border-radius: 24px;
+        box-shadow: 0 18px 35px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .books-results-card__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+        color: #fff;
+        padding: 1.5rem 1.5rem 1.25rem;
+    }
+
+    .books-results-card__header h2 {
+        margin: 0;
+        font-size: clamp(1.5rem, 2vw, 2rem);
+        font-weight: 800;
+    }
+
+    .books-results-card__header p {
+        margin: 0.25rem 0 0;
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    .books-results-card__body {
+        padding: 1.5rem;
+    }
+
+    .books-results-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.25rem;
+    }
+
+    .books-result-item {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        padding: 1.1rem;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .books-result-item:hover {
         transform: translateY(-2px);
+        box-shadow: 0 16px 28px rgba(15, 23, 42, 0.08);
     }
 
-    .transition-all {
-        transition: all 0.3s ease;
+    .books-result-item__topline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.4rem;
     }
 
-    .animate-slide-up {
-        animation: slideUp 0.6s ease-out;
+    .books-tag {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        background: #eef6ff;
+        color: #1d4ed8;
+        padding: 0.3rem 0.7rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
     }
 
-    @@keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(40px);
+    .books-tag--neutral {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .books-result-item h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        line-height: 1.35;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .books-result-item__author {
+        margin: 0.3rem 0 0;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .books-result-item__reason {
+        margin: 0.75rem 0 0;
+        color: #475569;
+        font-size: 0.92rem;
+        line-height: 1.6;
+    }
+
+    .books-result-item__footer {
+        margin-top: auto;
+    }
+
+    .books-result-item__button {
+        width: 100%;
+        min-height: 44px;
+        border-radius: 12px;
+        font-weight: 700;
+    }
+
+    .books-empty-state {
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 2.5rem 1.5rem;
+        border: 1px dashed #cbd5e1;
+        border-radius: 18px;
+        background: #f8fafc;
+        color: #475569;
+    }
+
+    .books-empty-state i {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+        color: #2563eb;
+    }
+
+    .books-empty-state h4 {
+        margin: 0;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .books-empty-state p {
+        margin: 0.5rem 0 0;
+        max-width: 540px;
+        line-height: 1.6;
+    }
+
+    .books-results-actions {
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #edf2f7;
+    }
+
+    .books-results-back {
+        min-height: 44px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    @@media (max-width: 991.98px) {
+        .books-results-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .books-results-grid {
+            grid-template-columns: 1fr;
         }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .page-header__actions {
+            margin-left: 0;
+        }
+
+        .books-results-card__body {
+            padding: 1rem;
         }
     }
 </style>

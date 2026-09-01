@@ -4,104 +4,175 @@
     ViewData["Title"] = "Book Recommendations";
 }
 
-<div class="container mt-5 animate-slide-up">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-lg border-0 rounded-3">
-                <div class="card-header text-white py-4" style="background-color: #ffc107;">
-                    <div class="d-flex align-items-center">
-                        <div class="display-6 me-3"><i class="bi bi-star-fill"></i></div>
-                        <div>
-                            <h4 class="mb-0 fw-bold">Recommended for You</h4>
-                            <p class="small opacity-75 mb-0">Personalized book suggestions based on your preferences</p>
-                        </div>
-                    </div>
+<div class="books-page">
+    <div class="container-fluid px-3 px-md-4 py-4 py-lg-5">
+        <div class="books-shell">
+            <header class="page-header">
+                <div class="page-header__title-block">
+                    <p class="page-header__eyebrow">Discovery</p>
+                    <h1 class="page-header__title">Recommended for You</h1>
                 </div>
+                <div class="page-header__actions">
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary books-header-action books-header-action--ghost">
+                        <i class="bi bi-arrow-left me-2"></i>Back
+                    </a>
+                </div>
+            </header>
 
-                <div class="card-body p-4 p-lg-5">
-                    @if (Model.Any())
+            <div class="recommendation-grid">
+                @if (Model.Any())
+                {
+                    @foreach (var recommendation in Model)
                     {
-                        <div class="row g-4">
-                            @foreach (var recommendation in Model)
-                            {
-                                <div class="col-md-6 col-lg-4">
-                                    <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
-                                        @if (!string.IsNullOrEmpty(recommendation.ImageUrl))
-                                        {
-                                            <img src="@recommendation.ImageUrl" class="card-img-top" alt="@recommendation.Title" style="height: 200px; object-fit: cover;" />
-                                        }
-                                        else
-                                        {
-                                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                                                <i class="bi bi-book text-muted" style="font-size: 3rem;"></i>
-                                            </div>
-                                        }
-                                        <div class="card-body">
-                                            <h5 class="card-title fw-bold">@recommendation.Title</h5>
-                                            <p class="card-text text-muted small mb-2">@recommendation.Author</p>
-                                            <div class="mb-2">
-                                                @foreach (var genre in recommendation.Genre)
-                                                {
-                                                    <span class="badge bg-secondary me-1">@genre</span>
-                                                }
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <span class="badge bg-warning text-dark">@(recommendation.RelevanceScore.ToString("P0")) Match</span>
-                                            </div>
-                                            <p class="card-text small text-muted mt-2">@recommendation.RecommendationReason</p>
-                                        </div>
-                                        <div class="card-footer bg-white border-0">
-                                            <a asp-action="Details" asp-route-id="@recommendation.BookId" class="btn btn-primary btn-sm w-100">
-                                                View Details
-                                            </a>
-                                        </div>
+                        <article class="recommendation-card">
+                            <img src="@(string.IsNullOrEmpty(recommendation.ImageUrl) ? "/images/default-book-cover.svg" : recommendation.ImageUrl)" alt="@recommendation.Title"
+                                 class="recommendation-card__image" />
+
+                            <div class="recommendation-card__body">
+                                <div class="recommendation-card__topline">
+                                    <span class="recommendation-score">@(recommendation.RelevanceScore.ToString("P0"))
+                                        Match</span>
                                     </div>
+                                    <h3>@recommendation.Title</h3>
+                                    <p class="recommendation-card__author">@recommendation.Author</p>
+                                    <div class="recommendation-card__tags">
+                                        @foreach (var genre in recommendation.Genre)
+                                        {
+                                            <span>@genre</span>
+                                        }
+                                    </div>
+                                    <p class="recommendation-card__reason">@recommendation.RecommendationReason</p>
+                                    <a asp-action="Details" asp-route-id="@recommendation.BookId"
+                                       class="btn btn-primary recommendation-card__cta">
+                                        View Details
+                                    </a>
                                 </div>
-                            }
-                        </div>
+                            </article>
+                        }
                     }
-                    else
+                else
                     {
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle me-2"></i>
-                            No recommendations available at the moment. Start borrowing books to get personalized suggestions!
+                        <div class="books-empty-state recommendation-empty-state">
+                            <i class="bi bi-info-circle"></i>
+                            <h4>No recommendations available yet</h4>
+                            <p>Start borrowing books to get personalized suggestions.</p>
                         </div>
                     }
-
-                    <div class="mt-4">
-                        <a asp-action="Index" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i> Back to Books
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<style>
-    .hover-shadow:hover {
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-        transform: translateY(-2px);
-    }
-
-    .transition-all {
-        transition: all 0.3s ease;
-    }
-
-    .animate-slide-up {
-        animation: slideUp 0.6s ease-out;
-    }
-
-    @@keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(40px);
+    <style>
+        .recommendation-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1.25rem;
         }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
+        .recommendation-card {
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid var(--books-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
         }
-    }
-</style>
+
+        .recommendation-card__image {
+            display: block;
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+        }
+
+        .recommendation-card__image--placeholder {
+            display: grid;
+            place-items: center;
+            color: #94a3b8;
+            font-size: 3rem;
+        }
+
+        .recommendation-card__body {
+            padding: 1.1rem 1rem 1.2rem;
+        }
+
+        .recommendation-card__topline {
+            margin-bottom: 0.75rem;
+        }
+
+        .recommendation-score {
+            display: inline-block;
+            background: rgba(245, 158, 11, 0.15);
+            color: #b45309;
+            border-radius: 999px;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.03em;
+        }
+
+        .recommendation-card__body h3 {
+            margin: 0 0 0.4rem;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--books-text);
+        }
+
+        .recommendation-card__author {
+            margin: 0 0 0.75rem;
+            color: var(--books-muted);
+            font-size: 0.9rem;
+        }
+
+        .recommendation-card__tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .recommendation-card__tags span {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.55rem;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #4338ca;
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .recommendation-card__reason {
+            margin: 0 0 1rem;
+            color: var(--books-muted);
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        .recommendation-card__cta {
+            width: 100%;
+            min-height: 46px;
+            border-radius: 12px;
+            font-weight: 700;
+        }
+
+        .recommendation-empty-state {
+            grid-column: 1 / -1;
+        }
+
+        @@media (max-width: 991.98px) {
+            .recommendation-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @@media (max-width: 575.98px) {
+            .recommendation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>

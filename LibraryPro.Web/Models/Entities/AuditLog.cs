@@ -60,5 +60,10 @@ namespace LibraryPro.Web.Models.Entities
 
         [NotMapped]
         public string? FormattedTimestamp => Timestamp.ToString("dd MMM yyyy HH:mm:ss");
+
+        [NotMapped]
+        public string? FriendlyDescription => string.IsNullOrWhiteSpace(Description)
+            ? $"{OperationType ?? "Activity"} recorded for {EntityType ?? Controller ?? "the system"}."
+            : Description;
     }
 }

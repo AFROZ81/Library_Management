@@ -76,7 +76,7 @@ public class GoogleBooksService : IExternalBookService
             ImageUrl = item.VolumeInfo.ImageLinks?.Thumbnail ?? item.VolumeInfo.ImageLinks?.SmallThumbnail,
             PublicationYear = item.VolumeInfo.PublishedDate != null ? 
                 int.TryParse(item.VolumeInfo.PublishedDate.Substring(0, 4), out var year) ? year : 0 : 0,
-            Genres = item.VolumeInfo.Categories ?? new List<string>(),
+            Genres = item.VolumeInfo.Categories?.Where(c => c != null).ToList() ?? new List<string?>(),
             Publisher = item.VolumeInfo.Publisher,
             PageCount = item.VolumeInfo.PageCount,
             Source = source

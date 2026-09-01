@@ -4,425 +4,679 @@
     ViewData["Title"] = "Digital Catalog";
 }
 
-<div class="main-viewport animate-fade-in">
-    <div class="header-container px-4 pt-4 pb-3">
-        <div class="d-flex flex-column flex-xl-row align-items-xl-center justify-content-between gap-3">
-            <div class="d-flex align-items-center gap-3">
-                <div class="header-icon-box shadow-sm">
-                    <i class="bi bi-bookshelf text-white fs-4"></i>
+<div class="books-page">
+    <div class="container-fluid px-3 px-md-4 py-4 py-lg-5">
+        <div class="books-shell">
+            <header class="page-header">
+                <div class="page-header__title-block">
+                    <p class="page-header__eyebrow">Catalog</p>
+                    <h1 class="page-header__title">Collection Archive</h1>
                 </div>
-                <div>
-                    <h2 class="fw-800 text-dark mb-0 fs-3">Collection <span class="text-primary-gradient">Archive</span></h2>
-                    <p class="text-muted small mb-0 opacity-75">@Model.Count() volumes currently in view</p>
+                <div class="page-header__actions">
+                    @if (User.IsInRole("Admin") || User.IsInRole("Librarian"))
+                    {
+                        <a asp-action="Create" class="btn btn-primary books-header-action">
+                            <i class="bi bi-plus-circle me-2"></i>New Volume
+                        </a>
+                    }
                 </div>
-            </div>
+            </header>
 
-            <div class="search-container-wrapper flex-grow-1 mx-xl-5">
-                <form asp-action="Index" method="get" class="glass-search-bar">
+            <div class="books-toolbar">
+                <form asp-action="Index" method="get" class="books-search">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="sortOrder" value="@ViewData["CurrentSort"]" />
-                    <div class="d-flex align-items-center w-100 px-3">
-                        <i class="bi bi-search text-muted me-3"></i>
-                        <input type="text" name="searchString" class="search-input-field flex-grow-1"
-                               placeholder="Search title, author, or ISBN..." value="@ViewData["CurrentFilter"]">
 
-                        <div class="d-flex align-items-center gap-2 border-start ps-3 ms-2">
-                            <div class="dropdown">
-                                <button class="btn btn-filter-soft btn-sm fw-bold rounded-pill" type="button" data-bs-toggle="dropdown">
-                                    <i class="bi bi-sliders2 me-1"></i>Sort
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2 rounded-4 mt-2">
-                                    <li><a class="dropdown-item rounded-3 py-2" asp-action="Index" asp-route-sortOrder="@ViewData["TitleSortParm"]" asp-route-searchString="@ViewData["CurrentFilter"]">Title</a></li>
-                                    <li><a class="dropdown-item rounded-3 py-2" asp-action="Index" asp-route-sortOrder="@ViewData["AuthorSortParm"]" asp-route-searchString="@ViewData["CurrentFilter"]">Author</a></li>
-                                    <li><a class="dropdown-item rounded-3 py-2" asp-action="Index" asp-route-sortOrder="@ViewData["YearSortParm"]" asp-route-searchString="@ViewData["CurrentFilter"]">Year</a></li>
-                                </ul>
-                            </div>
-                            <button type="submit" class="btn btn-dark btn-sm rounded-pill px-3 fw-bold">Apply</button>
-                            <a asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-circle p-0 reset-btn" title="Reset">
-                                <i class="bi bi-arrow-counterclockwise"></i>
-                            </a>
+                    <div class="books-search__field">
+                        <i class="bi bi-search"></i>
+                        <input type="text" name="searchString" placeholder="Search title, author, or ISBN..."
+                               value="@ViewData["CurrentFilter"]" />
+                    </div>
+
+                    <div class="books-search__controls">
+                        <div class="dropdown">
+                            <button class="btn btn-light books-sort-btn" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-sliders2 me-1"></i>Sort
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2 rounded-4 mt-2">
+                                <li><a class="dropdown-item rounded-3 py-2" asp-action="Index"
+                                           asp-route-sortOrder="@ViewData["TitleSortParm"]"
+                                           asp-route-searchString="@ViewData["CurrentFilter"]">Title</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" asp-action="Index"
+                                               asp-route-sortOrder="@ViewData["AuthorSortParm"]"
+                                               asp-route-searchString="@ViewData["CurrentFilter"]">Author</a></li>
+                                        <li><a class="dropdown-item rounded-3 py-2" asp-action="Index"
+                                                   asp-route-sortOrder="@ViewData["YearSortParm"]"
+                                                   asp-route-searchString="@ViewData["CurrentFilter"]">Year</a></li>
+                                        </ul>
+                                    </div>
+                                    <button type="submit" class="btn btn-dark books-apply-btn">Apply</button>
+                                    <a asp-action="Index" class="btn btn-outline-secondary books-reset-btn" title="Reset">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </a>
+                                </div>
+                            </form>
                         </div>
-                    </div>
-                </form>
-            </div>
 
-            <div class="col-auto">
-                <a asp-action="Create" class="btn btn-primary-gradient shadow-blue px-4 py-2 fw-bold rounded-pill">
-                    <i class="bi bi-plus-circle-fill me-2"></i>New Volume
-                </a>
-            </div>
-        </div>
-    </div>
+                        <div class="books-grid">
+                            @if (!Model.Any())
+                            {
+                                <div class="col-12">
+                                    <div class="books-empty-state">
+                                        <i class="bi bi-journal-x"></i>
+                                        <h4>No books found in the archive</h4>
+                                        <p>Try clearing your filters or adding a new volume.</p>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                @foreach (var item in Model)
+                                {
+                                    <article class="books-card">
+                                        <div class="status-dot @(item.AvailableCopies > 0 ? "is-available" : "is-empty")"></div>
 
-    <div class="scrollable-content px-4">
-        <div class="row g-4 pb-4">
-            @if (!Model.Any())
-            {
-                <div class="col-12 text-center py-5">
-                    <div class="empty-state py-5">
-                        <i class="bi bi-journal-x display-1 text-muted opacity-25"></i>
-                        <h4 class="fw-bold text-dark mt-3">No books found in the archive</h4>
-                        <p class="text-muted">Try clearing your filters or adding a new volume.</p>
-                    </div>
-                </div>
-            }
-            else
-            {
-                @foreach (var item in Model)
-                {
-                    <div class="col-xl-3 col-lg-4 col-md-6">
-                        <div class="card h-100 catalog-card border-0 shadow-sm">
-                            <div class="status-dot @(item.AvailableCopies > 0 ? "is-available" : "is-empty")"></div>
+                                        <div class="books-card__body">
+                                            <div class="books-card__tags">
+                                                @if (item.Genre != null && item.Genre.Any())
+                                                {
+                                                    @foreach (var g in item.Genre)
+                                                    {
+                                                        <span class="books-tag">@g</span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="books-tag books-tag--neutral">General</span>
+                                                }
+                                            </div>
 
-                            <div class="card-body p-4 d-flex flex-column">
-                                <div class="mb-3 d-flex flex-wrap gap-2">
-                                    @if (item.Genre != null && item.Genre.Any())
-                                    {
-                                        @foreach (var g in item.Genre)
-                                        {
-                                            <span class="genre-tag">@g</span>
+                                            <h3 class="books-card__title" title="@item.Title">@item.Title</h3>
+                                            <p class="books-card__meta">@item.Author • @item.PublicationYear</p>
+
+                                            <div class="books-card__stock">
+                                                <span class="books-card__stock-label">Inventory</span>
+                                                <span
+                                                    class="books-card__stock-value @(item.AvailableCopies > 0 ? "is-positive" : "is-negative")">
+                                                    @item.AvailableCopies / @item.TotalCopies
+                                                </span>
+                                            </div>
+
+                                            <div class="books-progress" aria-label="Inventory progress">
+                                                @{
+                                                    var percent = (item.TotalCopies > 0) ? (item.AvailableCopies * 100 / item.TotalCopies) : 0;
+                                                    var barColor = percent > 50 ? "books-progress__bar--primary" : (percent > 0 ?
+                             "books-progress__bar--warning" : "books-progress__bar--danger");
+                                                }
+                                                <span class="books-progress__bar @barColor" style="width: @percent%"></span>
+                                            </div>
+
+                                            <div class="books-card__actions">
+                                                @if (User.IsInRole("Admin") || User.IsInRole("Librarian"))
+                                                {
+                                                    <div class="books-card__quick-actions">
+                                                        <a asp-action="Edit" asp-route-id="@item.Id"
+                                                           class="books-icon-button books-icon-button--edit" title="Edit"><i
+                                                            class="bi bi-pencil-square"></i></a>
+                                                            <a href="javascript:void(0)" onclick="confirmDelete('@item.Id', '@item.Title')"
+                                                               class="books-icon-button books-icon-button--delete" title="Delete"><i
+                                                                class="bi bi-trash3"></i></a>
+                                                            </div>
+                                                        }
+                                                        <a asp-action="Details" asp-route-id="@item.Id" class="books-card__details">
+                                                            Details <i class="bi bi-arrow-right ms-1"></i>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </article>
                                         }
-                                    }
-                                    else
-                                    {
-                                        <span class="genre-tag-neutral">General</span>
                                     }
                                 </div>
 
-                                <h6 class="fw-bold text-dark book-title-height mb-1" title="@item.Title">@item.Title</h6>
-                                <p class="text-muted small mb-4">@item.Author &bull; @item.PublicationYear</p>
+                                @if (Model.TotalPages > 1)
+                                {
+                                    <nav aria-label="Book catalog pagination" class="books-pagination">
+                                        <ul>
+                                            <li class="@(!Model.HasPreviousPage ? "disabled" : "")">
+                                                <a asp-route-pageNumber="@(Model.PageIndex - 1)" asp-route-sortOrder="@ViewData["CurrentSort"]"
+                                                   asp-route-searchString="@ViewData["CurrentFilter"]">
+                                                    <i class="bi bi-chevron-left"></i>
+                                                    <span>Prev</span>
+                                                </a>
+                                            </li>
 
-                                <div class="mt-auto">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="tiny-label fw-bold text-muted uppercase">Inventory</span>
-                                        <span class="tiny-label fw-bold @(item.AvailableCopies > 0 ? "text-success" : "text-danger")">
-                                            @item.AvailableCopies / @item.TotalCopies
-                                        </span>
-                                    </div>
-                                    <div class="progress rounded-pill bg-light mb-4" style="height: 6px;">
-                                        @{
-                                            var percent = (item.TotalCopies > 0) ? (item.AvailableCopies * 100 / item.TotalCopies) : 0;
-                                            var barColor = percent > 50 ? "bg-primary" : (percent > 0 ? "bg-warning" : "bg-danger");
-                                        }
-                                        <div class="progress-bar @barColor rounded-pill" style="width: @percent%"></div>
-                                    </div>
+                                            @for (int i = 1; i <= Model.TotalPages; i++)
+                                            {
+                                                <li class="desktop-page @(i == Model.PageIndex ? "active" : "")">
+                                                    <a asp-route-pageNumber="@i" asp-route-sortOrder="@ViewData["CurrentSort"]"
+                                                       asp-route-searchString="@ViewData["CurrentFilter"]">@i</a>
+                                                </li>
+                                            }
 
-                                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                                        <div class="d-flex gap-3">
-                                            <a asp-action="Edit" asp-route-id="@item.Id" class="text-primary action-link" title="Edit"><i class="bi bi-pencil-square fs-5"></i></a>
-                                            <a href="javascript:void(0)" onclick="confirmDelete('@item.Id', '@item.Title')" class="text-danger action-link" title="Delete"><i class="bi bi-trash3 fs-5"></i></a>
-                                        </div>
-                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn-details">
-                                            Details <i class="bi bi-arrow-right ms-1"></i>
-                                        </a>
-                                    </div>
-                                </div>
+                                            <li class="@(!Model.HasNextPage ? "disabled" : "")">
+                                                <a asp-route-pageNumber="@(Model.PageIndex + 1)" asp-route-sortOrder="@ViewData["CurrentSort"]"
+                                                   asp-route-searchString="@ViewData["CurrentFilter"]">
+                                                    <span>Next</span>
+                                                    <i class="bi bi-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                }
                             </div>
                         </div>
                     </div>
-                }
-            }
-        </div>
-    </div>
 
-    <div class="footer-sticky px-4 py-3 bg-white border-top shadow-sm">
-        <div class="d-flex justify-content-between align-items-center">
-            <div class="d-none d-md-block">
-                <p class="text-muted small mb-0 fw-medium">Library Management System &copy; 2026</p>
-            </div>
-
-            @if (Model.TotalPages > 1)
-            {
-                <nav aria-label="Book catalog pagination">
-                    <ul class="pagination pagination-sm gap-2 mb-0">
-                        <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
-                            <a class="page-link rounded-pill border-0 shadow-sm px-3"
-                               asp-route-pageNumber="@(Model.PageIndex - 1)"
-                               asp-route-sortOrder="@ViewData["CurrentSort"]"
-                               asp-route-searchString="@ViewData["CurrentFilter"]">
-                                <i class="bi bi-chevron-left"></i> <span class="ms-1 d-none d-sm-inline">Prev</span>
-                            </a>
-                        </li>
-
-                        @for (int i = 1; i <= Model.TotalPages; i++)
-                        {
-                            <li class="page-item d-none d-sm-inline-block">
-                                <a class="page-link rounded-circle border-0 @(i == Model.PageIndex ? "active bg-primary text-white shadow" : "bg-light text-dark shadow-sm")"
-                                   asp-route-pageNumber="@i"
-                                   asp-route-sortOrder="@ViewData["CurrentSort"]"
-                                   asp-route-searchString="@ViewData["CurrentFilter"]">@i</a>
-                            </li>
+                    <style>
+                        :root {
+                            --books-bg: #f8fafc;
+                            --books-card: #ffffff;
+                            --books-border: #e5e7eb;
+                            --books-text: #0f172a;
+                            --books-muted: #64748b;
+                            --books-primary: #1d4ed8;
+                            --books-primary-soft: #eff6ff;
+                            --books-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
                         }
 
-                        <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
-                            <a class="page-link rounded-pill border-0 shadow-sm px-3"
-                               asp-route-pageNumber="@(Model.PageIndex + 1)"
-                               asp-route-sortOrder="@ViewData["CurrentSort"]"
-                               asp-route-searchString="@ViewData["CurrentFilter"]">
-                                <span class="me-1 d-none d-sm-inline">Next</span> <i class="bi bi-chevron-right"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            }
-        </div>
-    </div>
-</div>
+                        .books-page {
+                            min-height: calc(100vh - 56px);
+                            background: linear-gradient(180deg, #f8fafc 0%, #eef3f9 100%);
+                            padding: 0 0 2.5rem;
+                        }
 
-<style>
-    :root {
-        --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
-        --soft-bg: #f3f4f6;
-    }
+                        .books-shell {
+                            width: 100%;
+                            max-width: none;
+                            margin: 0;
+                            padding: 0 0.5rem;
+                        }
 
-    /* GLOBAL LAYOUT FIX */
-    html, body {
-        height: 100%;
-        margin: 0;
-        background-color: var(--soft-bg);
-    }
+                        .page-header {
+                            display: flex;
+                            align-items: flex-end;
+                            justify-content: space-between;
+                            gap: 1.5rem;
+                            padding: 0.25rem 0 0.5rem;
+                            border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+                            margin-bottom: 1.5rem;
+                        }
 
-    .main-viewport {
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
+                        .page-header__title-block {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: flex-start;
+                        }
 
-    /* Header and Footer stay fixed */
-    .header-container, .footer-sticky {
-        flex: 0 0 auto;
-        z-index: 100;
-        background-color: white;
-    }
+                        .page-header__eyebrow {
+                            margin: 0;
+                            font-size: 0.82rem;
+                            font-weight: 700;
+                            letter-spacing: 0.18em;
+                            text-transform: uppercase;
+                            color: var(--books-muted);
+                        }
 
-    /* Content scrolls independently */
-    .scrollable-content {
-        flex: 1 1 auto;
-        overflow-y: auto;
-        padding-top: 1.5rem;
-        scrollbar-width: thin;
-    }
+                        .page-header__title {
+                            margin: 0;
+                            font-size: clamp(2rem, 3vw, 3.5rem);
+                            letter-spacing: -0.06em;
+                            line-height: 0.95;
+                            font-weight: 700;
+                            color: var(--books-text);
+                        }
 
-    /* UTILITIES & BUTTONS */
-    .text-primary-gradient {
-        background: var(--primary-gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
+                        .page-header__actions {
+                            margin-left: auto;
+                            display: flex;
+                            align-items: center;
+                        }
 
-    .btn-primary-gradient {
-        background: var(--primary-gradient) !important;
-        color: #fff !important;
-        border: none !important;
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
+                        .books-header-action {
+                            min-height: 46px;
+                            border-radius: 12px;
+                            font-weight: 700;
+                            box-shadow: 0 10px 18px rgba(29, 78, 216, 0.18);
+                        }
 
-        .btn-primary-gradient:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4) !important;
-            color: #fff !important;
-        }
+                        .books-toolbar {
+                            background: rgba(255, 255, 255, 0.72);
+                            border: 1px solid var(--books-border);
+                            border-radius: 18px;
+                            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+                            padding: 0.9rem;
+                            margin-bottom: 1.5rem;
+                        }
 
-    .header-icon-box {
-        background: var(--primary-gradient);
-        width: 45px;
-        height: 45px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 12px;
-    }
+                        .books-search {
+                            display: flex;
+                            align-items: center;
+                            gap: 1rem;
+                            justify-content: space-between;
+                        }
 
-    /* SEARCH BAR */
-    .glass-search-bar {
-        background: white;
-        border-radius: 14px;
-        border: 1px solid #e5e7eb;
-        padding: 6px 4px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-        display: flex;
-        align-items: center;
-    }
+                        .books-search__field {
+                            flex: 1;
+                            display: flex;
+                            align-items: center;
+                            gap: 0.7rem;
+                            min-height: 54px;
+                            background: #fff;
+                            border: 1px solid #dfe7f1;
+                            border-radius: 12px;
+                            padding: 0 1rem;
+                        }
 
-    .search-input-field {
-        border: none;
-        outline: none;
-        background: transparent;
-        padding: 8px 0;
-        font-size: 0.95rem;
-        color: #1f2937;
-    }
+                        .books-search__field i {
+                            color: var(--books-muted);
+                            font-size: 1rem;
+                        }
 
-    .btn-filter-soft {
-        background: #f8fafc;
-        color: #64748b;
-        border: 1px solid #e2e8f0;
-    }
+                        .books-search__field input {
+                            height: 52px;
+                            width: 100%;
+                            border: none;
+                            background: transparent;
+                            outline: none;
+                            color: var(--books-text);
+                            font-size: 0.98rem;
+                        }
 
-    .reset-btn {
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+                        .books-search__controls {
+                            display: flex;
+                            align-items: center;
+                            gap: 0.65rem;
+                        }
 
-    /* CATALOG CARDS */
-    .catalog-card {
-        border-radius: 20px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+                        .books-sort-btn,
+                        .books-apply-btn,
+                        .books-reset-btn {
+                            min-height: 42px;
+                            border-radius: 10px;
+                            font-weight: 700;
+                        }
 
-        .catalog-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.08) !important;
-        }
+                        .books-sort-btn {
+                            background: #f8fafc;
+                            border: 1px solid var(--books-border);
+                            color: var(--books-text);
+                        }
 
-    .book-title-height {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        height: 2.8rem;
-        line-height: 1.4rem;
-    }
+                        .books-apply-btn {
+                            min-width: 96px;
+                        }
 
-    .status-dot {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        border: 2px solid white;
-        box-shadow: 0 0 0 1px #eee;
-    }
+                        .books-reset-btn {
+                            width: 42px;
+                            padding: 0;
+                        }
 
-    .is-available {
-        background: #10b981;
-    }
+                        .books-grid {
+                            display: grid;
+                            grid-template-columns: repeat(5, minmax(0, 1fr));
+                            gap: 1rem;
+                        }
 
-    .is-empty {
-        background: #ef4444;
-    }
+                        .books-card {
+                            position: relative;
+                            background: var(--books-card);
+                            border: 1px solid var(--books-border);
+                            border-radius: 20px;
+                            box-shadow: var(--books-shadow);
+                            min-height: 100%;
+                            transition: transform 0.2s ease, box-shadow 0.2s ease;
+                        }
 
-    /* TAGS & LABELS */
-    .genre-tag {
-        background: #eef2ff;
-        color: #4f46e5;
-        padding: 4px 10px;
-        border-radius: 8px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
-    }
+                        .books-card:hover {
+                            transform: translateY(-4px);
+                            box-shadow: 0 18px 32px rgba(15, 23, 42, 0.08);
+                        }
 
-    .genre-tag-neutral {
-        background: #f3f4f6;
-        color: #6b7280;
-        padding: 4px 10px;
-        border-radius: 8px;
-        font-size: 0.7rem;
-    }
+                        .books-card__body {
+                            display: flex;
+                            flex-direction: column;
+                            height: 100%;
+                            padding: 1rem;
+                        }
 
-    .tiny-label {
-        font-size: 0.65rem;
-    }
+                        .books-card__tags {
+                            display: flex;
+                            flex-wrap: wrap;
+                            gap: 0.45rem;
+                            margin-bottom: 0.9rem;
+                        }
 
-    .btn-details {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: #1f2937;
-        text-decoration: none;
-    }
+                        .books-tag {
+                            display: inline-flex;
+                            align-items: center;
+                            border-radius: 8px;
+                            padding: 0.35rem 0.55rem;
+                            background: rgba(79, 70, 229, 0.08);
+                            color: var(--books-primary);
+                            font-size: 0.62rem;
+                            font-weight: 700;
+                            letter-spacing: 0.04em;
+                            text-transform: uppercase;
+                        }
 
-    /* PAGINATION STYLING */
-    .page-link {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 32px;
-        height: 32px;
-        transition: all 0.2s;
-    }
+                        .books-tag--neutral {
+                            background: #f1f5f9;
+                            color: var(--books-muted);
+                        }
 
-    .page-item.disabled .page-link {
-        opacity: 0.5;
-        background-color: #f8fafc !important;
-    }
+                        .books-card__title {
+                            margin: 0 0 0.45rem;
+                            font-size: 1.04rem;
+                            font-weight: 800;
+                            line-height: 1.4;
+                            color: var(--books-text);
+                            display: -webkit-box;
+                            -webkit-line-clamp: 2;
+                            -webkit-box-orient: vertical;
+                            overflow: hidden;
+                            min-height: 2.9rem;
+                        }
 
-    /* Custom Toast Styling */
-    .swal2-toast-custom {
-        border-radius: 12px !important;
-        padding: 1rem !important;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
-    }
+                        .books-card__meta {
+                            margin: 0 0 1rem;
+                            color: var(--books-muted);
+                            font-size: 0.8rem;
+                        }
 
-    /* Matching the progress bar to your primary gradient */
-    .swal2-timer-progress-bar-custom {
-        background: var(--primary-gradient) !important;
-    }
-</style>
+                        .books-card__stock {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            margin-top: auto;
+                            margin-bottom: 0.75rem;
+                            font-size: 0.72rem;
+                            font-weight: 700;
+                            letter-spacing: 0.06em;
+                            text-transform: uppercase;
+                            color: var(--books-muted);
+                        }
 
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        const successMessage = '@TempData["Success"]';
-        if (successMessage) {
-            Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 2000,
-                timerProgressBar: true,
-                customClass: {
-                    popup: 'swal2-toast-custom',
-                    timerProgressBar: 'swal2-timer-progress-bar-custom'
-                }
-            }).fire({
-                icon: 'success',
-                iconColor: '#4f46e5',
-                title: `<span class="fw-bold text-dark">${successMessage}</span>`
-            });
-        }
+                        .books-card__stock-value {
+                            color: var(--books-text);
+                            letter-spacing: 0.01em;
+                            text-transform: none;
+                            font-size: 0.8rem;
+                        }
 
-        function confirmDelete(id, title) {
-            Swal.fire({
-                title: 'Confirm Removal',
-                text: `Are you sure you want to delete "${title}"?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                confirmButtonText: 'Yes, Delete',
-                cancelButtonText: 'Keep it',
-                background: '#ffffff',
-                customClass: {
-                    popup: 'rounded-4'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    // Use a relative path that matches your controller routing
-                    form.action = '/Books/Delete/' + id;
+                        .books-card__stock-value.is-positive {
+                            color: #15803d;
+                        }
 
-                    // Find the token anywhere on the page (it's in your search form)
-                    const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                        .books-card__stock-value.is-negative {
+                            color: #dc2626;
+                        }
 
-                    if (token) {
-                        const tokenInput = document.createElement('input');
-                        tokenInput.type = 'hidden';
-                        tokenInput.name = '__RequestVerificationToken';
-                        tokenInput.value = token.value;
-                        form.appendChild(tokenInput);
-                    } else {
-                        console.error("Antiforgery token not found! Check if a form exists on the page.");
+                        .books-progress {
+                            width: 100%;
+                            height: 7px;
+                            border-radius: 999px;
+                            background: #eef2f7;
+                            overflow: hidden;
+                            margin-bottom: 1rem;
+                        }
+
+                        .books-progress__bar {
+                            display: block;
+                            height: 100%;
+                            border-radius: inherit;
+                        }
+
+                        .books-progress__bar--primary {
+                            background: linear-gradient(90deg, #1d4ed8 0%, #60a5fa 100%);
+                        }
+
+                        .books-progress__bar--warning {
+                            background: linear-gradient(90deg, #d97706 0%, #fbbf24 100%);
+                        }
+
+                        .books-progress__bar--danger {
+                            background: linear-gradient(90deg, #dc2626 0%, #f87171 100%);
+                        }
+
+                        .books-card__actions {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            gap: 0.75rem;
+                            padding-top: 0.9rem;
+                            border-top: 1px solid #edf2f7;
+                        }
+
+                        .books-card__quick-actions {
+                            display: flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                        }
+
+                        .books-icon-button {
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 32px;
+                            height: 32px;
+                            border-radius: 10px;
+                            text-decoration: none;
+                            transition: opacity 0.2s ease;
+                        }
+
+                        .books-icon-button--edit {
+                            color: var(--books-primary);
+                            background: rgba(29, 78, 216, 0.08);
+                        }
+
+                        .books-icon-button--delete {
+                            color: #dc2626;
+                            background: rgba(220, 38, 38, 0.08);
+                        }
+
+                        .books-card__details {
+                            color: var(--books-text);
+                            text-decoration: none;
+                            font-size: 0.82rem;
+                            font-weight: 700;
+                        }
+
+                        .status-dot {
+                            position: absolute;
+                            top: 16px;
+                            right: 16px;
+                            width: 10px;
+                            height: 10px;
+                            border-radius: 50%;
+                            border: 2px solid #fff;
+                            box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.35);
+                        }
+
+                        .is-available {
+                            background: #22c55e;
+                        }
+
+                        .is-empty {
+                            background: #ef4444;
+                        }
+
+                        .books-empty-state {
+                            display: grid;
+                            place-items: center;
+                            text-align: center;
+                            padding: 4rem 1rem;
+                            background: rgba(255, 255, 255, 0.7);
+                            border: 1px solid var(--books-border);
+                            border-radius: 20px;
+                            box-shadow: var(--books-shadow);
+                        }
+
+                        .books-empty-state i {
+                            font-size: 3.5rem;
+                            color: rgba(100, 116, 139, 0.4);
+                        }
+
+                        .books-empty-state h4 {
+                            margin: 1rem 0 0.5rem;
+                            color: var(--books-text);
+                            font-weight: 800;
+                        }
+
+                        .books-empty-state p {
+                            margin: 0;
+                            color: var(--books-muted);
+                        }
+
+                        .books-pagination {
+                            display: flex;
+                            justify-content: center;
+                            margin-top: 1.5rem;
+                        }
+
+                        .books-pagination ul {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 0.55rem;
+                            list-style: none;
+                            padding: 0;
+                            margin: 0;
+                        }
+
+                        .books-pagination li {
+                            display: inline-flex;
+                        }
+
+                        .books-pagination a {
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 0.35rem;
+                            min-width: 42px;
+                            min-height: 42px;
+                            padding: 0 0.8rem;
+                            border-radius: 12px;
+                            background: #fff;
+                            border: 1px solid var(--books-border);
+                            color: var(--books-text);
+                            text-decoration: none;
+                            font-weight: 700;
+                        }
+
+                        .books-pagination li.active a {
+                            background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+                            border-color: transparent;
+                            color: #fff;
+                            box-shadow: 0 10px 18px rgba(29, 78, 216, 0.18);
+                        }
+
+                        .books-pagination li.disabled a {
+                            pointer-events: none;
+                            opacity: 0.5;
+                        }
+
+                        .desktop-page {
+                            display: inline-flex;
+                        }
+
+                        @@media (max-width: 1399.98px) {
+                            .books-grid {
+                                grid-template-columns: repeat(4, minmax(0, 1fr));
+                            }
+                        }
+
+                        @@media (max-width: 1199.98px) {
+                            .books-grid {
+                                grid-template-columns: repeat(3, minmax(0, 1fr));
+                            }
+                        }
+
+                        @@media (max-width: 991.98px) {
+                            .books-grid {
+                                grid-template-columns: repeat(2, minmax(0, 1fr));
+                            }
+                        }
+
+                        @@media (max-width: 767.98px) {
+                            .page-header {
+                                flex-direction: column;
+                                align-items: flex-start;
+                            }
+
+                            .page-header__actions {
+                                width: 100%;
+                                margin-left: 0;
+                            }
+
+                            .books-header-action {
+                                width: 100%;
+                            }
+
+                            .books-search {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+
+                            .books-search__controls {
+                                width: 100%;
+                                justify-content: flex-end;
+                            }
+
+                            .books-grid {
+                                grid-template-columns: 1fr;
+                            }
+
+                            .books-pagination li:not(.desktop-page) span,
+                            .books-pagination li:not(.desktop-page) i {
+                                display: inline-block;
+                            }
+
+                            .desktop-page {
+                                display: none;
+                            }
+                        }
+                    </style>
+
+                    @section Scripts {
+                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                        <script>
+                            function confirmDelete(id, title) {
+                            Swal.fire({
+                            title: 'Confirm Removal',
+                            text: `Are you sure you want to delete "${title}"?`,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#ef4444',
+                            confirmButtonText: 'Yes, Delete',
+                            cancelButtonText: 'Keep it',
+                            background: '#ffffff',
+                            customClass: {
+                            popup: 'rounded-4'
+                            }
+                            }).then((result) => {
+                            if (result.isConfirmed) {
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            // Use a relative path that matches your controller routing
+                            form.action = '/Books/Delete/' + id;
+
+                            // Find the token anywhere on the page (it's in your search form)
+                            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+
+                            if (token) {
+                            const tokenInput = document.createElement('input');
+                            tokenInput.type = 'hidden';
+                            tokenInput.name = '__RequestVerificationToken';
+                            tokenInput.value = token.value;
+                            form.appendChild(tokenInput);
+                            } else {
+                            console.error("Antiforgery token not found! Check if a form exists on the page.");
+                            }
+
+                            document.body.appendChild(form);
+                            form.submit();
+                            }
+                            });
+                            }
+                        </script>
                     }
-
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
-        }
-    </script>
-}

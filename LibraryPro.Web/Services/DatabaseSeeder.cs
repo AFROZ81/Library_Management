@@ -35,6 +35,9 @@ namespace LibraryPro.Web.Services
 
             // Seed default library settings
             await SeedLibrarySettingsAsync();
+
+            // Fix any old .png references to .svg
+            await FixDefaultBookCoverPathsAsync();
         }
 
         private async Task SeedRolesAsync()
@@ -86,6 +89,23 @@ namespace LibraryPro.Web.Services
                     GracePeriodDays = 0,
                     UpdatedAt = DateTime.Now
                 });
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private async Task FixDefaultBookCoverPathsAsync()
+        {
+            // Update any books with old .png default image path to .svg
+            var booksWithOldPath = await _context.Books
+                .Where(b => b.ImageUrl != null && b.ImageUrl.Contains("default-book-cover.png"))
+                .ToListAsync();
+
+            if (booksWithOldPath.Any())
+            {
+                foreach (var book in booksWithOldPath)
+                {
+                    book.ImageUrl = book.ImageUrl.Replace("default-book-cover.png", "default-book-cover.svg");
+                }
                 await _context.SaveChangesAsync();
             }
         }

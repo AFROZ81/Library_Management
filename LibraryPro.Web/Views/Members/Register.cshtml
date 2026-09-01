@@ -4,52 +4,71 @@
     ViewData["Title"] = "Member Registration";
 }
 
-<div class="container mt-5 animate-slide-up">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-lg border-0">
-                <div class="card-header text-white text-center py-4" style="background-color: #1a237e;">
-                    <h4 class="mb-0 fw-bold"><i class="bi bi-person-plus-fill me-2"></i>New Member Registration</h4>
-                    <p class="small opacity-75 mb-0">Join our library community today</p>
+<div class="member-register-page">
+    <div class="container-fluid px-4 py-4 animate-fade-in">
+        <div class="page-header mb-4">
+            <div class="page-header__title-block">
+                <p class="page-header__eyebrow">Members</p>
+                <h1 class="page-header__title">Register Member</h1>
+            </div>
+
+            <div class="page-header__actions">
+                <a asp-action="Index" class="btn page-header__cta">
+                    <span class="page-header__cta-icon"><i class="bi bi-arrow-left"></i></span>
+                    <span class="page-header__cta-text">Back to<br>Directory</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="register-shell">
+            <div class="register-card">
+                <div class="register-card__header">
+                    <div class="register-card__icon">
+                        <i class="bi bi-person-plus-fill"></i>
+                    </div>
+                    <div>
+                        <h2>New Member</h2>
+                        <p>Add a member to the library directory.</p>
+                    </div>
                 </div>
 
-                <div class="card-body p-4 p-lg-5">
-                    <form asp-action="Register">
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <div class="register-card__body">
+                    <form asp-action="Register" class="register-form">
+                        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
 
-                        <div class="mb-4">
-                            <label asp-for="Name" class="form-label fw-semibold text-secondary"></label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-primary"></i></span>
-                                <input asp-for="Name" class="form-control border-start-0 ps-0" placeholder="Enter full name" />
+                        <div class="field-group">
+                            <label asp-for="Name" class="form-label">Full Name</label>
+                            <div class="input-group modern-input-group">
+                                <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                                <input asp-for="Name" class="form-control" placeholder="Enter full name" />
                             </div>
-                            <span asp-validation-for="Name" class="text-danger small"></span>
+                            <span asp-validation-for="Name" class="field-validation-error"></span>
                         </div>
 
-                        <div class="mb-4">
-                            <label asp-for="Email" class="form-label fw-semibold text-secondary"></label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-primary"></i></span>
-                                <input asp-for="Email" class="form-control border-start-0 ps-0" placeholder="email@example.com" />
+                        <div class="field-group">
+                            <label asp-for="Email" class="form-label">Email Address</label>
+                            <div class="input-group modern-input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
+                                <input asp-for="Email" class="form-control" placeholder="name@example.com" />
                             </div>
-                            <span asp-validation-for="Email" class="text-danger small"></span>
+                            <span asp-validation-for="Email" class="field-validation-error"></span>
                         </div>
 
-                        <div class="mb-4">
-                            <label asp-for="PhoneNumber" class="form-label fw-semibold text-secondary"></label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-telephone text-primary"></i></span>
-                                <input asp-for="PhoneNumber" class="form-control border-start-0 ps-0" placeholder="Ex: +91 XXXXX XXXXX" />
+                        <div class="field-group">
+                            <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                            <div class="input-group modern-input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone-fill"></i></span>
+                                <input asp-for="PhoneNumber" class="form-control" placeholder="+1 (555) 000-0000" />
                             </div>
-                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                            <span asp-validation-for="PhoneNumber" class="field-validation-error"></span>
                         </div>
 
-                        <div class="d-grid gap-3 mt-5">
-                            <button type="submit" class="btn btn-warning btn-lg fw-bold shadow-sm py-3">
-                                Register Member
+                        <div class="register-actions">
+                            <button type="submit" class="btn register-submit-btn">
+                                <i class="bi bi-person-check-fill me-2"></i>Register Member
                             </button>
-                            <a asp-action="Index" class="btn btn-link text-decoration-none text-muted">
-                                <i class="bi bi-arrow-left me-1"></i> Back to Member Directory
+                            <a asp-action="Index" class="btn register-cancel-btn">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Directory
                             </a>
                         </div>
                     </form>
@@ -60,41 +79,314 @@
 </div>
 
 <style>
-    /* Professional UI Enhancements */
-    .form-control:focus {
+    :root {
+        --register-bg: #f8fafc;
+        --register-card-bg: #ffffff;
+        --register-border: #e5e7eb;
+        --register-primary: #1d4ed8;
+        --register-primary-soft: #eff6ff;
+        --register-text: #0f172a;
+        --register-muted: #64748b;
+        --register-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        --register-error: #dc2626;
+    }
+
+    .member-register-page {
+        min-height: calc(100vh - 56px);
+        background: var(--register-bg);
+        padding: 0 0 2.5rem;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1.5rem;
+        padding: 0.25rem 0 0.5rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+        margin-bottom: 1.5rem;
+    }
+
+    .page-header__title-block {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        min-width: 0;
+    }
+
+    .page-header__eyebrow {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .page-header__title {
+        margin: 0;
+        font-size: clamp(2.2rem, 3.4vw, 4rem);
+        line-height: 0.95;
+        font-weight: 600;
+        letter-spacing: -0.06em;
+        color: #0f172a;
+    }
+
+    .page-header__actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 1rem;
+        width: min(100%, 720px);
+        flex: 1;
+    }
+
+    .page-header__cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.7rem;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid #dfe7f1;
+        color: #0f172a;
+        border-radius: 12px;
+        min-width: 140px;
+        height: 48px;
+        padding: 0.7rem 1rem;
         box-shadow: none;
-        border-color: #1a237e;
+        transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
     }
 
-    .input-group-text {
-        border-color: #dee2e6;
+    .page-header__cta:hover {
+        color: #0f172a;
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        transform: translateY(-1px);
     }
 
-    .animate-slide-up {
-        animation: slideUp 0.6s ease-out;
+    .page-header__cta-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: transparent;
+        color: #475569;
+        font-size: 0.9rem;
     }
 
-    @@keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
+    .page-header__cta-text {
+        line-height: 1.1;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-align: left;
+    }
+
+    .register-shell {
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .register-card {
+        background: var(--register-card-bg);
+        border: 1px solid var(--register-border);
+        border-radius: 22px;
+        box-shadow: var(--register-shadow);
+        overflow: hidden;
+    }
+
+    .register-card__header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+        color: #fff;
+        padding: 1.5rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .register-card__icon {
+        width: 52px;
+        height: 52px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        font-size: 1.4rem;
+    }
+
+    .register-card__header h2 {
+        margin: 0;
+        font-size: clamp(1.4rem, 2vw, 1.85rem);
+        font-weight: 700;
+    }
+
+    .register-card__header p {
+        margin: 0.25rem 0 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.94rem;
+    }
+
+    .register-card__body {
+        padding: 2rem;
+        background: #fff;
+    }
+
+    .register-form {
+        max-width: 620px;
+        margin: 0 auto;
+    }
+
+    .validation-summary {
+        margin-bottom: 1.25rem;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 12px;
+        color: var(--register-error);
+        padding: 0.85rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .validation-summary ul {
+        margin: 0;
+        padding-left: 1.1rem;
+    }
+
+    .field-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.55rem;
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: var(--register-muted);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .modern-input-group .input-group-text {
+        width: 48px;
+        justify-content: center;
+        background: #f8fafc;
+        border: 1px solid #dfe7f1;
+        border-right: none;
+        border-radius: 12px 0 0 12px;
+        color: var(--register-primary);
+        font-size: 1rem;
+    }
+
+    .modern-input-group .form-control {
+        border: 1px solid #dfe7f1;
+        border-left: none;
+        border-radius: 0 12px 12px 0;
+        padding: 0.9rem 1rem;
+        font-size: 0.98rem;
+        color: var(--register-text);
+        background: #fff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .modern-input-group .form-control:focus {
+        border-color: rgba(26, 35, 126, 0.7);
+        box-shadow: 0 0 0 4px rgba(26, 35, 126, 0.08);
+        outline: none;
+    }
+
+    .field-validation-error {
+        display: block;
+        margin-top: 0.4rem;
+        color: var(--register-error);
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .register-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.9rem;
+        padding-top: 1rem;
+        margin-top: 1rem;
+        border-top: 1px solid var(--register-border);
+    }
+
+    .register-submit-btn,
+    .register-cancel-btn {
+        min-height: 48px;
+        padding: 0.8rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 700;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .register-submit-btn {
+        background: linear-gradient(135deg, #2f6ef5 0%, #1d4ed8 100%);
+        border: none;
+        color: #fff;
+        box-shadow: 0 10px 18px rgba(37, 99, 235, 0.2);
+    }
+
+    .register-submit-btn:hover {
+        transform: translateY(-1px);
+        color: #fff;
+    }
+
+    .register-cancel-btn {
+        border: 1px solid #dfe7f1;
+        color: var(--register-text);
+        background: #fff;
+    }
+
+    .register-cancel-btn:hover {
+        background: #f8fafc;
+        color: var(--register-text);
+        transform: translateY(-1px);
+    }
+
+    @@media (max-width: 991.98px) {
+        .page-header {
+            flex-direction: column;
+            align-items: stretch;
         }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
+        .page-header__actions {
+            width: 100%;
         }
     }
 
-    /* Subtle hover effect on the Register button */
-    .btn-warning {
-        transition: all 0.3s;
-    }
-
-        .btn-warning:hover {
-            transform: scale(1.02);
-            background-color: #ffca2c;
+    @@media (max-width: 767.98px) {
+        .page-header {
+            gap: 1rem;
         }
+
+        .page-header__actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .page-header__cta {
+            width: 100%;
+            min-width: 0;
+            justify-content: center;
+        }
+
+        .register-card__header,
+        .register-card__body {
+            padding: 1.25rem;
+        }
+
+        .register-actions {
+            flex-direction: column;
+        }
+
+        .register-submit-btn,
+        .register-cancel-btn {
+            width: 100%;
+        }
+    }
 </style>
 
 @section Scripts {

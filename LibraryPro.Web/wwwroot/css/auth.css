@@ -1,5 +1,5 @@
 /* ==========================================
-   LibraryPro Enterprise Light Auth CSS
+   Libris Enterprise Light Auth CSS
    ========================================== */
 
 :root {
@@ -38,6 +38,32 @@ body.auth-page-wrapper {
     margin: 0;
     overflow-x: hidden;
     position: relative;
+}
+
+.auth-logo {
+    height: 100px;
+    width: auto;
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+    animation: logoFloat 3s ease-in-out infinite;
+    filter: drop-shadow(0 8px 16px rgba(79, 70, 229, 0.15));
+}
+
+@keyframes logoFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.auth-form-card__logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding: 1rem 0;
 }
 
 /* Ambient Light Background Glows */
@@ -99,17 +125,18 @@ body.auth-page-wrapper {
 
 /* Header Brand Pill */
 .brand-header-pill {
-    background: #ffffff;
-    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.2);
     border-radius: var(--radius-full);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+    backdrop-filter: blur(8px);
 }
 
 .brand-icon-sm {
     width: 32px;
     height: 32px;
     background: linear-gradient(135deg, var(--primary-indigo), var(--accent-sky));
-    border-radius: 8px;
+    border-radius: 9px;
     color: #ffffff;
     display: flex;
     align-items: center;
@@ -122,47 +149,524 @@ body.auth-page-wrapper {
 .fw-extrabold { font-weight: 800; }
 .text-slate { color: var(--text-dark); }
 
-/* ==========================================
-   Single 3D Flip Card Container
-   ========================================== */
-
-.auth-flip-container {
-    perspective: 1200px;
-    width: 100%;
-    max-width: 450px;
-    margin: 0 auto;
+.auth-shell {
     position: relative;
     z-index: 1;
-}
-
-.auth-flip-inner {
+    width: min(100%, 520px);
+    margin: 0 auto;
     display: grid;
-    grid-template-areas: "card";
-    transform-style: preserve-3d;
-    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-    width: 100%;
+    grid-template-columns: 1fr;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+    backdrop-filter: none;
+    opacity: 1;
+    transform: none;
+    animation: none;
 }
 
-.auth-flip-inner.flipped {
+.auth-shell.auth-shell--out {
+    animation: authCardOut 0.28s ease forwards;
+}
+
+.auth-shell--simple {
+    width: min(100%, 520px);
+}
+
+.auth-card-shell {
+    position: relative;
+    width: 100%;
+    height: auto;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    background: transparent;
+}
+
+.auth-card-shell.is-flipped {
     transform: rotateY(180deg);
 }
 
-.card-face-front,
-.card-face-back {
-    grid-area: card;
+.auth-card-face {
+    position: relative;
+    width: 100%;
+    display: none;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    background: var(--light-card);
-    border-radius: var(--radius-card);
-    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 26px;
+    overflow: visible;
     box-shadow: var(--shadow-card);
-    padding: 2.25rem 2rem;
-    width: 100%;
 }
 
-.card-face-back {
+.auth-card-face--front {
+    display: flex;
+}
+
+.auth-card-face--back {
+    display: none;
+}
+
+.auth-card-shell.is-flipped .auth-card-face--front {
+    display: none;
+}
+
+.auth-card-shell.is-flipped .auth-card-face--back {
+    display: flex;
+}
+
+@keyframes authCardIn {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.985);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes authCardOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-12px) scale(0.99);
+    }
+}
+
+.auth-shell--compact {
+    grid-template-columns: 1fr 1fr;
+}
+
+.auth-panel {
+    padding: 2.4rem 2rem;
+    background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.auth-panel--brand {
+    background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+}
+
+.auth-panel--success {
+    background: linear-gradient(180deg, #0f172a 0%, #0b1322 100%);
+}
+
+.auth-panel--danger {
+    background: linear-gradient(180deg, #201115 0%, #1f2937 100%);
+}
+
+.auth-panel__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    align-self: flex-start;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.12);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    color: #dfe7f5;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.auth-panel__icon {
+    width: 74px;
+    height: 74px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #4f46e5 0%, #60a5fa 100%);
+    font-size: 2rem;
+    margin-top: 1.5rem;
+    box-shadow: 0 18px 30px rgba(79, 70, 229, 0.35);
+}
+
+.auth-panel h1 {
+    margin: 1.5rem 0 0.8rem;
+    font-size: clamp(2rem, 2.4vw, 2.7rem);
+    line-height: 1.1;
+    letter-spacing: -0.06em;
+    font-weight: 800;
+}
+
+.auth-panel p {
+    margin: 0;
+    color: rgba(226, 232, 240, 0.8);
+    line-height: 1.7;
+}
+
+.auth-feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.75rem 0 0;
+    display: grid;
+    gap: 0.9rem;
+}
+
+.auth-feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    color: #edf2ff;
+    font-weight: 500;
+}
+
+.auth-feature-list i {
+    color: #7dd3fc;
+    font-size: 1.05rem;
+}
+
+.auth-form-card {
+    background: rgba(255, 255, 255, 0.96);
+    padding: 2.3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 100%;
+    border-radius: 26px;
+}
+
+.auth-form-card--compact {
+    padding: 2rem;
+}
+
+.auth-form-card--standalone {
+    padding: 2.5rem 2rem;
+}
+
+.auth-form-card__header {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.auth-form-card__eyebrow {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    color: var(--primary-indigo);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+}
+
+.auth-form-card__header h2 {
+    margin: 0;
+    font-size: clamp(1.7rem, 2vw, 2.2rem);
+    line-height: 1.15;
+    letter-spacing: -0.05em;
+    font-weight: 800;
+    color: var(--text-dark);
+}
+
+.auth-link {
+    color: var(--primary-indigo);
+    font-weight: 700;
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+}
+
+.auth-link:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.form-group-light {
+    margin-bottom: 1.2rem;
+}
+
+.form-label-light {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-slate);
+    margin-bottom: 0.45rem;
+}
+
+.input-wrapper-light {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon-left {
+    position: absolute;
+    left: 0.9rem;
+    color: #94a3b8;
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.input-control-light {
+    width: 100%;
+    padding: 0.82rem 1rem 0.82rem 2.7rem;
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-md);
+    background: #fff;
+    color: var(--text-dark);
+    font-size: 0.94rem;
+    box-shadow: var(--shadow-input);
+    transition: all 0.2s ease;
+}
+
+.input-control-light:focus {
+    outline: none;
+    border-color: var(--primary-indigo);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+}
+
+.toggle-pass-btn {
+    position: absolute;
+    right: 0.8rem;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.toggle-pass-btn:hover {
+    color: var(--primary-indigo);
+}
+
+.form-check-light {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1.35rem;
+}
+
+.auth-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.auth-toggle__input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.auth-toggle__slider {
+    position: relative;
+    width: 52px;
+    height: 30px;
+    border-radius: 999px;
+    background: #dfe7f5;
+    box-shadow: inset 0 2px 5px rgba(15, 23, 42, 0.08);
+    transition: background-color 0.25s ease;
+}
+
+.auth-toggle__slider::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.14);
+    transition: transform 0.25s ease;
+}
+
+.auth-toggle__input:checked + .auth-toggle__slider {
+    background: linear-gradient(135deg, var(--primary-indigo), var(--primary-hover));
+}
+
+.auth-toggle__input:checked + .auth-toggle__slider::after {
+    transform: translateX(22px);
+}
+
+.form-check-label-light {
+    font-size: 0.82rem;
+    color: var(--text-slate);
+}
+
+.auth-policy {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    line-height: 1.7;
+    margin: 0 0 1.5rem;
+}
+
+.btn-submit-light {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.2rem;
+    border: none;
+    border-radius: var(--radius-md);
+    color: #fff;
+    font-size: 0.94rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary-indigo) 0%, var(--primary-hover) 100%);
+    box-shadow: var(--shadow-btn);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-submit-light:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
+}
+
+.btn-submit-emerald {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.28);
+}
+
+.auth-form-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    margin-top: auto;
+    padding-top: 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.validation-light {
+    margin-bottom: 1.1rem;
+    padding: 0.8rem 0.9rem;
+    border-radius: 12px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    font-size: 0.82rem;
+}
+
+.validation-light ul {
+    margin: 0;
+    padding-left: 1rem;
+}
+
+.field-validation-error {
+    display: block;
+    margin-top: 0.35rem;
+    color: #dc2626;
+    font-size: 0.76rem;
+    font-weight: 600;
+}
+
+@media (max-width: 767.98px) {
+    .auth-shell {
+        grid-template-columns: 1fr;
+        border-radius: 24px;
+    }
+
+    .auth-panel,
+    .auth-form-card {
+        padding: 1.5rem 1.2rem;
+    }
+
+    .auth-form-card__header h2 {
+        font-size: 1.75rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .auth-form-card__footer {
+        flex-direction: column;
+    }
+}
+
+/* ==========================================
+   Single 3D Flip Card - Login / Register
+   ========================================== */
+
+/*
+   The Login.cshtml markup uses:
+       .auth-shell--login
+       .auth-card-shell
+       .auth-card-face--front
+       .auth-card-face--back
+
+   Both faces must remain rendered at the same time.
+   The back face is rotated 180deg BEFORE the parent flips.
+   This prevents the blank-card problem caused by
+   display:none + rotateY(180deg).
+*/
+
+.auth-shell--login {
+    perspective: 1400px;
+    perspective-origin: center center;
+}
+
+.auth-card-shell {
+    position: relative;
+    width: 100%;
+    display: grid;
+    grid-template-areas: "auth-card";
+    align-items: start;
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    background: transparent;
+}
+
+.auth-card-shell.is-flipped {
     transform: rotateY(180deg);
 }
+
+.auth-card-face {
+    grid-area: auth-card;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+
+    border-radius: 26px;
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    background: var(--light-card);
+}
+
+.auth-card-face--front {
+    transform: rotateY(0deg);
+}
+
+.auth-card-face--back {
+    transform: rotateY(180deg);
+}
+
+/*
+   Keep the actual form card aligned with the face.
+*/
+.auth-card-face .auth-form-card {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/*
+   The old implementation below (.auth-flip-container /
+   .auth-flip-inner / .card-face-front / .card-face-back)
+   is intentionally retained because it is unrelated to
+   the Login.cshtml markup and removing it would touch
+   other possible consumers of this stylesheet.
+*/
 
 /* Auth Header inside Card */
 .card-brand-header {

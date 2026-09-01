@@ -4,90 +4,210 @@
     ViewData["Title"] = Model.Title;
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-5">
-                    @if (TempData["Success"] != null)
-                    {
-                        <div class="alert alert-success">@TempData["Success"]</div>
-                    }
-                    @if (TempData["Error"] != null)
-                    {
-                        <div class="alert alert-danger">@TempData["Error"]</div>
-                    }
+<div class="books-page books-page--detail">
+    <div class="container-fluid px-3 px-md-4 py-4 py-lg-5">
+        <div class="books-shell books-shell--narrow">
+            <header class="page-header page-header--compact">
+                <div class="page-header__title-block">
+                    <p class="page-header__eyebrow">Collection</p>
+                    <h1 class="page-header__title">Book Details</h1>
+                </div>
+                <div class="page-header__actions">
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary books-header-action books-header-action--ghost">
+                        <i class="bi bi-arrow-left me-2"></i>Back
+                    </a>
+                </div>
+            </header>
 
-                    <div class="row">
-                        <div class="col-md-4 mb-4 mb-md-0 text-center">
-                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                            {
-                                <img src="@Model.ImageUrl" alt="@Model.Title" class="img-fluid rounded shadow-sm" />
-                            }
-                            else
-                            {
-                                <div class="bg-light d-flex align-items-center justify-content-center rounded shadow-sm" style="height: 300px;">
-                                    <i class="bi bi-book text-muted" style="font-size: 5rem;"></i>
-                                </div>
-                            }
+            <div class="books-detail-card">
+                <div class="books-detail-card__cover">
+                    <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/default-book-cover.svg" : Model.ImageUrl)" alt="@Model.Title" />
+                </div>
+
+                <div class="books-detail-card__content">
+                    <div class="books-detail-card__eyebrow">Catalog Record</div>
+                    <h2>@Model.Title</h2>
+                    <p class="books-detail-card__author">by @Model.Author</p>
+
+                    <div class="books-detail-metadata">
+                        <div class="books-detail-metadata__item">
+                            <span>ISBN</span>
+                            <strong>@Model.ISBN</strong>
                         </div>
-                        <div class="col-md-8">
-                            <h2 class="fw-bold mb-1">@Model.Title</h2>
-                            <p class="text-muted fs-5 mb-4">by @Model.Author</p>
-
-                            <div class="row g-3 mb-4">
-                                <div class="col-sm-6">
-                                    <div class="p-3 bg-light rounded">
-                                        <small class="text-muted d-block">ISBN</small>
-                                        <span class="fw-bold">@Model.ISBN</span>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="p-3 bg-light rounded">
-                                        <small class="text-muted d-block">Publication Year</small>
-                                        <span class="fw-bold">@Model.PublicationYear</span>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="p-3 bg-light rounded">
-                                        <small class="text-muted d-block">Available Copies</small>
-                                        <span class="fw-bold @(Model.AvailableCopies > 0 ? "text-success" : "text-danger")">
-                                            @Model.AvailableCopies / @Model.TotalCopies
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="p-3 bg-light rounded">
-                                        <small class="text-muted d-block">Genre</small>
-                                        <span class="fw-bold">@(Model.Genre != null ? string.Join(", ", Model.Genre) : "N/A")</span>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="p-3 bg-light rounded">
-                                        <small class="text-muted d-block">Barcode</small>
-                                        <span class="fw-bold text-primary">@Model.Barcode</span>
-                                    </div>
-                                </div>
+                        <div class="books-detail-metadata__item">
+                            <span>Publication Year</span>
+                            <strong>@Model.PublicationYear</strong>
+                        </div>
+                        <div class="books-detail-metadata__item">
+                            <span>Available Copies</span>
+                            <strong
+                                class="@(Model.AvailableCopies > 0 ? "text-success" : "text-danger")">@Model.AvailableCopies
+                                / @Model.TotalCopies</strong>
                             </div>
-
-                            <div class="d-flex gap-2">
-                                <a asp-action="Index" class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-left me-1"></i> Back to Catalog
-                                </a>
-                                @if (User.Identity?.IsAuthenticated == true)
-                                {
-                                    <form asp-controller="Reservations" asp-action="Create" method="post">
-                                        <input type="hidden" name="bookId" value="@Model.Id" />
-                                        <button type="submit" class="btn btn-primary" @(Model.AvailableCopies > 0 ? "" : "")>
-                                            <i class="bi bi-bookmark-plus me-1"></i> Reserve Book
-                                        </button>
-                                    </form>
-                                }
+                            <div class="books-detail-metadata__item">
+                                <span>Genre</span>
+                                <strong>@(Model.Genre != null ? string.Join(", ", Model.Genre) : "N/A")</strong>
                             </div>
+                            <div class="books-detail-metadata__item books-detail-metadata__item--wide">
+                                <span>Barcode</span>
+                                <strong class="books-detail-card__barcode">@Model.Barcode</strong>
+                            </div>
+                        </div>
+
+                        <div class="books-detail-card__actions">
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <form asp-controller="Reservations" asp-action="Create" method="post">
+                                    <input type="hidden" name="bookId" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-primary books-detail-btn" @(Model.AvailableCopies > 0 ?
+                                                                                                            "" : "disabled")>
+                                        <i class="bi bi-bookmark-plus me-2"></i>Reserve Book
+                                    </button>
+                                </form>
+                            }
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+    <style>
+        .books-detail-card {
+            display: grid;
+            grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+            gap: 2rem;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid var(--books-border);
+            border-radius: 24px;
+            box-shadow: 0 18px 35px rgba(15, 23, 42, 0.06);
+            padding: 1.75rem;
+        }
+
+        .books-detail-card__cover {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #eef4ff 0%, #f8fafc 100%);
+            min-height: 360px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .books-detail-card__cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .books-detail-card__placeholder {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            place-items: center;
+            color: #94a3b8;
+            font-size: 5rem;
+            min-height: 360px;
+        }
+
+        .books-detail-card__content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .books-detail-card__eyebrow {
+            margin: 0 0 0.5rem;
+            color: #2563eb;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .books-detail-card__content h2 {
+            margin: 0;
+            font-size: clamp(2rem, 3vw, 3rem);
+            line-height: 1.05;
+            letter-spacing: -0.05em;
+            color: var(--books-text);
+        }
+
+        .books-detail-card__author {
+            margin: 0.75rem 0 1.25rem;
+            color: var(--books-muted);
+            font-size: 1.2rem;
+        }
+
+        .books-detail-metadata {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .books-detail-metadata__item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            padding: 1rem 1rem 0.9rem;
+            border-radius: 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .books-detail-metadata__item span {
+            color: var(--books-muted);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .books-detail-metadata__item strong {
+            color: var(--books-text);
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        .books-detail-metadata__item--wide {
+            grid-column: 1 / -1;
+        }
+
+        .books-detail-card__barcode {
+            color: #2563eb;
+            word-break: break-all;
+        }
+
+        .books-detail-card__actions {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .books-detail-btn {
+            min-height: 52px;
+            border-radius: 12px;
+            font-weight: 800;
+            padding-inline: 1.5rem;
+            box-shadow: 0 12px 24px rgba(29, 78, 216, 0.18);
+        }
+
+        @@media (max-width: 767.98px) {
+            .books-detail-card {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .books-detail-card__cover,
+            .books-detail-card__placeholder {
+                min-height: 260px;
+            }
+
+            .books-detail-metadata {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>

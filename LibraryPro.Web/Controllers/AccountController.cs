@@ -35,13 +35,13 @@ namespace LibraryPro.Web.Controllers
         public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
-            
+
             if (ModelState.IsValid && !string.IsNullOrEmpty(model.Email) && !string.IsNullOrEmpty(model.Password))
             {
                 var result = await _signInManager.PasswordSignInAsync(
-                    model.Email, 
-                    model.Password, 
-                    model.RememberMe, 
+                    model.Email,
+                    model.Password,
+                    model.RememberMe,
                     lockoutOnFailure: true);
 
                 if (result.Succeeded)
@@ -75,7 +75,7 @@ namespace LibraryPro.Web.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public IActionResult Register(string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
@@ -83,12 +83,12 @@ namespace LibraryPro.Web.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
+        [Authorize(Policy = "LibrarianOrAdmin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
-            
+
             if (ModelState.IsValid && !string.IsNullOrEmpty(model.Email) && !string.IsNullOrEmpty(model.Password))
             {
                 var user = new IdentityUser
@@ -123,10 +123,5 @@ namespace LibraryPro.Web.Controllers
             return View(model);
         }
 
-        [HttpGet]
-        public IActionResult AccessDenied()
-        {
-            return View();
-        }
     }
 }

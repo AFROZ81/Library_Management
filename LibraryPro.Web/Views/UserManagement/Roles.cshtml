@@ -13,21 +13,6 @@
                     <a asp-action="CreateRole" class="btn btn-light btn-sm">Create New Role</a>
                 </div>
                 <div class="card-body">
-                    @if (TempData["Success"] != null)
-                    {
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            @TempData["Success"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    }
-                    @if (TempData["Error"] != null)
-                    {
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            @TempData["Error"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    }
-
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
@@ -44,15 +29,15 @@
                                         <td>@role.Name</td>
                                         <td class="text-muted">@role.Id</td>
                                         <td>
-                                            @if (role.Name == LibraryPro.Web.Models.Constants.Roles.Admin || 
-                                                role.Name == LibraryPro.Web.Models.Constants.Roles.Librarian || 
+                                            @if (role.Name == LibraryPro.Web.Models.Constants.Roles.Admin ||
+                                                role.Name == LibraryPro.Web.Models.Constants.Roles.Librarian ||
                                                 role.Name == LibraryPro.Web.Models.Constants.Roles.Member)
                                             {
                                                 <span class="text-muted">System Role</span>
                                             }
                                             else
                                             {
-                                                <form asp-action="DeleteRole" asp-route-id="@role.Id" method="post" 
+                                                <form asp-action="DeleteRole" asp-route-id="@role.Id" method="post"
                                                       onsubmit="return confirm('Are you sure you want to delete this role?');">
                                                     @Html.AntiForgeryToken()
                                                     <button type="submit" class="btn btn-sm btn-danger">Delete</button>

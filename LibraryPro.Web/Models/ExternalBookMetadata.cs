@@ -8,7 +8,7 @@ public class ExternalBookMetadata
     public string? Description { get; set; }
     public string? ImageUrl { get; set; }
     public int PublicationYear { get; set; }
-    public List<string> Genres { get; set; } = new();
+    public List<string?> Genres { get; set; } = new();
     public string? Publisher { get; set; }
     public int PageCount { get; set; }
     public string Source { get; set; } = string.Empty; // "Google Books" or "Open Library"

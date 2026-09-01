@@ -5,285 +5,849 @@
     var settings = ViewBag.Settings as LibraryPro.Web.Models.Entities.LibrarySettings ?? new LibraryPro.Web.Models.Entities.LibrarySettings();
 }
 
-<div class="container py-5 animate-fade-in">
-    @* --- Header Section --- *@
-    <div class="row align-items-end mb-4">
-        <div class="col-lg-6">
-            <h2 class="fw-bold text-dark mb-1"><i class="bi bi-arrow-left-right text-primary me-2"></i>Loan Operations</h2>
-            <p class="text-muted mb-0">Manage circulation, track overdues, process renewals, and handle returns.</p>
-        </div>
-        <div class="col-lg-6 text-lg-end mt-3">
-            <div class="d-inline-flex gap-2">
-                <div class="input-group shadow-sm" style="width: 300px;">
-                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-                    <input type="text" id="loanSearch" class="form-control border-start-0" placeholder="Search member name...">
+<style>
+    :root {
+        --loan-bg: #f8fafc;
+        --loan-panel: #ffffff;
+        --loan-border: #e5e7eb;
+        --loan-text: #0f172a;
+        --loan-muted: #64748b;
+        --loan-primary: #1d4ed8;
+        --loan-primary-soft: #eff6ff;
+        --loan-danger: #dc2626;
+        --loan-danger-soft: #fef2f2;
+        --loan-success: #059669;
+        --loan-success-soft: #ecfdf5;
+        --loan-warning: #d97706;
+        --loan-warning-soft: #fffbeb;
+    }
+
+    .loan-page {
+        min-height: calc(100vh - 56px);
+        background: var(--loan-bg);
+        padding: 0 0 2.5rem;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1.5rem;
+        padding: 0.25rem 0 0.5rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+        margin-bottom: 1.5rem;
+    }
+
+    .page-header__title-block {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        min-width: 0;
+    }
+
+    .page-header__eyebrow {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .page-header__title {
+        margin: 0;
+        font-size: clamp(2.2rem, 3.4vw, 4rem);
+        line-height: 0.95;
+        font-weight: 600;
+        letter-spacing: -0.06em;
+        color: #0f172a;
+    }
+
+    .page-header__actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 1rem;
+        width: min(100%, 720px);
+        flex: 1;
+    }
+
+    .search-shell {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        min-width: 220px;
+        background: rgba(255, 255, 255, 0.55);
+        border: 1px solid rgba(148, 163, 184, 0.9);
+        border-radius: 16px;
+        height: 64px;
+        padding: 0 1rem 0 0.9rem;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
+    }
+
+    .search-shell__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: rgba(148, 163, 184, 0.08);
+        color: #64748b;
+        font-size: 1.1rem;
+        margin-right: 0.75rem;
+    }
+
+    .search-shell__input {
+        border: 0;
+        background: transparent;
+        width: 100%;
+        height: 100%;
+        font-size: 1rem;
+        color: #0f172a;
+        outline: none;
+    }
+
+    .search-shell__input::placeholder {
+        color: #94a3b8;
+    }
+
+    .page-header__cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        background: linear-gradient(135deg, #2f6ef5 0%, #1d4ed8 100%);
+        color: #fff;
+        border: 0;
+        border-radius: 20px;
+        min-width: 170px;
+        height: 64px;
+        padding: 0.75rem 1.2rem;
+        box-shadow: 0 12px 24px rgba(37, 99, 235, 0.28);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .page-header__cta:hover {
+        color: #fff;
+        transform: translateY(-1px);
+        box-shadow: 0 16px 26px rgba(37, 99, 235, 0.3);
+    }
+
+    .page-header__cta-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.14);
+        font-size: 1rem;
+    }
+
+    .page-header__cta-text {
+        line-height: 1.1;
+        font-weight: 700;
+        font-size: 1.02rem;
+        text-align: left;
+    }
+
+    .loan-content {
+        max-width: none;
+        width: 100%;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .loan-alert {
+        margin-bottom: 1.25rem;
+        border-radius: 14px;
+        border: none;
+        padding: 1rem 1.1rem;
+    }
+
+    .loan-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        background: var(--loan-panel);
+        border: 1px solid var(--loan-border);
+        border-radius: 18px;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+        padding: 1.25rem;
+    }
+
+    .stat-icon {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        font-size: 1.3rem;
+        margin-bottom: 0.9rem;
+    }
+
+    .stat-number {
+        margin: 0;
+        font-size: clamp(1.4rem, 2vw, 2rem);
+        font-weight: 800;
+        color: var(--loan-text);
+    }
+
+    .stat-label {
+        margin: 0.25rem 0 0;
+        color: var(--loan-muted);
+        font-size: 0.83rem;
+        font-weight: 600;
+    }
+
+    .loan-list-shell {
+        background: var(--loan-panel);
+        border: 1px solid var(--loan-border);
+        border-radius: 22px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .loan-list-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--loan-border);
+        background: linear-gradient(180deg, rgba(26,35,126,0.03) 0%, rgba(26,35,126,0.01) 100%);
+    }
+
+    .loan-list-head h2 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--loan-text);
+    }
+
+    .summary-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.46rem 0.8rem;
+        border-radius: 999px;
+        background: var(--loan-primary-soft);
+        color: var(--loan-primary);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .loan-members {
+        padding: 1.25rem;
+        display: grid;
+        gap: 1rem;
+    }
+
+    .loan-accordion {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .loan-member-card {
+        background: #fff;
+        border: 1px solid var(--loan-border);
+        border-radius: 18px;
+        overflow: hidden;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .loan-member-card:hover {
+        box-shadow: 0 12px 22px rgba(15, 23, 42, 0.06);
+        transform: translateY(-1px);
+    }
+
+    .loan-member-card .accordion-item {
+        border: none;
+        background: transparent;
+    }
+
+    .loan-accordion-button {
+        background: linear-gradient(180deg, rgba(148,163,184,0.04) 0%, rgba(148,163,184,0.01) 100%);
+        border: none;
+        box-shadow: none;
+        border-radius: 0;
+        padding: 1.1rem 1.2rem;
+        color: var(--loan-text);
+        width: 100%;
+    }
+
+    .loan-accordion-button:not(.collapsed) {
+        background: linear-gradient(180deg, rgba(37,99,235,0.04) 0%, rgba(37,99,235,0.01) 100%);
+        box-shadow: none;
+        color: var(--loan-text);
+    }
+
+    .loan-accordion-button:focus {
+        box-shadow: none;
+    }
+
+    .loan-accordion-button::after {
+        margin-left: 1rem;
+        width: 0.8rem;
+        height: 0.8rem;
+        background-size: 0.8rem;
+        filter: brightness(0.5);
+    }
+
+    .member-summary {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        width: 100%;
+        gap: 0.9rem;
+    }
+
+    .member-identity {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        min-width: 0;
+    }
+
+    .member-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+        color: #fff;
+        font-weight: 700;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .member-name-wrap {
+        min-width: 0;
+        text-align: left;
+    }
+
+    .member-name {
+        margin: 0;
+        color: var(--loan-text);
+        font-weight: 700;
+        font-size: 1.06rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .member-meta {
+        margin: 0.2rem 0 0;
+        color: var(--loan-muted);
+        font-size: 0.77rem;
+        letter-spacing: 0.03em;
+    }
+
+    .member-status-block {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.45rem 0.8rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .status-badge.active {
+        background: var(--loan-primary-soft);
+        color: var(--loan-primary);
+    }
+
+    .status-badge.overdue {
+        background: var(--loan-danger-soft);
+        color: var(--loan-danger);
+    }
+
+    .status-badge.clear {
+        background: var(--loan-success-soft);
+        color: var(--loan-success);
+    }
+
+    .member-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.8rem;
+        padding: 1rem 1.2rem 0;
+    }
+
+    .detail-box {
+        background: #f8fafc;
+        border: 1px solid #edf2f7;
+        border-radius: 12px;
+        padding: 0.8rem 0.9rem;
+    }
+
+    .detail-label {
+        display: block;
+        margin-bottom: 0.35rem;
+        color: var(--loan-muted);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .detail-value {
+        display: block;
+        color: var(--loan-text);
+        font-size: 0.93rem;
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+    .loan-entries {
+        padding: 1rem 1.2rem 1.2rem;
+    }
+
+    .loan-entry-list {
+        display: grid;
+        gap: 0.8rem;
+    }
+
+    .loan-entry {
+        display: grid;
+        grid-template-columns: minmax(0, 2.2fr) minmax(120px, 1fr) minmax(90px, 0.8fr) minmax(90px, 0.7fr) auto;
+        align-items: center;
+        gap: 0.75rem;
+        background: #f8fafc;
+        border: 1px solid #edf2f7;
+        border-radius: 14px;
+        padding: 0.85rem 0.9rem;
+    }
+
+    .book-info {
+        min-width: 0;
+    }
+
+    .book-title {
+        margin: 0;
+        color: var(--loan-text);
+        font-weight: 700;
+        line-height: 1.45;
+        word-break: break-word;
+    }
+
+    .book-isbn {
+        margin: 0.2rem 0 0;
+        color: var(--loan-muted);
+        font-size: 0.77rem;
+    }
+
+    .data-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.42rem 0.7rem;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid var(--loan-border);
+        color: var(--loan-text);
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .data-chip.danger {
+        color: var(--loan-danger);
+        background: var(--loan-danger-soft);
+        border-color: rgba(220, 38, 38, 0.12);
+    }
+
+    .fine-value {
+        font-weight: 800;
+        color: var(--loan-danger);
+    }
+
+    .fine-value.muted {
+        color: var(--loan-muted);
+        font-weight: 700;
+    }
+
+    .loan-entry-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.55rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-action-loan {
+        padding: 0.55rem 0.75rem;
+        border-radius: 10px;
+        font-size: 0.76rem;
+        font-weight: 700;
+    }
+
+    .btn-action-loan.success {
+        background: rgba(22, 163, 74, 0.08);
+        border: 1px solid rgba(22, 163, 74, 0.16);
+        color: var(--loan-success);
+    }
+
+    .btn-action-loan.primary {
+        background: rgba(26, 35, 126, 0.07);
+        border: 1px solid rgba(26, 35, 126, 0.15);
+        color: var(--loan-primary);
+    }
+
+    .loan-empty {
+        padding: 1.5rem;
+        border: 1px dashed #d9e1ed;
+        border-radius: 14px;
+        text-align: center;
+        background: #f8fafc;
+        color: var(--loan-muted);
+    }
+
+    .loan-empty i {
+        display: block;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        color: var(--loan-primary);
+    }
+
+    @@media (max-width: 991.98px) {
+        .page-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .page-header__actions {
+            width: 100%;
+        }
+
+        .loan-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .loan-entry {
+            grid-template-columns: minmax(0, 1.8fr) 1fr 0.8fr auto;
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .page-header {
+            gap: 1rem;
+        }
+
+        .page-header__actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-shell {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .page-header__cta {
+            width: 100%;
+            min-width: 0;
+            justify-content: center;
+        }
+
+        .member-summary {
+            grid-template-columns: 1fr;
+            align-items: flex-start;
+        }
+
+        .member-status-block {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .member-detail-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .loan-entry {
+            grid-template-columns: 1fr;
+            align-items: flex-start;
+        }
+
+        .loan-entry-actions {
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        .btn-action-loan {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .page-header__eyebrow {
+            font-size: 0.72rem;
+            letter-spacing: 0.14em;
+        }
+
+        .page-header__title {
+            font-size: 2.1rem;
+        }
+
+        .search-shell {
+            height: 54px;
+            border-radius: 14px;
+        }
+
+        .page-header__cta {
+            height: 54px;
+            border-radius: 14px;
+        }
+
+        .loan-members {
+            padding: 0.8rem;
+        }
+
+        .loan-member-head,
+        .member-detail-grid,
+        .loan-entries {
+            padding-left: 0.9rem;
+            padding-right: 0.9rem;
+        }
+
+        .member-detail-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .loan-entry {
+            padding: 0.8rem;
+        }
+    }
+</style>
+
+<div class="loan-page">
+    <div class="container-fluid px-4 py-4 animate-fade-in">
+        <div class="page-header mb-4">
+            <div class="page-header__title-block">
+                <p class="page-header__eyebrow">Operations</p>
+                <h1 class="page-header__title">Loan</h1>
+            </div>
+
+            <div class="page-header__actions">
+                <div class="search-shell">
+                    <span class="search-shell__icon"><i class="bi bi-search"></i></span>
+                    <input type="text" id="loanSearch" class="search-shell__input" placeholder="Search member name..." />
                 </div>
-                <a asp-action="Issue" class="btn btn-primary fw-bold px-4 shadow-sm rounded-pill">
-                    <i class="bi bi-plus-lg me-2"></i>Issue Book
+
+                <a asp-action="Issue" class="btn page-header__cta">
+                    <span class="page-header__cta-icon"><i class="bi bi-plus-lg"></i></span>
+                    <span class="page-header__cta-text">New<br>Issue</span>
                 </a>
             </div>
         </div>
-    </div>
 
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+        <div class="loan-content">
+            @{
+                var allLoans = Model.SelectMany(m => m.Loans).ToList();
+                var activeCount = allLoans.Count(l => !l.IsReturned);
+                var overdueCount = allLoans.Count(l => !l.IsReturned && l.DueDate.Date < DateTime.Now.Date);
+                var totalReturned = allLoans.Count(l => l.IsReturned);
+                var returnRate = allLoans.Any() ? (totalReturned * 100 / allLoans.Count()) : 0;
+                var totalFine = allLoans.Where(l => !l.IsReturned).Sum(l => l.GetLateFeeWithRate(settings.DailyFineRate, settings.GracePeriodDays));
+            }
 
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-            <i class="bi bi-exclamation-octagon-fill me-2"></i> @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+            <div class="loan-stats">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--loan-primary-soft); color: var(--loan-primary);">
+                        <i class="bi bi-journal-bookmark"></i>
+                    </div>
+                    <p class="stat-number">@activeCount</p>
+                    <p class="stat-label">Currently Out</p>
+                </div>
 
-    @* --- Stats Cards Section --- *@
-    <div class="row g-3 mb-4">
-        @{
-            var allLoans = Model.SelectMany(m => m.Loans).ToList();
-            var activeCount = allLoans.Count(l => !l.IsReturned);
-            var overdueCount = allLoans.Count(l => !l.IsReturned && l.DueDate.Date < DateTime.Now.Date);
-            var totalReturned = allLoans.Count(l => l.IsReturned);
-            var returnRate = allLoans.Any() ? (totalReturned * 100 / allLoans.Count()) : 0;
-            var totalFine = allLoans.Where(l => !l.IsReturned).Sum(l => l.GetLateFeeWithRate(settings.DailyFineRate, settings.GracePeriodDays));
-        }
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm p-3">
-                <div class="d-flex align-items-center">
-                    <div class="stats-icon bg-primary-soft text-primary me-3"><i class="bi bi-journal-bookmark"></i></div>
-                    <div><h4 class="mb-0 fw-bold">@activeCount</h4><small class="text-muted">Currently Out</small></div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--loan-danger-soft); color: var(--loan-danger);">
+                        <i class="bi bi-exclamation-octagon"></i>
+                    </div>
+                    <p class="stat-number">@overdueCount</p>
+                    <p class="stat-label">Overdue Items</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--loan-success-soft); color: var(--loan-success);">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <p class="stat-number">@returnRate%</p>
+                    <p class="stat-label">Return Rate</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--loan-warning-soft); color: var(--loan-warning);">
+                        <i class="bi bi-currency-rupee"></i>
+                    </div>
+                    <p class="stat-number">₹@totalFine.ToString("N2")</p>
+                    <p class="stat-label">Uncollected Fines</p>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm p-3">
-                <div class="d-flex align-items-center">
-                    <div class="stats-icon bg-danger-soft text-danger me-3"><i class="bi bi-exclamation-octagon"></i></div>
-                    <div><h4 class="mb-0 fw-bold">@overdueCount</h4><small class="text-muted">Overdue Items</small></div>
+
+            <div class="loan-list-shell">
+                <div class="loan-list-head">
+                    <h2>Member Loan Records</h2>
+                    <span class="summary-pill">@Model.Count() Members</span>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm p-3">
-                <div class="d-flex align-items-center">
-                    <div class="stats-icon bg-success-soft text-success me-3"><i class="bi bi-graph-up-arrow"></i></div>
-                    <div><h4 class="mb-0 fw-bold">@returnRate%</h4><small class="text-muted">Return Rate</small></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm p-3">
-                <div class="d-flex align-items-center">
-                    <div class="stats-icon bg-warning-soft text-warning me-3"><i class="bi bi-currency-rupee"></i></div>
-                    <div>
-                        <h4 class="mb-0 fw-bold">₹@totalFine.ToString("N2")</h4>
-                        <small class="text-muted">Uncollected Fines</small>
+
+                <div class="loan-members" id="loanMembersList">
+                    <div class="accordion loan-accordion" id="loanAccordion">
+                        @foreach (var member in Model)
+                        {
+                            var memberActiveLoans = member.Loans.Where(l => !l.IsReturned).ToList();
+                            var isOverdue = memberActiveLoans.Any(l => l.DueDate.Date < DateTime.Now.Date);
+                            var statusClass = isOverdue ? "overdue" : (memberActiveLoans.Any() ? "active" : "clear");
+                            var statusText = isOverdue ? "Overdue" : (memberActiveLoans.Any() ? "Active" : "Clear");
+                            var collapseId = $"member-{member.Id}";
+
+                            <div class="accordion-item loan-member-card" data-member-name="@member.Name">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed loan-accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+                                        <div class="member-summary">
+                                            <div class="member-identity">
+                                                <div class="member-avatar">@(string.IsNullOrWhiteSpace(member.Name) ? "M" : member.Name.Substring(0, 1).ToUpper())</div>
+                                                <div class="member-name-wrap">
+                                                    <h3 class="member-name">@member.Name</h3>
+                                                    <p class="member-meta">Member ID #@member.Id.ToString("D4")</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="member-status-block">
+                                                <span class="status-badge @statusClass">@statusText</span>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </h2>
+
+                                <div id="@collapseId" class="accordion-collapse collapse" data-bs-parent="#loanAccordion">
+                                    <div class="accordion-body p-0">
+                                        <div class="member-detail-grid">
+                                            <div class="detail-box">
+                                                <span class="detail-label">Email</span>
+                                                <span class="detail-value">@member.Email</span>
+                                            </div>
+                                            <div class="detail-box">
+                                                <span class="detail-label">Phone</span>
+                                                <span class="detail-value">@member.PhoneNumber</span>
+                                            </div>
+                                            <div class="detail-box">
+                                                <span class="detail-label">Borrowed</span>
+                                                <span class="detail-value">@memberActiveLoans.Count / @settings.MaxBooksPerMember</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="loan-entries">
+                                            @if (memberActiveLoans.Any())
+                                            {
+                                                <div class="loan-entry-list">
+                                                    @foreach (var loan in memberActiveLoans)
+                                                    {
+                                                        var loanOverdue = loan.DueDate.Date < DateTime.Now.Date;
+                                                        var fineAmount = loan.GetLateFeeWithRate(settings.DailyFineRate, settings.GracePeriodDays);
+
+                                                        <div class="loan-entry">
+                                                            <div class="book-info">
+                                                                <p class="book-title">@loan.Book?.Title</p>
+                                                                <p class="book-isbn">ISBN: @loan.Book?.ISBN</p>
+                                                            </div>
+
+                                                            <div>
+                                                                <span class="detail-label">Due Date</span>
+                                                                <span class="data-chip @(loanOverdue ? "danger" : "")">@loan.DueDate.ToString("MMM dd, yyyy")</span>
+                                                            </div>
+
+                                                            <div>
+                                                                <span class="detail-label">Renewals</span>
+                                                                <span class="data-chip">@loan.RenewalCount / @settings.MaxRenewalAttempts</span>
+                                                            </div>
+
+                                                            <div>
+                                                                <span class="detail-label">Fine</span>
+                                                                @if (fineAmount > 0)
+                                                                {
+                                                                    <span class="fine-value">₹@fineAmount.ToString("N2")</span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="fine-value muted">₹0.00</span>
+                                                                }
+                                                            </div>
+
+                                                            <div class="loan-entry-actions">
+                                                                @if (loan.RenewalCount < settings.MaxRenewalAttempts)
+                                                                {
+                                                                    <form asp-action="Renew" method="post" class="d-inline">
+                                                                        <input type="hidden" name="loanId" value="@loan.Id" />
+                                                                        <button type="submit" class="btn btn-action-loan success">
+                                                                            <i class="bi bi-arrow-repeat me-1"></i>Renew
+                                                                        </button>
+                                                                    </form>
+                                                                }
+
+                                                                <form asp-action="Return" method="post" class="d-inline">
+                                                                    <input type="hidden" name="loanId" value="@loan.Id" />
+                                                                    <button type="submit" class="btn btn-action-loan primary">
+                                                                        <i class="bi bi-check-circle me-1"></i>Return
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="loan-empty">
+                                                    <i class="bi bi-inbox"></i>
+                                                    No active books currently borrowed for this member.
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    @* --- Main Table --- *@
-    <div class="card shadow-sm border-0 overflow-hidden">
-        <div class="table-responsive">
-            <table class="table align-middle mb-0" id="loansTable">
-                <thead class="bg-dark text-white">
-                    <tr class="small">
-                        <th class="ps-4 py-3">Member Name</th>
-                        <th>Contact Email</th>
-                        <th>Phone</th>
-                        <th class="text-center">Active Loans</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-end pe-4">Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var m in Model)
-                    {
-                        var collapseId = "memberLoans" + m.Id;
-                        var memberActiveLoans = m.Loans.Where(l => !l.IsReturned).ToList();
-                        var isOverdue = memberActiveLoans.Any(l => l.DueDate.Date < DateTime.Now.Date);
-
-                        <tr class="member-row" data-bs-toggle="collapse" data-bs-target="#@collapseId" style="cursor: pointer;">
-                            <td class="ps-4">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar-circle me-3">@(string.IsNullOrEmpty(m.Name) ? "M" : m.Name.Substring(0, 1).ToUpper())</div>
-                                    <div>
-                                        <span class="fw-bold d-block text-dark">@m.Name</span>
-                                        <small class="text-muted">ID: #@m.Id.ToString("D4")</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>@m.Email</td>
-                            <td>@m.PhoneNumber</td>
-                            <td class="text-center">
-                                <span class="badge bg-light text-dark border rounded-pill px-3">
-                                    @memberActiveLoans.Count / @settings.MaxBooksPerMember Books
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                @if (isOverdue)
-                                {
-                                    <span class="badge bg-danger-soft text-danger rounded-pill">Overdue Items</span>
-                                }
-                                else if (memberActiveLoans.Any())
-                                {
-                                    <span class="badge bg-primary-soft text-primary rounded-pill">Active</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-success-soft text-success rounded-pill">Clear</span>
-                                }
-                            </td>
-                            <td class="text-end pe-4">
-                                <i class="bi bi-chevron-down text-muted"></i>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="6" class="p-0 border-0">
-                                <div class="collapse" id="@collapseId">
-                                    <div class="p-4 bg-light border-bottom">
-                                        <h6 class="fw-bold mb-3"><i class="bi bi-journal-text me-2"></i>Current Books with @m.Name</h6>
-
-                                        @if (memberActiveLoans.Any())
-                                        {
-                                            <div class="table-responsive rounded-3 shadow-sm bg-white">
-                                                <table class="table table-sm align-middle mb-0">
-                                                    <thead class="table-light small">
-                                                        <tr>
-                                                            <th class="ps-3 py-2">Book Title</th>
-                                                            <th>Due Date</th>
-                                                            <th>Renewals</th>
-                                                            <th>Fine</th>
-                                                            <th class="text-end pe-3">Actions</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach (var loan in memberActiveLoans)
-                                                        {
-                                                            var loanOverdue = loan.DueDate.Date < DateTime.Now.Date;
-                                                            var fineAmount = loan.GetLateFeeWithRate(settings.DailyFineRate, settings.GracePeriodDays);
-                                                            <tr>
-                                                                <td class="ps-3">
-                                                                    <span class="fw-medium">@loan.Book?.Title</span><br />
-                                                                    <small class="text-muted">ISBN: @loan.Book?.ISBN</small>
-                                                                </td>
-                                                                <td class="@(loanOverdue ? "text-danger fw-bold" : "")">
-                                                                    @loan.DueDate.ToString("MMM dd, yyyy")
-                                                                </td>
-                                                                <td>
-                                                                    <span class="badge bg-light text-dark border">
-                                                                        @loan.RenewalCount / @settings.MaxRenewalAttempts
-                                                                    </span>
-                                                                </td>
-                                                                <td>
-                                                                    @if (fineAmount > 0)
-                                                                    {
-                                                                        <span class="text-danger fw-bold">₹@fineAmount.ToString("N2")</span>
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        <span class="text-muted">&mdash;</span>
-                                                                    }
-                                                                </td>
-                                                                <td class="text-end pe-3">
-                                                                    <div class="d-inline-flex gap-2">
-                                                                        @if (loan.RenewalCount < settings.MaxRenewalAttempts)
-                                                                        {
-                                                                            <form asp-action="Renew" method="post" class="d-inline">
-                                                                                <input type="hidden" name="loanId" value="@loan.Id" />
-                                                                                <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3">
-                                                                                    <i class="bi bi-arrow-repeat me-1"></i> Renew
-                                                                                </button>
-                                                                            </form>
-                                                                        }
-
-                                                                        <form asp-action="Return" method="post" class="d-inline">
-                                                                            <input type="hidden" name="loanId" value="@loan.Id" />
-                                                                            <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                                                                                <i class="bi bi-check-circle me-1"></i> Mark Returned
-                                                                            </button>
-                                                                        </form>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        }
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <div class="text-center py-3 text-muted small border rounded bg-white">
-                                                No active books currently borrowed.
-                                            </div>
-                                        }
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
 </div>
 
-<style>
-    .avatar-circle {
-        width: 35px;
-        height: 35px;
-        background: #6366f1;
-        color: white;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 0.9rem;
-    }
-
-    .stats-icon {
-        width: 45px;
-        height: 45px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-    }
-
-    .bg-primary-soft { background-color: #eef2ff; color: #4f46e5; }
-    .bg-danger-soft { background-color: #fef2f2; color: #dc2626; }
-    .bg-success-soft { background-color: #f0fdf4; color: #16a34a; }
-    .bg-warning-soft { background-color: #fffbeb; color: #d97706; }
-
-    .member-row:hover { background-color: #f8fafc !important; }
-    .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
-
-    @@keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-</style>
-
 <script>
-    document.getElementById('loanSearch').addEventListener('keyup', function() {
-        let val = this.value.toLowerCase();
-        let rows = document.querySelectorAll('#loansTable tbody .member-row');
-        rows.forEach(row => {
-            let text = row.innerText.toLowerCase();
-            row.style.display = text.includes(val) ? '' : 'none';
-            let nextRow = row.nextElementSibling;
-            if (nextRow && nextRow.querySelector('.collapse')) {
-                nextRow.style.display = text.includes(val) ? '' : 'none';
-            }
+    const loanSearchInput = document.getElementById('loanSearch');
+    const loanCards = document.querySelectorAll('#loanMembersList .loan-member-card');
+
+    if (loanSearchInput) {
+        loanSearchInput.addEventListener('input', function () {
+            const query = this.value.trim().toLowerCase();
+
+            loanCards.forEach(card => {
+                const text = card.dataset.memberName?.toLowerCase() || '';
+                const visible = !query || text.includes(query);
+                card.style.display = visible ? '' : 'none';
+            });
         });
-    });
+    }
 </script>
+

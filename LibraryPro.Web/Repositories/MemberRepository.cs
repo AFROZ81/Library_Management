@@ -18,6 +18,9 @@ namespace LibraryPro.Web.Repositories
         public async Task<Member?> GetByIdAsync(int id) =>
             await _context.Members.FindAsync(id);
 
+        public async Task<Member?> GetByEmailAsync(string email) =>
+            await _context.Members.FirstOrDefaultAsync(m => m.Email == email);
+
         public async Task AddAsync(Member member)
         {
             await _context.Members.AddAsync(member);

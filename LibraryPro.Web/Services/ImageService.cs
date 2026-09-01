@@ -73,16 +73,13 @@ namespace LibraryPro.Web.Services
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(imageFile.FileName)}";
             var filePath = Path.Combine(uploadPath, fileName);
 
-            // Save the file
+            // Save the file directly without optimization
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await imageFile.CopyToAsync(stream);
             }
 
             _logger.LogInformation("Image saved successfully: {FilePath}", filePath);
-
-            // Optimize the image
-            await OptimizeImageAsync(filePath, _imageSettings.MaxWidth, _imageSettings.MaxHeight, _imageSettings.Quality);
 
             return $"/{folder}/{fileName}";
         }
@@ -186,14 +183,14 @@ namespace LibraryPro.Web.Services
 
         public string GetDefaultImagePath()
         {
-            return "/images/default-book-cover.jpg";
+            return "/images/default-book-cover.svg";
         }
     }
 
     public class ImageSettings
     {
         public int MaxFileSizeMB { get; set; } = 5;
-        public List<string> AllowedExtensions { get; set; } = new List<string> { ".jpg", ".jpeg", ".png", ".webp" };
+        public List<string> AllowedExtensions { get; set; } = new List<string> { ".jpg", ".jpeg", ".png", ".webp", ".svg" };
         public int MaxWidth { get; set; } = 1200;
         public int MaxHeight { get; set; } = 1600;
         public int Quality { get; set; } = 85;

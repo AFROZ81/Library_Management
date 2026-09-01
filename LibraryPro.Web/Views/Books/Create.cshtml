@@ -6,55 +6,71 @@
 
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-<div class="container mt-5 animate-slide-up">
-    <div class="row justify-content-center">
-        <div class="col-md-9 col-lg-8">
-            <div class="card shadow-lg border-0 rounded-3">
-                <div class="card-header text-white text-center py-4" style="background-color: #1a237e;">
-                    <div class="display-6 mb-2"><i class="bi bi-book-half"></i></div>
-                    <h4 class="mb-0 fw-bold">Register New Book</h4>
-                    <p class="small opacity-75 mb-0">Add a new asset to your digital collection</p>
+<div class="books-page books-page--form">
+    <div class="container-fluid px-3 px-md-4 py-4 py-lg-5">
+        <div class="books-shell books-shell--narrow">
+            <header class="page-header page-header--compact">
+                <div class="page-header__title-block">
+                    <p class="page-header__eyebrow">Catalog</p>
+                    <h1 class="page-header__title">Register New Book</h1>
+                </div>
+                <div class="page-header__actions">
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary books-header-action books-header-action--ghost">
+                        <i class="bi bi-arrow-left me-2"></i>Back
+                    </a>
+                </div>
+            </header>
+
+            <div class="books-form-card">
+                <div class="books-form-card__header">
+                    <div class="books-form-card__icon"><i class="bi bi-book-half"></i></div>
+                    <div>
+                        <h2>Register New Book</h2>
+                        <p>Add a new volume to your catalog</p>
+                    </div>
                 </div>
 
-                <div class="card-body p-4 p-lg-5">
-                    <form asp-action="Create">
+                <div class="books-form-card__body">
+                    <form asp-action="Create" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4"></div>
 
                         <div class="row g-4">
-                            <div class="col-md-6">
-                                <label asp-for="Title" class="form-label fw-semibold text-secondary small text-uppercase">Title</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-type text-primary"></i></span>
-                                    <input asp-for="Title" class="form-control border-start-0" placeholder="e.g. The Great Gatsby" />
+                            <div class="col-12 col-md-6">
+                                <label asp-for="Title" class="form-label">Title</label>
+                                <div class="input-group books-input-group">
+                                    <span class="input-group-text"><i class="bi bi-type"></i></span>
+                                    <input asp-for="Title" class="form-control" placeholder="e.g. The Great Gatsby" />
                                 </div>
                                 <span asp-validation-for="Title" class="text-danger small"></span>
                             </div>
 
-                            <div class="col-md-6">
-                                <label asp-for="Author" class="form-label fw-semibold text-secondary small text-uppercase">Author</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-lines-fill text-primary"></i></span>
-                                    <input asp-for="Author" class="form-control border-start-0" placeholder="Author Name" />
+                            <div class="col-12 col-md-6">
+                                <label asp-for="Author" class="form-label">Author</label>
+                                <div class="input-group books-input-group">
+                                    <span class="input-group-text"><i class="bi bi-person-lines-fill"></i></span>
+                                    <input asp-for="Author" class="form-control" placeholder="Author Name" />
                                 </div>
                                 <span asp-validation-for="Author" class="text-danger small"></span>
                             </div>
 
-                            <div class="col-md-6">
-                                <label asp-for="ISBN" class="form-label fw-semibold text-secondary small text-uppercase">ISBN</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-upc-scan text-primary"></i></span>
-                                    <input asp-for="ISBN" id="isbnInput" class="form-control border-start-0" placeholder="ISBN-13" />
-                                    <button type="button" id="lookupBtn" class="btn btn-outline-primary" title="Lookup book details">
+                            <div class="col-12 col-md-6">
+                                <label asp-for="ISBN" class="form-label">ISBN</label>
+                                <div class="input-group books-input-group">
+                                    <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+                                    <input asp-for="ISBN" id="isbnInput" class="form-control" placeholder="ISBN-13" />
+                                    <button type="button" id="lookupBtn" class="btn btn-outline-primary"
+                                            title="Lookup book details">
                                         <i class="bi bi-search"></i>
                                     </button>
                                 </div>
                                 <span asp-validation-for="ISBN" class="text-danger small"></span>
                             </div>
 
-                            <div class="col-md-6">
-                                <label asp-for="Genre" class="form-label fw-semibold text-secondary small text-uppercase">Genre</label>
-                                <div class="input-group select2-bootstrap-fix">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-tags text-primary"></i></span>
+                            <div class="col-12 col-md-6">
+                                <label asp-for="Genre" class="form-label">Genre</label>
+                                <div class="input-group books-input-group select2-bootstrap-fix">
+                                    <span class="input-group-text"><i class="bi bi-tags"></i></span>
                                     <select asp-for="Genre" id="genreSelect" class="form-select" multiple="multiple">
                                         <option value="Fiction">Fiction</option>
                                         <option value="Non-Fiction">Non-Fiction</option>
@@ -76,11 +92,11 @@
                                 <span asp-validation-for="Genre" class="text-danger small"></span>
                             </div>
 
-                            <div class="col-md-6">
-                                <label asp-for="PublicationYear" class="form-label fw-semibold text-secondary small text-uppercase">Year</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-calendar-check text-primary"></i></span>
-                                    <select asp-for="PublicationYear" class="form-select border-start-0">
+                            <div class="col-12 col-md-6">
+                                <label asp-for="PublicationYear" class="form-label">Year</label>
+                                <div class="input-group books-input-group">
+                                    <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
+                                    <select asp-for="PublicationYear" class="form-select">
                                         <option value="">-- Year --</option>
                                         @for (int year = DateTime.Now.Year; year >= 1800; year--)
                                         {
@@ -90,34 +106,34 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <label asp-for="TotalCopies" class="form-label fw-semibold text-secondary small text-uppercase">Stock Quantity</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-plus-square text-primary"></i></span>
-                                    <input asp-for="TotalCopies" class="form-control border-start-0" type="number" min="1" value="1" />
+                            <div class="col-12 col-md-6">
+                                <label asp-for="TotalCopies" class="form-label">Stock Quantity</label>
+                                <div class="input-group books-input-group">
+                                    <span class="input-group-text"><i class="bi bi-plus-square"></i></span>
+                                    <input asp-for="TotalCopies" class="form-control" type="number" min="1" value="1" />
                                 </div>
                                 <span asp-validation-for="TotalCopies" class="text-danger small"></span>
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label fw-semibold text-secondary small text-uppercase">Book Cover Image</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-image text-primary"></i></span>
-                                    <input type="file" name="imageFile" class="form-control border-start-0" accept=".jpg,.jpeg,.png,.webp" />
+                                <label class="form-label">Book Cover Image</label>
+                                <div class="input-group books-input-group">
+                                    <span class="input-group-text"><i class="bi bi-image"></i></span>
+                                    <input type="file" name="imageFile" class="form-control"
+                                           accept=".jpg,.jpeg,.png,.webp" />
                                 </div>
-                                <div class="form-text small text-muted">Allowed formats: JPG, JPEG, PNG, WEBP. Maximum size: 5MB.</div>
+                                <div class="form-text small text-muted">Allowed formats: JPG, JPEG, PNG, WEBP. Maximum
+                                    size: 5MB.</div>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="d-grid gap-3 mt-5">
-                            <button type="submit" class="btn btn-warning btn-lg fw-bold shadow-sm py-3 transition-lift">
-                                <i class="bi bi-cloud-arrow-up-fill me-2"></i>SAVE TO CATALOG
-                            </button>
-                            <a asp-action="Index" class="btn btn-link text-decoration-none text-muted">
-                                <i class="bi bi-arrow-left me-1"></i> Back to Collection
-                            </a>
-                        </div>
-                    </form>
+                            <div class="books-form-card__actions">
+                                <button type="submit" class="btn btn-primary books-submit-btn">
+                                    <i class="bi bi-cloud-arrow-up-fill me-2"></i>Save to Catalog
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -125,7 +141,156 @@
 </div>
 
 <style>
-    /* 1. Fix the Bootstrap Input Group alignment for Select2 */
+    .books-page--form {
+        min-height: calc(100vh - 56px);
+        background: #f8fafc;
+        padding: 0 0 2rem;
+    }
+
+    .books-shell {
+        width: min(100%, 1280px);
+        margin: 0 auto;
+    }
+
+    .books-shell--narrow {
+        width: min(100%, 1100px);
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1.25rem;
+        padding: 0.25rem 0 0.75rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+        margin: 0 auto 1.5rem;
+        width: 100%;
+    }
+
+    .page-header__title-block {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-header__eyebrow {
+        margin: 0;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .page-header__title {
+        margin: 0;
+        font-size: clamp(2rem, 3vw, 3.2rem);
+        letter-spacing: -0.06em;
+        line-height: 0.95;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .page-header__actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+    }
+
+    .page-header--compact {
+        margin-bottom: 1.25rem;
+    }
+
+    .books-header-action--ghost {
+        background: #fff;
+        border: 1px solid #dfe7f1;
+        color: #0f172a;
+        min-height: 42px;
+        border-radius: 12px;
+        font-weight: 600;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+    }
+
+    .books-form-card {
+        background: rgba(255, 255, 255, 0.82);
+        border: 1px solid #dfe7f1;
+        border-radius: 24px;
+        box-shadow: 0 18px 35px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .books-form-card__header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+        color: #fff;
+        padding: 1.5rem 1.5rem 1.25rem;
+    }
+
+    .books-form-card__icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.12);
+        font-size: 1.7rem;
+    }
+
+    .books-form-card__header h2 {
+        margin: 0;
+        font-weight: 800;
+        font-size: clamp(1.5rem, 2vw, 2rem);
+    }
+
+    .books-form-card__header p {
+        margin: 0.25rem 0 0;
+        opacity: 0.8;
+        font-size: 0.9rem;
+    }
+
+    .books-form-card__body {
+        padding: 1.4rem 1.4rem 1.6rem;
+    }
+
+    .form-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #475569;
+        margin-bottom: 0.5rem;
+    }
+
+    .books-input-group .input-group-text {
+        background: #f8fafc;
+        border-color: #dfe7f1;
+        color: #334155;
+    }
+
+    .books-input-group .form-control,
+    .books-input-group .form-select {
+        min-height: 48px;
+        border-color: #dfe7f1;
+        border-left: none;
+        background: #fff;
+        color: #0f172a;
+    }
+
+    .books-input-group input:focus,
+    .books-input-group select:focus {
+        border-color: #1d4ed8;
+        box-shadow: none;
+    }
+
+    .books-input-group .btn {
+        min-height: 48px;
+    }
+
     .select2-bootstrap-fix {
         display: flex !important;
         flex-wrap: nowrap !important;
@@ -136,82 +301,76 @@
         width: 1% !important;
     }
 
-    /* 2. Style the main Select2 box to match Bootstrap inputs */
     .select2-container--default .select2-selection--multiple {
-        border: 1px solid #dee2e6 !important;
+        border: 1px solid #dfe7f1 !important;
         border-left: none !important;
         border-top-left-radius: 0 !important;
         border-bottom-left-radius: 0 !important;
-        padding: 2px 5px !important;
-        min-height: 38px !important;
+        min-height: 48px !important;
+        padding: 4px 6px !important;
         display: flex !important;
         align-items: center !important;
     }
 
-    /* 3. FIX: Tag Container & Internal Spacing */
     .select2-selection__choice {
-        background-color: #1a237e !important;
+        background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%) !important;
         color: white !important;
         border: none !important;
-        border-radius: 4px !important;
-        margin: 2px 4px !important;
-        padding: 2px 8px 2px 24px !important; /* LARGE LEFT PADDING to make room for X */
+        border-radius: 6px !important;
+        margin: 2px 6px 2px 0 !important;
+        padding: 5px 8px 5px 22px !important;
         position: relative !important;
-        display: inline-block !important;
     }
 
-    /* 4. FIX: Position the "X" remove button so it doesn't overlap */
     .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
         position: absolute !important;
-        left: 4px !important; /* Lock it to the far left */
+        left: 6px !important;
         top: 50% !important;
         transform: translateY(-50%) !important;
-        color: rgba(255,255,255,0.8) !important;
-        border: none !important;
+        color: rgba(255, 255, 255, 0.8) !important;
         margin: 0 !important;
         padding: 0 4px !important;
-        font-weight: bold !important;
     }
 
-        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
-            color: #fff !important;
-            background: transparent !important;
-        }
-
-    /* 5. Fix the search input alignment inside the box */
-    .select2-search--inline, .select2-search__field {
+    .select2-search--inline,
+    .select2-search__field {
         margin: 0 !important;
         height: 30px !important;
         line-height: 30px !important;
     }
 
-    /* UI Polish */
-    .form-control:focus, .form-select:focus {
-        border-color: #1a237e;
-        box-shadow: none;
+    .books-form-card__actions {
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #edf2f7;
     }
 
-    .transition-lift {
-        transition: transform 0.2s;
+    .books-submit-btn {
+        min-height: 52px;
+        width: 100%;
+        border-radius: 12px;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        box-shadow: 0 12px 24px rgba(29, 78, 216, 0.18);
     }
 
-        .transition-lift:hover {
-            transform: translateY(-3px);
+    @@media (max-width: 767.98px) {
+        .books-form-card__header {
+            padding: 1.2rem 1rem;
         }
 
-    .animate-slide-up {
-        animation: slideUp 0.6s ease-out;
-    }
-
-    @@keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(40px);
+        .books-form-card__body {
+            padding: 1rem;
         }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .page-header__actions {
+            margin-left: 0;
         }
     }
 </style>
@@ -219,53 +378,44 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        $(document).ready(function() {
-            $('#genreSelect').select2({
-                placeholder: "  Select Genres", /* Added spaces for alignment */
-                allowClear: true,
-                width: '100%'
-            });
+        $(document).ready(function () {
+        $('#genreSelect').select2({
+        placeholder: 'Select genres',
+        allowClear: true,
+        width: '100%'
+        });
 
-            // ISBN Lookup functionality
-            $('#lookupBtn').click(function() {
-                const isbn = $('#isbnInput').val().trim();
-                if (!isbn) {
-                    alert('Please enter an ISBN');
-                    return;
-                }
+        $('#lookupBtn').click(function () {
+        const isbn = $('#isbnInput').val().trim();
+        if (!isbn) {
+        alert('Please enter an ISBN');
+        return;
+        }
 
-                $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+        $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
 
-                $.get('@Url.Action("LookupByISBN", "Books")', { isbn: isbn })
-                    .done(function(response) {
-                        if (response.success) {
-                            const data = response.data;
-                            if (data.title) $('input[name="Title"]').val(data.title);
-                            if (data.author) $('input[name="Author"]').val(data.author);
-                            if (data.isbn) $('input[name="ISBN"]').val(data.isbn);
-                            if (data.publicationYear) $('select[name="PublicationYear"]').val(data.publicationYear);
-                            
-                            // Handle genres
-                            if (data.genres && data.genres.length > 0) {
-                                $('#genreSelect').val(data.genres).trigger('change');
-                            }
-
-                            // Optional: Auto-fill image URL if available
-                            if (data.imageUrl) {
-                                // You could display a preview or auto-fill if desired
-                                console.log('Image URL available:', data.imageUrl);
-                            }
-                        } else {
-                            alert(response.message || 'Book not found');
-                        }
-                    })
-                    .fail(function() {
-                        alert('Error looking up book. Please try again.');
-                    })
-                    .always(function() {
-                        $('#lookupBtn').prop('disabled', false).html('<i class="bi bi-search"></i>');
-                    });
-            });
+        $.get('@Url.Action("LookupByISBN", "Books")', { isbn: isbn })
+        .done(function (response) {
+        if (response.success) {
+        const data = response.data;
+        if (data.title) $('input[name="Title"]').val(data.title);
+        if (data.author) $('input[name="Author"]').val(data.author);
+        if (data.isbn) $('input[name="ISBN"]').val(data.isbn);
+        if (data.publicationYear) $('select[name="PublicationYear"]').val(data.publicationYear);
+        if (data.genres && data.genres.length > 0) {
+        $('#genreSelect').val(data.genres).trigger('change');
+        }
+        } else {
+        alert(response.message || 'Book not found');
+        }
+        })
+        .fail(function () {
+        alert('Error looking up book. Please try again.');
+        })
+        .always(function () {
+        $('#lookupBtn').prop('disabled', false).html('<i class="bi bi-search"></i>');
+        });
+        });
         });
     </script>
     @{
