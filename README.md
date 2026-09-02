@@ -116,29 +116,6 @@ Libris.Web/
 - **AuditLogs**: System activity tracking
 - **LibrarySettings**: Configurable library parameters
 
-## 🚢 Deployment
-
-### **For MonsterASP**
-
-1. **Build the Project**
-   ```bash
-   dotnet publish -c Release -o ./publish
-   ```
-
-2. **Update Production Settings**
-   - Modify `appsettings.Production.json` with your MonsterASP database credentials
-   - Configure email settings for production
-
-3. **Deploy**
-   - Upload the `publish` folder contents to MonsterASP
-   - Set the entry point to `Libris.Web.dll`
-   - Configure environment variables as needed
-
-### **Environment Variables**
-- `ASPNETCORE_ENVIRONMENT`: Set to `Production`
-- `ConnectionStrings__DefaultConnection`: Production database connection
-- `EmailSettings__ApiKey`: Production SendGrid key
-
 ## 🔐 Security Features
 
 - Role-based authorization with policies
